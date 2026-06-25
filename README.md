@@ -13,7 +13,11 @@ Live in the n8n template library.
 
 ## Pending review
 
-Submitted to the n8n Creator hub and awaiting approval. Templates move up to `published/` once they are live in the library. Nothing is in review right now.
+Submitted to the n8n Creator hub and awaiting approval. Templates move up to `published/` once they are live in the library.
+
+## Pending submission
+
+Built and tested but not yet submitted to the Creator hub. Templates move to `pending-review/` once submitted.
 
 ## License
 
