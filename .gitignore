@@ -1,0 +1,14 @@
+# Dependencies and build output
+node_modules/
+
+# Secrets and local-only values (never commit)
+.env
+*.secret
+secrets.txt
+*-secrets.*
+*SECRET*
+*_SECRET*
+*_ID.txt
+
+# Private build references, kept local
+BUILD-NOTES.md
