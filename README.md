@@ -19,6 +19,10 @@ Submitted to the n8n Creator hub and awaiting approval. Templates move up to `pu
 
 Built and tested but not yet submitted to the Creator hub. Templates move to `pending-review/` once submitted.
 
+| Template | What it does |
+|---|---|
+| [Answer legal questions with grounded citations from CanLII and CourtListener](pending-submission/n8n-legal-research-assistant/) | Answers a legal question using only authorities retrieved from CourtListener or CanLII, with every citation verified against the retrieved sources. |
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
