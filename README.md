@@ -21,7 +21,7 @@ Built and tested but not yet submitted to the Creator hub. Templates move to `pe
 
 | Template | What it does |
 |---|---|
-| [Answer legal questions with grounded citations from CanLII and CourtListener](pending-submission/n8n-legal-research-assistant/) | Answers a legal question using only authorities retrieved from CourtListener or CanLII, with every citation verified against the retrieved sources. |
+| [Answer legal questions with grounded citations from CanLII and CourtListener](pending-submission/legal-research-assistant-canlii-courtlistener/) | Answers a legal question using only authorities retrieved from CourtListener or CanLII, with every citation verified against the retrieved sources. |
 
 ## License
 
