@@ -48,8 +48,8 @@
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.6,
       "position": [
-        0,
-        256
+        16,
+        336
       ],
       "webhookId": "11111111-1111-4111-8111-111111111111"
     },
@@ -103,8 +103,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        224,
-        256
+        192,
+        336
       ]
     },
     {
@@ -165,7 +165,7 @@
       "typeVersion": 3.4,
       "position": [
         448,
-        256
+        336
       ]
     },
     {
@@ -198,8 +198,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        896,
-        112
+        672,
+        320
       ],
       "onError": "continueErrorOutput",
       "credentials": {
@@ -220,8 +220,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1120,
-        112
+        928,
+        304
       ],
       "onError": "continueErrorOutput",
       "credentials": {
@@ -243,7 +243,7 @@
       "typeVersion": 4.4,
       "position": [
         672,
-        480
+        496
       ],
       "onError": "continueErrorOutput",
       "credentials": {
@@ -264,8 +264,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        896,
-        400
+        928,
+        496
       ],
       "onError": "continueErrorOutput",
       "credentials": {
@@ -285,8 +285,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1344,
-        208
+        1184,
+        432
       ]
     },
     {
@@ -300,8 +300,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        700,
-        780
+        1168,
+        832
       ]
     },
     {
@@ -314,8 +314,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        1584,
-        432
+        1456,
+        528
       ],
       "credentials": {
         "groqApi": {
@@ -333,8 +333,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        1712,
-        640
+        1584,
+        704
       ],
       "credentials": {
         "groqApi": {
@@ -353,8 +353,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        1712,
-        432
+        1584,
+        528
       ]
     },
     {
@@ -368,8 +368,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        1568,
-        208
+        1456,
+        336
       ]
     },
     {
@@ -383,8 +383,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1920,
-        208
+        1936,
+        336
       ]
     },
     {
@@ -398,15 +398,15 @@
       "type": "n8n-nodes-base.form",
       "typeVersion": 2.5,
       "position": [
-        2192,
-        208
+        2176,
+        496
       ],
       "webhookId": "22222222-2222-4222-8222-222222222222"
     },
     {
       "parameters": {
         "content": "## Answer legal questions with grounded citations from CanLII and CourtListener\n\nResearch assistance for lawyers and legal researchers. It answers a natural-language legal question using only authorities retrieved live from a real legal database, then shows the citation behind every point. If the sources do not support an answer, it says so instead of inventing case law.\n\n### How it works\n1. You submit a question and pick a source: CourtListener (US case law, full-text search) or CanLII (a Canadian authority plus its citator network).\n2. The workflow retrieves authorities over HTTP from the chosen database.\n3. A language model answers using only those retrieved sources and returns a structured answer, a supported flag, and a citation list.\n4. A code step verifies every citation against the retrieved set and drops anything that does not match, so a hallucinated citation cannot reach the reader.\n5. The result page shows the answer, a supported or not-supported badge, the verified citations, and a disclaimer.\n\n### Setup\nAdd a CourtListener token (Header Auth) and a CanLII API key (Query Auth) as credentials, and connect a Groq chat model. Open \"Set research configuration\" to set result count, language, and citator direction.\n\n### Customization\nSwap the chat model, change the result count or CanLII citator direction, or add a Slack step to post results.\n\nThis is research assistance, not legal advice. The lawyer must read and verify every cited source.",
-        "height": 780,
+        "height": 1100,
         "width": 400,
         "color": 1
       },
@@ -415,14 +415,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -440,
-        -40
+        -464,
+        160
       ]
     },
     {
       "parameters": {
         "content": "## 1. Intake\nCollect the legal question and source database, and centralize configurable settings.",
-        "height": 300,
+        "height": 380,
         "width": 430,
         "color": 7
       },
@@ -431,15 +431,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        150
+        -48,
+        160
       ]
     },
     {
       "parameters": {
         "content": "## 2. Retrieve authorities\nCourtListener full-text search, then the full opinion text of the top hit so the answer grounds on the holding (not just the caption). Or a CanLII case plus its citator network. Credentialed HTTP, no hardcoded keys.",
-        "height": 600,
-        "width": 880,
+        "height": 488,
+        "width": 688,
         "color": 7
       },
       "id": "s2",
@@ -447,15 +447,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        430,
-        0
+        400,
+        160
       ]
     },
     {
       "parameters": {
         "content": "## 3. Build grounding context\nBoth retrieval branches converge here, shaping the retrieved sources into one numbered block the model can cite from.",
-        "height": 230,
-        "width": 240,
+        "height": 438,
+        "width": 256,
         "color": 7
       },
       "id": "s3",
@@ -463,15 +463,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1315,
-        120
+        1104,
+        160
       ]
     },
     {
       "parameters": {
         "content": "## 4. Grounded answer\nA Groq chat model answers using only the retrieved sources and returns a structured answer with citations. A structured parser with auto-fix is layer 1 of the guardrail.",
-        "height": 620,
-        "width": 380,
+        "height": 684,
+        "width": 492,
         "color": 7
       },
       "id": "s4",
@@ -479,15 +479,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1500,
-        150
+        1376,
+        160
       ]
     },
     {
       "parameters": {
         "content": "## 5. Citation guardrail and result\nLayer 2: every citation is checked against the retrieved sources. Unmatched citations are dropped and the answer is marked not supported, then the cited answer is rendered and returned.",
-        "height": 230,
-        "width": 460,
+        "height": 534,
+        "width": 508,
         "color": 7
       },
       "id": "s5",
@@ -495,15 +495,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1900,
-        120
+        1888,
+        160
       ]
     },
     {
       "parameters": {
         "content": "## Error handling\nIf a retrieval call fails, return a clear message instead of a broken run.",
-        "height": 200,
-        "width": 520,
+        "height": 328,
+        "width": 232,
         "color": 7
       },
       "id": "s7",
@@ -511,8 +511,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        660,
-        700
+        1104,
+        640
       ]
     }
   ],
