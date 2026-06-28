@@ -1,0 +1,1101 @@
+{
+  "name": "Auto-file Google Drive inbox files into dated folders by filename rules",
+  "nodes": [
+    {
+      "name": "Watch Inbox Folder",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "triggerOn": "specificFolder",
+        "event": "fileCreated",
+        "folderToWatch": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "options": {
+          "fileType": "all"
+        }
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_DRIVE_CREDENTIAL",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "name": "Plan Destination From Rules",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// ====================================================================\n// EDIT HERE: FILENAME RULES (the only block most people change)\n// Each rule maps a filename pattern to a destination Type (folder name).\n// Patterns are case-insensitive regular expressions, checked top to bottom,\n// and the FIRST match wins, so put more specific rules higher.\n// Add, remove, or reorder lines to match how you file documents.\n// Files that match no rule are filed under FALLBACK_TYPE.\n// ====================================================================\nconst RULES = [\n  { pattern: 'contract|agreement', type: 'Contracts' },\n  { pattern: 'invoice|inv[ _-]?[0-9]|receipt|bill', type: 'Invoices' },\n  { pattern: 'scan|scanned|camscanner|img[ _-]?[0-9]', type: 'Scans' },\n  { pattern: 'report|summary|q[1-4]|monthly|weekly|forecast', type: 'Reports' },\n];\nconst FALLBACK_TYPE = '_Unsorted';\n\n// Drive folder ID that holds the dated archive tree. Use a folder that is NOT\n// the watched inbox, so filed documents are not picked up again. Copy the ID\n// from the folder URL: drive.google.com/drive/folders/THIS_PART\nconst FILED_ROOT_FOLDER_ID = 'PASTE_YOUR_FILED_ROOT_FOLDER_ID_HERE';\n// ====================================================================\n// No need to edit below this line.\n// ====================================================================\n\nconst out = [];\nconst inputItems = $input.all();\nfor (let i = 0; i < inputItems.length; i++) {\n  const file = inputItems[i].json;\n  const filename = String(file.name || '');\n  let type = FALLBACK_TYPE;\n  let matchedRule = '';\n  for (const rule of RULES) {\n    let re;\n    try { re = new RegExp(rule.pattern, 'i'); } catch (err) { continue; }\n    if (re.test(filename)) { type = rule.type; matchedRule = rule.pattern; break; }\n  }\n  const rawCreated = file.createdTime ? new Date(file.createdTime) : new Date();\n  const created = isNaN(rawCreated.getTime()) ? new Date() : rawCreated;\n  const year = String(created.getFullYear());\n  const month = String(created.getMonth() + 1).padStart(2, '0');\n  out.push({\n    json: {\n      fileId: String(file.id || ''),\n      originalFilename: filename,\n      mimeType: String(file.mimeType || ''),\n      matchedRule: matchedRule,\n      matched: matchedRule !== '',\n      type: type,\n      year: year,\n      month: month,\n      destinationPath: year + '/' + month + '/' + type,\n      filedRootFolderId: FILED_ROOT_FOLDER_ID,\n      loggedAt: new Date().toISOString(),\n    },\n    pairedItem: { item: i },\n  });\n}\nreturn out;\n"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "name": "Route By Document Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "renameOutput": true,
+              "outputKey": "Contracts",
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "Contracts",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "renameOutput": true,
+              "outputKey": "Invoices",
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "Invoices",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "renameOutput": true,
+              "outputKey": "Scans",
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "Scans",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "renameOutput": true,
+              "outputKey": "Reports",
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "Reports",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Unsorted / Needs Review"
+        }
+      }
+    },
+    {
+      "name": "Find Year Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "fileFolder",
+        "operation": "search",
+        "searchMethod": "query",
+        "queryString": "=name='{{ $('Plan Destination From Rules').item.json.year }}' and '{{ $('Plan Destination From Rules').item.json.filedRootFolderId }}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false",
+        "returnAll": false,
+        "limit": 1,
+        "options": {
+          "fields": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_DRIVE_CREDENTIAL",
+          "name": "Google Drive account"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "name": "Year Folder Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "name": "Create Year Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        880,
+        220
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "folder",
+        "operation": "create",
+        "name": "={{ $('Plan Destination From Rules').item.json.year }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Plan Destination From Rules').item.json.filedRootFolderId }}"
+        },
+        "options": {
+          "simplifyOutput": true
+        }
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_DRIVE_CREDENTIAL",
+          "name": "Google Drive account"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "name": "Find Month Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "fileFolder",
+        "operation": "search",
+        "searchMethod": "query",
+        "queryString": "=name='{{ $('Plan Destination From Rules').item.json.month }}' and '{{ $json.id }}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false",
+        "returnAll": false,
+        "limit": 1,
+        "options": {
+          "fields": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_DRIVE_CREDENTIAL",
+          "name": "Google Drive account"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "name": "Month Folder Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1320,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "name": "Create Month Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1320,
+        220
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "folder",
+        "operation": "create",
+        "name": "={{ $('Plan Destination From Rules').item.json.month }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Find Year Folder').item.json.id || $('Create Year Folder').item.json.id }}"
+        },
+        "options": {
+          "simplifyOutput": true
+        }
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_DRIVE_CREDENTIAL",
+          "name": "Google Drive account"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "name": "Find Type Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1540,
+        0
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "fileFolder",
+        "operation": "search",
+        "searchMethod": "query",
+        "queryString": "=name='{{ $('Plan Destination From Rules').item.json.type }}' and '{{ $json.id }}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false",
+        "returnAll": false,
+        "limit": 1,
+        "options": {
+          "fields": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_DRIVE_CREDENTIAL",
+          "name": "Google Drive account"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "name": "Type Folder Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1760,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "name": "Create Type Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1760,
+        220
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "folder",
+        "operation": "create",
+        "name": "={{ $('Plan Destination From Rules').item.json.type }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Find Month Folder').item.json.id || $('Create Month Folder').item.json.id }}"
+        },
+        "options": {
+          "simplifyOutput": true
+        }
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_DRIVE_CREDENTIAL",
+          "name": "Google Drive account"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "name": "Move File Into Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1980,
+        0
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "move",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Plan Destination From Rules').item.json.fileId }}"
+        },
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        }
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_DRIVE_CREDENTIAL",
+          "name": "Google Drive account"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "name": "Append Audit Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2200,
+        0
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $('Plan Destination From Rules').item.json.loggedAt }}",
+            "Original Filename": "={{ $('Plan Destination From Rules').item.json.originalFilename }}",
+            "Matched Rule": "={{ $('Plan Destination From Rules').item.json.matchedRule }}",
+            "Type": "={{ $('Plan Destination From Rules').item.json.type }}",
+            "Destination Path": "={{ $('Plan Destination From Rules').item.json.destinationPath }}",
+            "File ID": "={{ $('Plan Destination From Rules').item.json.fileId }}",
+            "Status": "Filed",
+            "Notes": ""
+          },
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Original Filename",
+              "displayName": "Original Filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Matched Rule",
+              "displayName": "Matched Rule",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Type",
+              "displayName": "Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Destination Path",
+              "displayName": "Destination Path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "File ID",
+              "displayName": "File ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_SHEETS_CREDENTIAL",
+          "name": "Google Sheets account"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "name": "Log Filing Failure",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1100,
+        420
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now.toISO() }}",
+            "Original Filename": "={{ $json.originalFilename || $json.name || 'unknown' }}",
+            "Matched Rule": "={{ $json.matchedRule || '' }}",
+            "Type": "={{ $json.type || '' }}",
+            "Destination Path": "={{ $json.destinationPath || '' }}",
+            "File ID": "={{ $json.fileId || $json.id || '' }}",
+            "Status": "Failed",
+            "Notes": "={{ $json.error?.message || 'Filing step failed, see execution log' }}"
+          },
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Original Filename",
+              "displayName": "Original Filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Matched Rule",
+              "displayName": "Matched Rule",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Type",
+              "displayName": "Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Destination Path",
+              "displayName": "Destination Path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "File ID",
+              "displayName": "File ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_SHEETS_CREDENTIAL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "name": "Sticky Note Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        -20
+      ],
+      "parameters": {
+        "content": "## Drive Auto-Filer\n\nWatches one Google Drive inbox folder and files every new document into a dated Year/Month/Type folder tree, then records each move in a Google Sheet. No AI, fully rule based.\n\n### How it works\n1. The Google Drive trigger fires when a new file appears in the inbox folder.\n2. A Code node reads the file name against an editable rules table and works out the document Type (Contracts, Invoices, Scans, Reports, or _Unsorted) plus the destination path, for example 2026/06/Contracts.\n3. A Switch routes the file by Type. Each missing folder level (year, then month, then type) is found or created on the fly.\n4. The file is moved into the leaf folder and one audit row is appended to the Google Sheet.\n\n### Setup\n1. Connect Google Drive and Google Sheets credentials (the same Google account works for both).\n2. In the trigger, pick the inbox folder to watch.\n3. In the Plan Destination From Rules node, edit the rules table and paste your archive root folder ID.\n4. In the two Google Sheets nodes, pick your audit spreadsheet and tab.\n\n### Customize\nEdit the rules table to add document types, change folder names, or reorder matching. A bad file is logged and skipped, so one failure never stops the run.",
+        "color": 3,
+        "width": 340,
+        "height": 600
+      }
+    },
+    {
+      "name": "Sticky Note Rules",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        180,
+        -170
+      ],
+      "parameters": {
+        "content": "## Editable rules table\nOpen this node and edit the RULES block at the top. Each line maps a filename pattern (case-insensitive regex) to a Type folder. First match wins. Files matching nothing go to _Unsorted.",
+        "color": 7,
+        "width": 250,
+        "height": 130
+      }
+    },
+    {
+      "name": "Sticky Note Tree",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        640,
+        -170
+      ],
+      "parameters": {
+        "content": "## Find or create the Year/Month/Type tree\nEach level is searched under its parent. A missing level is created, an existing one is reused, so no duplicate folders build up. The file is then moved into the leaf folder.",
+        "color": 7,
+        "width": 1320,
+        "height": 130
+      }
+    },
+    {
+      "name": "Sticky Note Audit",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2120,
+        -170
+      ],
+      "parameters": {
+        "content": "## Audit log\nEvery move appends one row: Timestamp, Original Filename, Matched Rule, Type, Destination Path, File ID, Status, Notes. Failures are logged with Status Failed so nothing is lost silently. Add these headers to row 1 of your sheet.",
+        "color": 7,
+        "width": 320,
+        "height": 140
+      }
+    },
+    {
+      "name": "Sticky Note Warning",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        620
+      ],
+      "parameters": {
+        "content": "## Keep the archive root separate\nThe archive root folder (set in the rules node) must NOT be the watched inbox folder, or filed documents could be picked up again. Use a different folder.",
+        "color": 5,
+        "width": 340,
+        "height": 150
+      }
+    }
+  ],
+  "connections": {
+    "Watch Inbox Folder": {
+      "main": [
+        [
+          {
+            "node": "Plan Destination From Rules",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plan Destination From Rules": {
+      "main": [
+        [
+          {
+            "node": "Route By Document Type",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Filing Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route By Document Type": {
+      "main": [
+        [
+          {
+            "node": "Find Year Folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Find Year Folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Find Year Folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Find Year Folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Find Year Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Year Folder": {
+      "main": [
+        [
+          {
+            "node": "Year Folder Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Filing Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Year Folder Exists?": {
+      "main": [
+        [
+          {
+            "node": "Find Month Folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Year Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Year Folder": {
+      "main": [
+        [
+          {
+            "node": "Find Month Folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Filing Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Month Folder": {
+      "main": [
+        [
+          {
+            "node": "Month Folder Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Filing Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Month Folder Exists?": {
+      "main": [
+        [
+          {
+            "node": "Find Type Folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Month Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Month Folder": {
+      "main": [
+        [
+          {
+            "node": "Find Type Folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Filing Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Type Folder": {
+      "main": [
+        [
+          {
+            "node": "Type Folder Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Filing Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Type Folder Exists?": {
+      "main": [
+        [
+          {
+            "node": "Move File Into Folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Type Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Type Folder": {
+      "main": [
+        [
+          {
+            "node": "Move File Into Folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Filing Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move File Into Folder": {
+      "main": [
+        [
+          {
+            "node": "Append Audit Row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Filing Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Audit Row": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Log Filing Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {},
+  "tags": []
+}
