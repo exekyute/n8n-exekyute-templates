@@ -4,6 +4,8 @@ This workflow watches a Google Drive folder that another job already writes back
 
 Built with n8n, plus Google Drive, Google Sheets, and Slack.
 
+![The Backup Freshness Auditor workflow on the n8n canvas](images/workflow.png)
+
 ## How it works
 
 A nightly schedule trigger runs after the backup jobs are expected to have finished. The workflow reads the SLA table from a Google Sheet and lists the watched Drive folder, then a Code node matches files to sources and assigns a verdict. Every source is logged to a scorecard sheet, and an IF gate sends a single Slack message only when at least one source failed.

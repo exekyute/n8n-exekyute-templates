@@ -7,7 +7,7 @@
       "typeVersion": 1.2,
       "position": [
         0,
-        0
+        96
       ],
       "parameters": {
         "rule": {
@@ -25,8 +25,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        220,
-        0
+        224,
+        96
       ],
       "parameters": {
         "authentication": "oAuth2",
@@ -59,8 +59,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        440,
-        0
+        544,
+        96
       ],
       "parameters": {
         "authentication": "oAuth2",
@@ -93,8 +93,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        660,
-        0
+        912,
+        96
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
@@ -107,8 +107,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        900,
-        160
+        1408,
+        224
       ],
       "parameters": {
         "authentication": "oAuth2",
@@ -282,8 +282,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        900,
-        -40
+        1280,
+        -128
       ],
       "parameters": {
         "conditions": {
@@ -312,11 +312,12 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.5,
       "position": [
-        1140,
-        -40
+        1536,
+        -144
       ],
       "parameters": {
-        "authentication": "oAuth2",
+        "resource": "message",
+        "operation": "post",
         "select": "channel",
         "channelId": {
           "__rl": true,
@@ -329,7 +330,7 @@
         }
       },
       "credentials": {
-        "slackOAuth2Api": {
+        "slackApi": {
           "id": "REPLACE_WITH_YOUR_SLACK_CREDENTIAL",
           "name": "Slack account"
         }
@@ -345,13 +346,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -420,
-        -40
+        128,
+        -912
       ],
       "parameters": {
         "content": "## Google Drive backup freshness auditor\n\nWatches one Google Drive folder that an external job already writes backups into (a pg_dump cron, Veeam, or any other tool) and checks each expected source against a per-source SLA table in a Google Sheet. It never creates a backup. It only reads file metadata and reports a verdict per source: OK, STALE, MISSING, or SHRUNK.\n\n### How it works\n1. The schedule trigger fires nightly, after the backup jobs are expected to finish.\n2. Read SLA Table pulls one row per expected source (pattern, cadence, max age, min size).\n3. List Backup Files lists the watched Drive folder with each file's name, modified time, and size.\n4. Compute Verdicts matches files to sources and assigns OK / STALE / MISSING / SHRUNK. SHRUNK compares the newest file against the trailing median size of recent files, so a truncated or corrupt dump is caught.\n5. Append Scorecard logs one dated row per source. Slack is pinged only when at least one source fails.\n\n### Setup\n1. Connect Google Drive, Google Sheets, and Slack credentials.\n2. In List Backup Files, paste your backup folder ID into the query (see the note on that node).\n3. Point Read SLA Table and Append Scorecard at your spreadsheet and tabs.\n4. Fill the SLA table (see the SLA note), pick the Slack channel, and set the schedule time.",
         "color": 1,
-        "width": 360,
+        "width": 1628,
         "height": 560
       }
     },
@@ -360,14 +361,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        160,
-        -250
+        128,
+        -240
       ],
       "parameters": {
         "content": "## SLA table (your config lives here)\nOne row per expected backup source. Columns: source, pattern (regex or filename prefix), cadence (hourly/daily/weekly/monthly), max_age_hours, min_size_bytes, min_pct_of_median. Leave a size column blank to skip that check; blank max_age_hours falls back to the cadence window.",
         "color": 7,
-        "width": 280,
-        "height": 190
+        "width": 290,
+        "height": 504
       }
     },
     {
@@ -375,14 +376,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        380,
-        200
+        432,
+        -160
       ],
       "parameters": {
         "content": "## Set your folder ID here\nOpen List Backup Files and replace PASTE_YOUR_BACKUP_FOLDER_ID_HERE in the query with your backup folder ID (the part after /folders/ in the folder URL). Watch the folder the external job writes into, not a copy.",
         "color": 5,
-        "width": 280,
-        "height": 180
+        "width": 316,
+        "height": 420
       }
     },
     {
@@ -390,14 +391,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        620,
-        -270
+        768,
+        -160
       ],
       "parameters": {
         "content": "## Verdict logic\nMISSING: no file matches the pattern. STALE: newest match is older than max_age_hours (or the cadence window). SHRUNK: newest file is below the byte floor, or below min_pct_of_median of the trailing-median size of recent files, which flags truncated or corrupt dumps. Otherwise OK.",
         "color": 7,
-        "width": 320,
-        "height": 210
+        "width": 410,
+        "height": 418
       }
     },
     {
@@ -405,14 +406,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1080,
-        -270
+        1200,
+        -304
       ],
       "parameters": {
         "content": "## Failing-only alert\nThe IF node passes only when at least one source failed, so Slack stays quiet on an all-clear night. The alert is sent once and lists every failing source with its reason.",
         "color": 7,
-        "width": 320,
-        "height": 180
+        "width": 560,
+        "height": 330
       }
     },
     {
@@ -420,14 +421,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        840,
-        320
+        1200,
+        32
       ],
       "parameters": {
         "content": "## Dated scorecard\nOne row per source every run: run time, status, newest file, age, size, trailing median, and percent of median. Add these headers to row 1 of your scorecard tab. This is the audit trail.",
         "color": 7,
-        "width": 320,
-        "height": 160
+        "width": 490,
+        "height": 358
       }
     }
   ],
