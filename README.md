@@ -28,6 +28,7 @@ Built and tested but not yet submitted to the Creator hub. Templates move to `pe
 | [Legal Research Assistant](pending-submission/n8n-legal-research-assistant/) | Answers a legal question using only authorities retrieved from CourtListener or CanLII, and verifies every citation against the retrieved sources so invented case law never reaches the reader. |
 | [Drive Auto-Filer](pending-submission/n8n-drive-auto-filer/) | Sorts new Google Drive inbox files into a dated Year/Month/Type folder tree by filename rules, and logs every move to a Google Sheet. |
 | [Backup Freshness Auditor](pending-submission/n8n-backup-freshness-auditor/) | Audits a Google Drive folder of externally produced backups against a per-source SLA table in Sheets, flags stale, missing, or shrunken dumps, logs a scorecard, and alerts Slack only on failures. |
+| [API Contract Drift Watcher](pending-submission/n8n-api-contract-drift-watcher/) | Polls a JSON or OpenAPI endpoint on a schedule, snapshots its response schema in a Data Table, and posts a severity-tagged Slack alert only when the contract breaks, ignoring ordinary value churn. |
 
 ## License
 
