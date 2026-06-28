@@ -26,6 +26,7 @@ Built and tested but not yet submitted to the Creator hub. Templates move to `pe
 | Template | What it does |
 |---|---|
 | [Legal Research Assistant](pending-submission/n8n-legal-research-assistant/) | Answers a legal question using only authorities retrieved from CourtListener or CanLII, and verifies every citation against the retrieved sources so invented case law never reaches the reader. |
+| [Drive Auto-Filer](pending-submission/n8n-drive-auto-filer/) | Sorts new Google Drive inbox files into a dated Year/Month/Type folder tree by filename rules, and logs every move to a Google Sheet. |
 
 ## License
 
