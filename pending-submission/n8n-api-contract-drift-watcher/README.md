@@ -1,8 +1,10 @@
-# Watch a JSON or OpenAPI endpoint and alert Slack on contract drift
+# Alert Slack when an API response changes structure
 
 Polls a JSON or OpenAPI endpoint on a schedule, works out the shape of its response (every field path and its type), stores that shape in a Data Table, and posts a Slack alert only when the contract breaks. Ordinary value churn, a number that changed or an extra item in a list, is ignored. Only structural and type changes raise an alert.
 
 Built with n8n, plus an HTTP endpoint and Slack.
+
+![The workflow on the n8n canvas](images/workflow.png)
 
 ## How it works
 
