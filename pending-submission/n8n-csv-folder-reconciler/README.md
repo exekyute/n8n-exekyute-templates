@@ -4,6 +4,8 @@ Multi-branch teams export a CSV a day, and someone ends up stitching them into o
 
 Built with n8n, plus Google Drive and Slack.
 
+![The CSV Folder Reconciler workflow on the n8n canvas](images/workflow.png)
+
 ## How it works
 
 On a schedule, the workflow lists every CSV in the folder, downloads and parses each one, and merges all the rows. A Code node validates each row, deduplicates on a key, and splits the clean rows from the bad ones. The good rows are written to a dated master CSV and the rejected rows to a dated reject file, both uploaded back to Drive, and a recap is posted to Slack.
@@ -23,7 +25,7 @@ The reject file and the recap are the point: every row that does not reach the m
 ## Setup
 
 1. Import `workflow.json` into n8n. It imports inactive, so configure it before activating.
-2. Assign a Google Drive credential to the three Google Drive nodes, and a Slack credential to the recap node.
+2. Assign a Google Drive credential to the four Google Drive nodes, and a Slack credential to the recap node.
 3. In "List CSV Files in Folder", pick the folder your exports land in.
 4. In "Reconcile CSVs", set the required columns, the dedup key, and the format checks in the block at the top of the node.
 5. In "Upload Master CSV" and "Upload Reject CSV", pick the folder to write the output files to.
@@ -98,6 +100,7 @@ The Drive steps retry a few times on a transient error. A file that cannot be pa
 | `README.md` | This overview |
 | `TEMPLATE-DESCRIPTION.md` | The n8n Creator hub listing text |
 | `workflow.json` | The importable n8n workflow |
+| `images/workflow.png` | The workflow on the n8n canvas |
 
 ---
 

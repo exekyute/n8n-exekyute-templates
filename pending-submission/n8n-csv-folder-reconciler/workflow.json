@@ -7,7 +7,7 @@
       "typeVersion": 1.2,
       "position": [
         0,
-        320
+        192
       ],
       "parameters": {
         "rule": {
@@ -25,8 +25,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        220,
-        320
+        208,
+        192
       ],
       "parameters": {
         "authentication": "oAuth2",
@@ -66,8 +66,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        440,
-        320
+        416,
+        192
       ],
       "parameters": {
         "authentication": "oAuth2",
@@ -99,8 +99,8 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        660,
-        320
+        624,
+        192
       ],
       "parameters": {
         "operation": "csv",
@@ -116,8 +116,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        880,
-        320
+        992,
+        224
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
@@ -130,8 +130,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1120,
-        180
+        1392,
+        144
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
@@ -144,8 +144,8 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        1340,
-        180
+        1568,
+        144
       ],
       "parameters": {
         "operation": "csv",
@@ -161,8 +161,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1560,
-        180
+        1760,
+        144
       ],
       "parameters": {
         "authentication": "oAuth2",
@@ -198,8 +198,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1120,
-        380
+        1392,
+        496
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
@@ -212,8 +212,8 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        1340,
-        380
+        1568,
+        496
       ],
       "parameters": {
         "operation": "csv",
@@ -229,8 +229,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1560,
-        380
+        1760,
+        496
       ],
       "parameters": {
         "authentication": "oAuth2",
@@ -266,8 +266,8 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.5,
       "position": [
-        1120,
-        600
+        1392,
+        688
       ],
       "parameters": {
         "resource": "message",
@@ -296,14 +296,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        80
+        -560,
+        -160
       ],
       "parameters": {
         "color": 1,
-        "width": 460,
-        "height": 680,
-        "content": "## CSV Folder Reconciler\n\nMerges the daily CSV exports that land in one Google Drive folder into a single deduplicated master file, quarantines every bad row to a dated reject file with a reason, and posts an auditable recap to Slack. Built for multi-branch retail or finance teams whose branches each drop a daily export. No AI, fully deterministic.\n\n### How it works\n1. A schedule fires once a day.\n2. Google Drive lists every CSV in the folder and downloads each one.\n3. Extract from File parses each CSV into rows.\n4. The Reconcile node merges all rows, validates each against your rules, deduplicates on a key, and splits good rows from bad.\n5. Convert to File writes a clean master CSV and a dated reject CSV, both uploaded back to Drive.\n6. Slack receives the rows in, merged, quarantined, and duplicates recap.\n\n### Setup\n1. Connect a Google Drive credential to the three Drive nodes and a Slack credential to the recap node.\n2. In \"List CSV Files in Folder\", pick the folder your exports land in.\n3. In \"Reconcile CSVs\", set the required columns, the dedup key, and the format checks.\n4. In the two upload nodes, pick the folder for the master and reject files.\n5. In \"Post Recap to Slack\", pick the channel.\n6. Run once, then activate."
+        "width": 480,
+        "height": 880,
+        "content": "## CSV Folder Reconciler\n\nMerges the daily CSV exports that land in one Google Drive folder into a single deduplicated master file, quarantines every bad row to a dated reject file with a reason, and posts an auditable recap to Slack. Built for multi-branch retail or finance teams whose branches each drop a daily export. No AI, fully deterministic.\n\n### How it works\n1. A schedule fires once a day.\n2. Google Drive lists every CSV in the folder and downloads each one.\n3. Extract from File parses each CSV into rows.\n4. The Reconcile node merges all rows, validates each against your rules, deduplicates on a key, and splits good rows from bad.\n5. Convert to File writes a clean master CSV and a dated reject CSV, both uploaded back to Drive.\n6. Slack receives the rows in, merged, quarantined, and duplicates recap.\n\n### Setup\n1. Connect a Google Drive credential to the four Drive nodes and a Slack credential to the recap node.\n2. In \"List CSV Files in Folder\", pick the folder your exports land in.\n3. In \"Reconcile CSVs\", set the required columns, the dedup key, and the format checks.\n4. In the two upload nodes, pick the folder for the master and reject files.\n5. In \"Post Recap to Slack\", pick the channel.\n6. Run once, then activate."
       }
     },
     {
@@ -311,13 +311,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        200,
-        110
+        -48,
+        32
       ],
       "parameters": {
         "color": 7,
-        "width": 560,
-        "height": 150,
+        "width": 856,
+        "height": 334,
         "content": "## 1. Read the folder\nLists every CSV in the folder (skipping the reconciled- prefix so outputs are never re-read), downloads each, and parses it into rows. A file that will not parse is logged and skipped."
       }
     },
@@ -326,13 +326,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        820,
-        60
+        832,
+        0
       ],
       "parameters": {
         "color": 7,
-        "width": 280,
-        "height": 200,
+        "width": 452,
+        "height": 366,
         "content": "## 2. Validate, dedup, quarantine\nEach row needs every required column filled, a non-empty key, and valid formats (integer, number, date). Bad rows are quarantined with a reason. Survivors are deduped on the key, keeping the first. Edit the rules at the top of this node."
       }
     },
@@ -341,13 +341,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1100,
-        20
+        1312,
+        0
       ],
       "parameters": {
         "color": 7,
-        "width": 700,
-        "height": 120,
+        "width": 648,
+        "height": 298,
         "content": "## 3a. Clean master CSV\nThe good, deduped rows become reconciled-master-YYYY-MM-DD.csv, uploaded to your output folder. Valid rows only, no audit columns added."
       }
     },
@@ -356,13 +356,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1100,
-        500
+        1312,
+        304
       ],
       "parameters": {
         "color": 7,
-        "width": 700,
-        "height": 120,
+        "width": 648,
+        "height": 346,
         "content": "## 3b. Reject lane (quarantine)\nQuarantined rows become reconciled-rejects-YYYY-MM-DD.csv with source_file, reject_type (invalid, duplicate, unreadable_file), and reject_reason columns. Skipped when nothing is quarantined."
       }
     },
@@ -371,13 +371,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -520,
-        790
+        1312,
+        -208
       ],
       "parameters": {
         "color": 5,
-        "width": 460,
-        "height": 150,
+        "width": 640,
+        "height": 188,
         "content": "## Keep outputs out of the input\nThe master and reject files use the reconciled- prefix and the List node skips that prefix, so writing them to the same folder is safe. To be extra safe, point the two upload nodes at a separate output folder."
       }
     }
