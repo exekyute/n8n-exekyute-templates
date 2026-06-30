@@ -1,6 +1,6 @@
 # Plan delivery routes from Notion orders and email the schedule
 
-[Published n8n template](https://n8n.io/workflows/16154)
+[Published n8n template](https://n8n.io/workflows/16154-plan-delivery-routes-from-notion-orders-with-nominatim-and-email/)
 
 An n8n workflow that batches delivery orders into a Notion database, then on a schedule (Friday 6pm by default) emails a route plan grouped by delivery day, with nearest-neighbor stop ordering and per-stop payment tags.
 
@@ -81,7 +81,7 @@ You need: an n8n instance, a Notion workspace, and any SMTP account for sending 
 
 **The route email.** Each stop is listed with customer name, phone, address, items, total, payment tag (`[PAID]` or `[COLLECT ON DELIVERY]`), and any notes. Saturday and Sunday sections include a totals line with revenue and amount to collect on the road.
 
-## What is in the repo
+## What is in this folder
 
 - `workflow.json`: the importable n8n workflow. This is the source of truth.
 - `TEMPLATE-DESCRIPTION.md`: the dashboard description used for the n8n template listing.
@@ -105,8 +105,8 @@ A few simple extensions that have come up:
 - Notion's API has rate limits too but nothing this workflow will hit in normal use.
 - The Email Plan node sends plain text. If you want formatting, see the HTML email tweak above.
 
-## License
+---
 
-MIT. See `LICENSE`.
+All sample data is fictional. No real credentials, IDs, or endpoints are included.
 
-Built by Kevin Yu ([exekyute](https://github.com/exekyute)).
+Part of the [n8n-exekyute-templates](../../) collection. MIT licensed.
