@@ -1,5 +1,7 @@
 # Enrich and route inbound leads with You.com, Groq, Notion and Slack
 
+[Published n8n template](https://n8n.io/workflows/16504-enrich-and-route-inbound-leads-using-youcom-groq-notion-and-slack/)
+
 Turn a raw company name or domain into a qualified, one-page lead profile before a human ever opens it. The workflow researches the company, writes a profile and a fit score, alerts the team on Slack for hot leads, and logs every lead to Notion.
 
 Built with n8n, plus You.com, Groq, Notion, and Slack.

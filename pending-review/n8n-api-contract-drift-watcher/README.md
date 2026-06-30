@@ -57,7 +57,7 @@ The reference design polls a public, no-key endpoint. For a private API, open Fe
 ## Testing it
 
 ```
-cd "C:\Users\jebo\Documents\Claude Code Projects\n8n-exekyute-templates\pending-submission\n8n-api-contract-drift-watcher"
+cd "C:\Users\jebo\Documents\Claude Code Projects\n8n-exekyute-templates\pending-review\n8n-api-contract-drift-watcher"
 ```
 
 1. Seed. With the default endpoint, run the workflow once. The Data Table now holds one row for `jsonplaceholder-users`, and no alert fires.

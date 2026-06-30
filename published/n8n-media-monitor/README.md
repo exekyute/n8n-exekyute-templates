@@ -1,6 +1,6 @@
 # Monitor RSS feeds for brand and regulatory mentions with rule-based scoring and email digests
 
-![CI](https://github.com/exekyute/n8n-media-monitor/actions/workflows/test.yml/badge.svg)
+[Published n8n template](https://n8n.io/workflows/16296-send-scored-media-monitoring-digests-from-rss-feeds-via-smtp-email/)
 
 An n8n workflow that scans RSS/Atom feeds on a schedule (hourly by default), scores each matching article for relevance, sentiment, and entity tags, and emails an HTML digest grouped by topic. Optional routes send each team or client department a digest filtered to just its own topics.
 
@@ -63,7 +63,7 @@ That department gets its own email with only those topics, while the full digest
 
 **Tune the noise.** Raise `digest.minRelevance` to hide low-scoring items, or adjust the scoring weights in Config.
 
-## What is in the repo
+## What is in this folder
 
 - `workflows/media-monitor.workflow.json`: the importable n8n workflow. This is the source of truth; the Code-node bodies are embedded, with no external requires at runtime.
 - `TEMPLATE-DESCRIPTION.md`: the dashboard description used for the n8n template listing.
@@ -94,8 +94,8 @@ npm run build   # regenerates the workflow JSON after editing the lib
 - **De-duplication is stored inside this one workflow.** The "do not email the same article twice" memory (the seen-list) is held in that workflow's static data on your instance. A freshly imported copy starts with an empty memory, so its very first run treats everything currently in your feeds as new and can send one large digest. *What to do:* run that first execution manually at a quiet time, or temporarily raise `digest.minRelevance` so the opening batch is smaller. It settles from the second run onward.
 - **The seen-list only persists on scheduled runs, not manual test clicks.** When the schedule fires the active workflow, the memory is saved and carried forward. When you click Execute Workflow to test, it is not saved between clicks, so the same article can reappear while you experiment. *What to do:* treat repeats during manual testing as normal; real de-duplication begins once the workflow is active and running on its schedule.
 
-## License
+---
 
-MIT. See `LICENSE`.
+All sample data is fictional. No real credentials, IDs, or endpoints are included.
 
-Built by Kevin Yu ([exekyute](https://github.com/exekyute)).
+Part of the [n8n-exekyute-templates](../../) collection. MIT licensed.
