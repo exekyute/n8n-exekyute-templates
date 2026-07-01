@@ -1,12 +1,26 @@
 # Draft grounded support replies from a Notion knowledge base using Groq and Gmail
 
-Turn inbound support email into sourced, ready-to-review replies grounded in your own Notion knowledge base. Every answer is drafted from retrieved articles only, and saved as a Gmail draft for a person to approve. Nothing is auto-sent.
+Turn inbound support email into sourced, ready-to-review replies grounded in your own Notion knowledge base. This is a retrieval-augmented generation (RAG) assistant: every answer is drafted from articles retrieved for that specific question, and saved as a Gmail draft for a person to approve. Nothing is auto-sent.
 
 Built with n8n, plus Notion, Groq, Cohere, and Gmail.
 
 ![The support assistant flow on the n8n canvas](images/workflow.png)
 
 The worked example is built around "Cadence", a fictional team time-tracking and invoicing SaaS with a 12-article knowledge base. Swap in your own product, articles, and inbox.
+
+## The RAG pipeline
+
+Instead of answering from the model's own training, the workflow retrieves the passages relevant to each question and makes the model answer from those passages only. The five RAG stages map to the workflow like this:
+
+| RAG stage | In this workflow |
+|---|---|
+| Index | Notion articles are chunked and embedded with Cohere `embed-english-v3.0`, then stored as vectors in the built-in Simple Vector Store with title, category, url, and last_updated metadata |
+| Retrieve | The incoming question is embedded with the same model and matched against the store by vector similarity, returning the `topK` candidates |
+| Rerank | Cohere `rerank-v3.5` reorders those candidates by true relevance and keeps the top `topN`, which sharpens precision beyond raw vector distance |
+| Augment | The retained chunks are assembled into one numbered source block that is injected into the model prompt |
+| Generate | Groq answers from that source block only, and returns `NEEDS_HUMAN` when the sources do not support an answer |
+
+Using the same embedding model on both the index and the query side keeps every vector in one space. The reranker and the confidence gate are what separate this from naive embed-and-hope retrieval, and the `NEEDS_HUMAN` check keeps generation honest when retrieval comes up short.
 
 ## How it works
 
