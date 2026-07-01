@@ -6,7 +6,7 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
       "position": [
-        240,
+        208,
         400
       ],
       "parameters": {
@@ -24,7 +24,7 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
       "position": [
-        448,
+        384,
         400
       ],
       "parameters": {
@@ -51,7 +51,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        720,
+        672,
         400
       ],
       "parameters": {
@@ -63,7 +63,7 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        944,
+        848,
         400
       ],
       "parameters": {
@@ -88,9 +88,7 @@
                   }
                 ],
                 "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "update"
+              }
             },
             {
               "conditions": {
@@ -111,9 +109,7 @@
                   }
                 ],
                 "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "recap"
+              }
             }
           ]
         },
@@ -146,19 +142,14 @@
             },
             {
               "key": "Key|rich_text",
-              "richText": false,
               "textContent": "={{ $json.key }}"
             },
             {
               "key": "Created week|rich_text",
-              "richText": false,
               "textContent": "={{ $json.createdWeek }}"
             },
             {
               "key": "Last normalized|date",
-              "range": false,
-              "includeTime": true,
-              "timezone": "default",
               "date": "={{ $json.lastNormalized }}"
             }
           ]
@@ -179,7 +170,7 @@
       "typeVersion": 2.2,
       "position": [
         1280,
-        480
+        512
       ],
       "parameters": {
         "resource": "block",
@@ -210,11 +201,11 @@
       "typeVersion": 1,
       "position": [
         -480,
-        40
+        48
       ],
       "parameters": {
         "content": "## Normalize and backfill Notion database properties from an editable rules table\n\n### How it works\n\n1. On a daily schedule, it reads every row from the Notion database you choose.\n2. A Code node fills a missing Status with a default, folds messy Status spellings into one canonical value, and derives a title slug and a created-week stamp.\n3. It compares each derived value to what is already stored and marks a row changed only when something actually differs.\n4. Only changed rows are updated in Notion, and each gets a Last normalized timestamp, so already-clean rows produce no write.\n5. A one-line recap of every run is appended to a log page, including runs that change nothing.\n\n### Setup steps\n\n- [ ] Connect a Notion credential and share the target database and the log page with the integration.\n- [ ] In Get Database Rows, select the database you want to normalize.\n- [ ] In Apply Normalization Rules, edit the CONFIG block: property names, DEFAULT_STATUS, and the CANONICAL_STATUS map.\n- [ ] In Update Normalized Rows, confirm the four mapped properties match your database (Status, Key, Created week, Last normalized).\n- [ ] In Append Run to Log, paste the URL of the page that should receive the recap.\n\n### Customization\n\nEdit CANONICAL_STATUS to add spellings, change DEFAULT_STATUS, or set COMPUTE_KEY and COMPUTE_WEEK to false to leave a derived field alone. Adjust Every Day at 3am to run on any schedule.",
-        "height": 860,
+        "height": 812,
         "width": 620
       }
     },
@@ -229,7 +220,7 @@
       "parameters": {
         "content": "## Fetch database rows\n\nRuns on a daily schedule and reads every row with full property data.",
         "height": 356,
-        "width": 460,
+        "width": 380,
         "color": 7
       }
     },
@@ -238,7 +229,7 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        640,
+        576,
         224
       ],
       "parameters": {
@@ -253,13 +244,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1152,
+        1104,
         160
       ],
       "parameters": {
         "content": "## Write updates and log the run\n\nUpdates just the changed rows in Notion and appends a one-line recap of every run to your log page.",
-        "height": 504,
-        "width": 372,
+        "height": 520,
+        "width": 436,
         "color": 7
       }
     }
