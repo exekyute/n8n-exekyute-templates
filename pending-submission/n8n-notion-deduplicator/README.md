@@ -4,6 +4,8 @@ Point this workflow at one Notion database and it removes duplicate rows on a sc
 
 Built with n8n and Notion.
 
+![Workflow canvas](images/workflow.png)
+
 ## How it works
 
 A Schedule trigger runs the workflow each day. A Notion node reads every row from the target database with full property data. A Code node groups the rows by a property you choose, ignoring case and surrounding spaces, and finds any group with more than one row. For each duplicate group it keeps one row, the newest by default, and marks the others. A Switch routes duplicates to the archive step and routes a run recap to the log. Each duplicate is archived to the Notion trash, where it stays recoverable for 30 days, and a one-line recap is appended to a log page on every run.

@@ -4,6 +4,8 @@ Point this workflow at one Notion database and it keeps the properties tidy on a
 
 Built with n8n and Notion.
 
+![Workflow canvas](images/workflow.png)
+
 ## How it works
 
 A Schedule trigger runs the workflow each day. A Notion node reads every row from the target database with full property data. A Code node applies an editable rules block to each row: it backfills an empty Status with a default, canonicalizes known Status variants (for example `wip`, `in progress`, and `In Progress` all resolve to `In Progress`), and computes a title slug and an ISO year-week stamp. It compares each result to what is already stored and marks a row changed only when something differs. A Switch sends changed rows to the update step and a run recap to the log. Each changed row is updated in place and stamped with a normalized time, while already-clean rows are skipped entirely.
