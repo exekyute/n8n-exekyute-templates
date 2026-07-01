@@ -1,4 +1,4 @@
-Turn inbound support email into sourced, ready-to-review replies grounded in your own Notion knowledge base. Cohere reranking and a two-step grounding check keep it from guessing, and a person approves every answer in Gmail before it goes out, so the model never sends on its own.
+Turn inbound support email into sourced, ready-to-review replies grounded in your own Notion knowledge base with retrieval-augmented generation (RAG). Cohere reranking and a two-step grounding check keep it from guessing, and a person approves every answer in Gmail before it goes out, so the model never sends on its own.
 
 ## Who's it for
 
