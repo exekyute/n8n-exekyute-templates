@@ -4,6 +4,8 @@ Point this workflow at one Notion task database and it rewrites overdue tasks in
 
 Built with n8n and Notion.
 
+![Workflow canvas](images/workflow.png)
+
 ## How it works
 
 A Schedule trigger runs the workflow each morning. A Notion node reads every row from the target database with full property data. A Code node finds rows whose due date is in the past and whose status is not one of your done values, then works out a new date, the next roll count, and the stale flag for each. Only the rows that actually change are written back with the native Notion update step, in place. Finished tasks and tasks that are not yet due are never touched.
