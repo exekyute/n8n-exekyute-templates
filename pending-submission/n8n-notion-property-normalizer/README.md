@@ -104,4 +104,4 @@ Clean runs are logged too, so the page holds a full history.
 
 All sample data is fictional. No real credentials, IDs, or endpoints are included.
 
-Part of the [n8n-exekyute-templates](../../) collection. MIT licensed.
+Part of the [n8n-exekyute-templates](../../README.md) collection. MIT licensed.

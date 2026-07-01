@@ -86,4 +86,4 @@ This workflow provides research assistance only. It is not legal advice and does
 
 All sample data is fictional. No real credentials, IDs, or endpoints are included.
 
-Part of the [n8n-exekyute-templates](../../) collection. MIT licensed.
+Part of the [n8n-exekyute-templates](../../README.md) collection. MIT licensed.

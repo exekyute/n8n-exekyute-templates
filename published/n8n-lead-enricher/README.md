@@ -83,4 +83,4 @@ Set these in the "Set Config & Normalize Input" node:
 
 All sample data is fictional. No real credentials, IDs, or endpoints are included.
 
-Part of the [n8n-exekyute-templates](../../) collection. MIT licensed.
+Part of the [n8n-exekyute-templates](../../README.md) collection. MIT licensed.
