@@ -6,8 +6,8 @@
       "type": "n8n-nodes-base.googleDriveTrigger",
       "typeVersion": 1,
       "position": [
-        0,
-        0
+        -160,
+        544
       ],
       "parameters": {
         "authentication": "oAuth2",
@@ -41,8 +41,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        220,
-        0
+        224,
+        544
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
@@ -56,15 +56,13 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        440,
-        0
+        512,
+        480
       ],
       "parameters": {
         "rules": {
           "values": [
             {
-              "renameOutput": true,
-              "outputKey": "Contracts",
               "conditions": {
                 "options": {
                   "caseSensitive": false,
@@ -83,11 +81,11 @@
                   }
                 ],
                 "combinator": "and"
-              }
+              },
+              "renameOutput": true,
+              "outputKey": "Contracts"
             },
             {
-              "renameOutput": true,
-              "outputKey": "Invoices",
               "conditions": {
                 "options": {
                   "caseSensitive": false,
@@ -106,11 +104,11 @@
                   }
                 ],
                 "combinator": "and"
-              }
+              },
+              "renameOutput": true,
+              "outputKey": "Invoices"
             },
             {
-              "renameOutput": true,
-              "outputKey": "Scans",
               "conditions": {
                 "options": {
                   "caseSensitive": false,
@@ -129,11 +127,11 @@
                   }
                 ],
                 "combinator": "and"
-              }
+              },
+              "renameOutput": true,
+              "outputKey": "Scans"
             },
             {
-              "renameOutput": true,
-              "outputKey": "Reports",
               "conditions": {
                 "options": {
                   "caseSensitive": false,
@@ -152,7 +150,9 @@
                   }
                 ],
                 "combinator": "and"
-              }
+              },
+              "renameOutput": true,
+              "outputKey": "Reports"
             }
           ]
         },
@@ -167,8 +167,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        660,
-        0
+        784,
+        704
       ],
       "parameters": {
         "authentication": "oAuth2",
@@ -178,6 +178,7 @@
         "queryString": "=name='{{ $('Plan Destination From Rules').item.json.year }}' and '{{ $('Plan Destination From Rules').item.json.filedRootFolderId }}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false",
         "returnAll": false,
         "limit": 1,
+        "filter": {},
         "options": {
           "fields": [
             "id",
@@ -202,8 +203,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        880,
-        0
+        992,
+        688
       ],
       "parameters": {
         "conditions": {
@@ -225,7 +226,8 @@
             }
           ],
           "combinator": "and"
-        }
+        },
+        "options": {}
       }
     },
     {
@@ -233,8 +235,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        880,
-        220
+        1200,
+        704
       ],
       "parameters": {
         "authentication": "oAuth2",
@@ -271,8 +273,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1100,
-        0
+        1376,
+        432
       ],
       "parameters": {
         "authentication": "oAuth2",
@@ -282,6 +284,7 @@
         "queryString": "=name='{{ $('Plan Destination From Rules').item.json.month }}' and '{{ $json.id }}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false",
         "returnAll": false,
         "limit": 1,
+        "filter": {},
         "options": {
           "fields": [
             "id",
@@ -306,8 +309,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1320,
-        0
+        1584,
+        416
       ],
       "parameters": {
         "conditions": {
@@ -329,7 +332,8 @@
             }
           ],
           "combinator": "and"
-        }
+        },
+        "options": {}
       }
     },
     {
@@ -337,8 +341,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1320,
-        220
+        1744,
+        560
       ],
       "parameters": {
         "authentication": "oAuth2",
@@ -375,8 +379,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1540,
-        0
+        1888,
+        400
       ],
       "parameters": {
         "authentication": "oAuth2",
@@ -386,6 +390,7 @@
         "queryString": "=name='{{ $('Plan Destination From Rules').item.json.type }}' and '{{ $json.id }}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false",
         "returnAll": false,
         "limit": 1,
+        "filter": {},
         "options": {
           "fields": [
             "id",
@@ -410,8 +415,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1760,
-        0
+        2096,
+        384
       ],
       "parameters": {
         "conditions": {
@@ -433,7 +438,8 @@
             }
           ],
           "combinator": "and"
-        }
+        },
+        "options": {}
       }
     },
     {
@@ -441,8 +447,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1760,
-        220
+        2320,
+        400
       ],
       "parameters": {
         "authentication": "oAuth2",
@@ -479,8 +485,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1980,
-        0
+        2496,
+        288
       ],
       "parameters": {
         "authentication": "oAuth2",
@@ -518,8 +524,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        2200,
-        0
+        2784,
+        448
       ],
       "parameters": {
         "authentication": "oAuth2",
@@ -547,6 +553,7 @@
             "Status": "Filed",
             "Notes": ""
           },
+          "matchingColumns": [],
           "schema": [
             {
               "id": "Timestamp",
@@ -620,7 +627,9 @@
               "type": "string",
               "canBeUsedToMatch": true
             }
-          ]
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
         },
         "options": {}
       },
@@ -640,8 +649,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        1100,
-        420
+        3008,
+        640
       ],
       "parameters": {
         "authentication": "oAuth2",
@@ -669,6 +678,7 @@
             "Status": "Failed",
             "Notes": "={{ $json.error?.message || 'Filing step failed, see execution log' }}"
           },
+          "matchingColumns": [],
           "schema": [
             {
               "id": "Timestamp",
@@ -742,7 +752,9 @@
               "type": "string",
               "canBeUsedToMatch": true
             }
-          ]
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
         },
         "options": {}
       },
@@ -754,78 +766,77 @@
       }
     },
     {
-      "name": "Sticky Note Overview",
+      "name": "Sticky Note de7e10e6",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -380,
-        -20
+        -272,
+        -368
       ],
       "parameters": {
         "content": "## Drive Auto-Filer\n\nWatches one Google Drive inbox folder and files every new document into a dated Year/Month/Type folder tree, then records each move in a Google Sheet. No AI, fully rule based.\n\n### How it works\n1. The Google Drive trigger fires when a new file appears in the inbox folder.\n2. A Code node reads the file name against an editable rules table and works out the document Type (Contracts, Invoices, Scans, Reports, or _Unsorted) plus the destination path, for example 2026/06/Contracts.\n3. A Switch routes the file by Type. Each missing folder level (year, then month, then type) is found or created on the fly.\n4. The file is moved into the leaf folder and one audit row is appended to the Google Sheet.\n\n### Setup\n1. Connect Google Drive and Google Sheets credentials (the same Google account works for both).\n2. In the trigger, pick the inbox folder to watch.\n3. In the Plan Destination From Rules node, edit the rules table and paste your archive root folder ID.\n4. In the two Google Sheets nodes, pick your audit spreadsheet and tab.\n\n### Customize\nEdit the rules table to add document types, change folder names, or reorder matching. A bad file is logged and skipped, so one failure never stops the run.",
-        "color": 3,
-        "width": 340,
-        "height": 600
+        "height": 584,
+        "width": 1508
       }
     },
     {
-      "name": "Sticky Note Rules",
+      "name": "Sticky Note 98813566",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        180,
-        -170
+        96,
+        304
       ],
       "parameters": {
         "content": "## Editable rules table\nOpen this node and edit the RULES block at the top. Each line maps a filename pattern (case-insensitive regex) to a Type folder. First match wins. Files matching nothing go to _Unsorted.",
-        "color": 7,
-        "width": 250,
-        "height": 130
+        "height": 434,
+        "width": 346,
+        "color": 7
       }
     },
     {
-      "name": "Sticky Note Tree",
+      "name": "Sticky Note 96d66081",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        640,
-        -170
+        720,
+        240
       ],
       "parameters": {
         "content": "## Find or create the Year/Month/Type tree\nEach level is searched under its parent. A missing level is created, an existing one is reused, so no duplicate folders build up. The file is then moved into the leaf folder.",
-        "color": 7,
-        "width": 1320,
-        "height": 130
+        "height": 642,
+        "width": 1944,
+        "color": 7
       }
     },
     {
-      "name": "Sticky Note Audit",
+      "name": "Sticky Note ecc6f80e",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2120,
-        -170
+        2704,
+        240
       ],
       "parameters": {
         "content": "## Audit log\nEvery move appends one row: Timestamp, Original Filename, Matched Rule, Type, Destination Path, File ID, Status, Notes. Failures are logged with Status Failed so nothing is lost silently. Add these headers to row 1 of your sheet.",
-        "color": 7,
-        "width": 320,
-        "height": 140
+        "height": 572,
+        "width": 528,
+        "color": 7
       }
     },
     {
-      "name": "Sticky Note Warning",
+      "name": "Sticky Note eff0ab00",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -380,
-        620
+        -272,
+        304
       ],
       "parameters": {
         "content": "## Keep the archive root separate\nThe archive root folder (set in the rules node) must NOT be the watched inbox folder, or filed documents could be picked up again. Use a different folder.",
-        "color": 5,
+        "height": 438,
         "width": 340,
-        "height": 150
+        "color": 3
       }
     }
   ],

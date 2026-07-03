@@ -4,29 +4,29 @@ Drop files into one Google Drive inbox folder and this workflow files each one i
 
 Built with n8n, plus Google Drive and Google Sheets.
 
+![The Drive Auto-Filer workflow on the n8n canvas](images/workflow.png)
+
 ## How it works
 
-A Google Drive trigger watches the inbox folder. For each new file, a Code node reads the filename against an editable rules table, picks a Type, and works out the destination path from the file's created date. A Switch routes the file by Type. The workflow then finds or creates each folder level (year, then month, then type), moves the file into the leaf folder, and appends one row to a Google Sheet.
+A new file lands in the inbox, the workflow decides where it belongs, files it, and logs the move. Three stages:
 
-| Stage | What happens |
-|---|---|
-| Watch inbox | A Google Drive trigger fires on each new file in the inbox folder |
-| Plan destination | A Code node matches the filename to a Type and builds the Year/Month/Type path |
-| Route by Type | A Switch sends the file down its Type branch, or the catch-all branch for unmatched files |
-| Find or create folders | Each level is searched under its parent and created only if missing, so no duplicates pile up |
-| Move the file | The file is moved into the leaf folder |
-| Log the move | One audit row is appended: timestamp, filename, matched rule, Type, path, file id, status |
+### 1. Watch the inbox and classify the file
 
-Each folder level is searched before it is created, so running on a busy month reuses the existing Year and Month folders instead of stacking up duplicates.
+![The trigger, the rules Code node, and the Switch that routes by Type](images/step-1-classify.png)
 
-## Setup
+The Google Drive trigger fires on each new file in the inbox folder. A Code node reads the filename against an editable rules table, picks a document Type (Contracts, Invoices, Scans, Reports), and builds the destination path from the file's created date, for example `2026/06/Contracts`. A Switch then routes the file down its Type branch, and anything that matches no rule takes the catch-all branch and is filed under `_Unsorted`.
 
-1. Import `workflow.json` into n8n. It imports inactive, so configure it before activating.
-2. Assign a Google Drive credential to the trigger and the four Google Drive nodes, and a Google Sheets credential to the two Google Sheets nodes. The same Google account can back both.
-3. In the trigger, pick the inbox folder to watch.
-4. Open "Plan Destination From Rules" and set `FILED_ROOT_FOLDER_ID` to the folder that should hold the dated tree. Use a different folder than the inbox, so filed documents are not picked up again.
-5. In "Append Audit Row" and "Log Filing Failure", pick your audit spreadsheet and tab, and put the column headers in row 1 (listed below).
-6. Run it once on a test file, then activate.
+### 2. File it into a dated Year/Month/Type tree
+
+![Find or create each folder level, then move the file into the leaf folder](images/step-2-file-tree.png)
+
+For each level (year, then month, then type) the workflow searches under the parent folder and creates the level only if it is missing, so an existing Year or Month folder is reused instead of duplicated. Once the leaf folder exists, the file is moved into it.
+
+### 3. Log every move
+
+![Both Google Sheets nodes: the audit append and the failure log](images/step-3-audit-log.png)
+
+Every move appends one row to a Google Sheet: timestamp, original filename, matched rule, Type, destination path, file id, and status. If any Drive or Sheets step fails for a file, that file is logged with a `Failed` status and skipped, so one bad file never stops the run.
 
 ## The rules table
 
@@ -59,9 +59,14 @@ Every move appends one row to the audit sheet. Create these headers in row 1:
 | Status | `Filed` for a move, `Failed` for an error |
 | Notes | The error message on a failed row, blank otherwise |
 
-## Error handling
+## Setup
 
-Each Google Drive and Google Sheets step retries a few times on a transient error, then routes a failure to the "Log Filing Failure" node instead of halting. A single problem file is logged with `Status` of `Failed` and the rest of the run keeps going.
+1. Import `workflow.json` into n8n. It imports inactive, so configure it before activating.
+2. Assign a Google Drive credential to the trigger and the four Google Drive nodes, and a Google Sheets credential to the two Google Sheets nodes. The same Google account can back both.
+3. In the trigger, pick the inbox folder to watch.
+4. Open "Plan Destination From Rules" and set `FILED_ROOT_FOLDER_ID` to the folder that should hold the dated tree. Use a different folder than the inbox, so filed documents are not picked up again.
+5. In "Append Audit Row" and "Log Filing Failure", pick your audit spreadsheet and tab, and put the column headers above in row 1.
+6. Run it once on a test file, then activate.
 
 ## Customize
 
@@ -83,9 +88,10 @@ Each Google Drive and Google Sheets step retries a few times on a transient erro
 | `README.md` | This overview |
 | `TEMPLATE-DESCRIPTION.md` | The n8n Creator hub listing text |
 | `workflow.json` | The importable n8n workflow |
+| `images/` | The canvas screenshots used above |
 
 ---
 
 All sample data is fictional. No real credentials, IDs, or endpoints are included.
 
-Part of the [n8n-exekyute-templates](../../README.md) collection. MIT licensed.
+Part of the [n8n-exekyute-templates](../../) collection. MIT licensed.
