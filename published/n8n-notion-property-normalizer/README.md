@@ -1,5 +1,7 @@
 # Normalize and backfill Notion database properties from an editable rules table
 
+[Published n8n template](https://n8n.io/workflows/16800-normalize-and-backfill-notion-database-properties-with-rules-and-logging/)
+
 Point this workflow at one Notion database and it keeps the properties tidy on a schedule: it fills a missing Status with a default, folds inconsistent Status spellings into one canonical value, derives a slug key and a created-week stamp from each row, and stamps a "Last normalized" time. No AI, fully rule based, so the same row always resolves the same way, and only rows that actually change are written.
 
 Built with n8n and Notion.

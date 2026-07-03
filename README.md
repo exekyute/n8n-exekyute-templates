@@ -13,17 +13,14 @@ Live in the n8n template library.
 | [Lead Enricher](published/n8n-lead-enricher/) | Researches an inbound company with You.com, writes a profile and fit score with Groq, alerts Slack for hot leads, and logs every lead to Notion. | [View](https://n8n.io/workflows/16504-enrich-and-route-inbound-leads-using-youcom-groq-notion-and-slack/) |
 | [API Contract Drift Watcher](published/n8n-api-contract-drift-watcher/) | Polls a JSON or OpenAPI endpoint on a schedule, snapshots its response schema in a Data Table, and posts a severity-tagged Slack alert only when the contract breaks, ignoring ordinary value churn. | [View](https://n8n.io/workflows/16699-alert-on-api-contract-drift-using-data-tables-and-slack/) |
 | [Backup Freshness Auditor](published/n8n-backup-freshness-auditor/) | Audits a Google Drive folder of externally produced backups against a per-source SLA table in Sheets, flags stale, missing, or shrunken dumps, logs a scorecard, and alerts Slack only on failures. | [View](https://n8n.io/workflows/16701-audit-google-drive-backup-freshness-with-google-sheets-and-slack/) |
+| [CSV Folder Reconciler](published/n8n-csv-folder-reconciler/) | Merges the daily CSV exports in a Google Drive folder into one deduped master, quarantines every bad row to a dated reject file with a reason, and posts a rows in, merged, quarantined, duplicates recap to Slack. | [View](https://n8n.io/workflows/16700-reconcile-daily-google-drive-csv-exports-into-a-master-file-and-send-a-slack-recap/) |
+| [Notion Deduplicator](published/n8n-notion-deduplicator/) | Removes duplicate rows from a Notion database on a schedule, keeping the newest or most complete record in each group, archiving the rest to the Notion trash, and logging a recap of every run. | [View](https://n8n.io/workflows/16801-deduplicate-and-archive-notion-database-rows-daily-with-an-audit-log/) |
+| [Notion Overdue Roller](published/n8n-notion-overdue-roller/) | Rolls overdue Notion tasks forward in place on a schedule, incrementing a per-task roll counter and setting a Stale flag once a task has been pushed too many times, without sending any reminder. | [View](https://n8n.io/workflows/16802-roll-overdue-notion-tasks-forward-and-flag-stale-ones-on-a-schedule/) |
+| [Notion Property Normalizer](published/n8n-notion-property-normalizer/) | Cleans up one Notion database on a schedule with no AI: backfills a missing Status default, canonicalizes inconsistent Status spellings, derives a slug key and a created-week stamp, and writes only the rows that actually change. | [View](https://n8n.io/workflows/16800-normalize-and-backfill-notion-database-properties-with-rules-and-logging/) |
 
 ## Pending review
 
 Submitted to the n8n Creator hub and awaiting approval. Templates move up to `published/` once they are live in the library.
-
-| Template | What it does |
-|---|---|
-| [CSV Folder Reconciler](pending-review/n8n-csv-folder-reconciler/) | Merges the daily CSV exports in a Google Drive folder into one deduped master, quarantines every bad row to a dated reject file with a reason, and posts a rows in, merged, quarantined, duplicates recap to Slack. |
-| [Notion Deduplicator](pending-review/n8n-notion-deduplicator/) | Removes duplicate rows from a Notion database on a schedule, keeping the newest or most complete record in each group, archiving the rest to the Notion trash, and logging a recap of every run. |
-| [Notion Overdue Roller](pending-review/n8n-notion-overdue-roller/) | Rolls overdue Notion tasks forward in place on a schedule, incrementing a per-task roll counter and setting a Stale flag once a task has been pushed too many times, without sending any reminder. |
-| [Notion Property Normalizer](pending-review/n8n-notion-property-normalizer/) | Cleans up one Notion database on a schedule with no AI: backfills a missing Status default, canonicalizes inconsistent Status spellings, derives a slug key and a created-week stamp, and writes only the rows that actually change. |
 
 ## Pending submission
 

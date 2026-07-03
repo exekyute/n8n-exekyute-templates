@@ -1,5 +1,7 @@
 # Roll overdue Notion tasks forward and flag ones rolled too often
 
+[Published n8n template](https://n8n.io/workflows/16802-roll-overdue-notion-tasks-forward-and-flag-stale-ones-on-a-schedule/)
+
 Point this workflow at one Notion task database and it rewrites overdue tasks in place on a schedule. It rolls each past-due date forward to today, counts how many times a task has been rolled, and checks a Stale flag once a task has been pushed too many times. It is not a reminder, so it notifies nothing. No AI, fully rule based, so the same board always resolves the same way.
 
 Built with n8n and Notion.

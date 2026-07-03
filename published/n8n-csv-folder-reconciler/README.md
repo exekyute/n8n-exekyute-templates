@@ -1,5 +1,7 @@
 # Reconcile daily CSV exports in Google Drive into a deduped master with a reject lane and Slack recap
 
+[Published n8n template](https://n8n.io/workflows/16700-reconcile-daily-google-drive-csv-exports-into-a-master-file-and-send-a-slack-recap/)
+
 Multi-branch teams export a CSV a day, and someone ends up stitching them into one clean file by hand. This workflow merges every CSV in a Google Drive folder into a single deduplicated master, quarantines every bad row to a dated reject file with the reason it failed, and posts a rows in, merged, quarantined, duplicates recap to Slack. No AI, fully rule based, so the same input always produces the same result.
 
 Built with n8n, plus Google Drive and Slack.
