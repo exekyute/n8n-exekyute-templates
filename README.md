@@ -36,6 +36,7 @@ Built and tested but not yet submitted to the Creator hub. Templates move to `pe
 | [Gladia Subtitle Generator](pending-submission/n8n-gladia-subtitle-generator/) | Generates ready-to-use SRT and VTT subtitle files from a public audio or video URL using Gladia, and saves both to Google Drive with the download links shown on the form. |
 | [Gladia Speaker Transcript](pending-submission/n8n-gladia-speaker-transcript/) | Transcribes a public call or interview recording into a clean speaker-labeled transcript with Gladia diarization, saves it to Google Drive as Markdown, and posts the link to Slack. |
 | [Gladia Drive Transcriber](pending-submission/n8n-gladia-drive-transcriber/) | Transcribes new audio and video files dropped into a Google Drive folder with Gladia, saves the transcript back to Drive as a Markdown file, and logs every run to a Google Sheet. |
+| [Gladia Audio Translator](pending-submission/n8n-gladia-audio-translator/) | Translates a foreign-language audio or video recording into a target language with Gladia in a single call, saving both the original transcript and the translation to Google Drive as a Markdown file and logging every run to a Google Sheet. |
 
 ## License
 
