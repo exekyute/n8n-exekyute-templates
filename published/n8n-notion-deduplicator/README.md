@@ -1,5 +1,7 @@
 # Deduplicate a Notion database by keeping the newest row and archiving the rest
 
+[Published n8n template](https://n8n.io/workflows/16801-deduplicate-and-archive-notion-database-rows-daily-with-an-audit-log/)
+
 Point this workflow at one Notion database and it removes duplicate rows on a schedule, keeping the best record in each set instead of an arbitrary one, and writing a recap of every run to a log page. No AI, fully rule based, so the same data always resolves the same way.
 
 Built with n8n and Notion.
