@@ -1,5 +1,7 @@
 # Audit Google Drive backups for stale, missing, or shrunken files and alert Slack
 
+[Published n8n template](https://n8n.io/workflows/16701-audit-google-drive-backup-freshness-with-google-sheets-and-slack/)
+
 This workflow watches a Google Drive folder that another job already writes backups into (a pg_dump cron, Veeam, or any other tool) and checks each expected source against a per-source SLA table in a Google Sheet. It never makes a backup. It reads file metadata, assigns one verdict per source (OK, STALE, MISSING, or SHRUNK), logs a dated scorecard row for each source, and pings Slack only when something fails.
 
 Built with n8n, plus Google Drive, Google Sheets, and Slack.
