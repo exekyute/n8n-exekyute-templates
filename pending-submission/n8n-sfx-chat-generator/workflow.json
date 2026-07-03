@@ -1,0 +1,377 @@
+{
+  "name": "Generate sound effects from chat using ElevenLabs and Google Drive",
+  "nodes": [
+    {
+      "parameters": {
+        "public": false,
+        "initialMessages": "Hi! Describe a sound and I'll generate it with ElevenLabs.\nTry: \"a heavy wooden door creaking open\" or \"distant thunder rumbling\".",
+        "options": {
+          "responseMode": "lastNode"
+        }
+      },
+      "id": "7bd0f184-6872-4898-9b98-45dd612caf41",
+      "name": "When Chat Message Received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        280,
+        360
+      ],
+      "webhookId": "2bf344ca-1c02-4ca4-b0f6-117305edd0f5"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert sound-effects director for the ElevenLabs sound-generation API. Turn the user's casual description into ONE richly detailed, literal sound-effects prompt, then choose sensible settings.\n\nWrite sfx_prompt so it describes the sound literally: the source, material, action, environment, and how it evolves over time. Prefer concrete audio detail (for example, \"a heavy oak door slowly creaking open, hinges groaning, faint echo in a stone hall\") over vague labels (for example, \"door sound\"). Keep it to one continuous sound event unless the user clearly asks for a sequence. Do not add music or narration unless asked.\n\nChoose duration_seconds between 0.5 and 30. Use 0.5 to 2 for short impacts like clicks or thuds, and 8 to 20 for ambiences or drones.\n\nChoose prompt_influence between 0 and 1. Use about 0.3 for organic or natural sounds, and 0.6 to 0.8 for precise, mechanical, or branded sounds that must match exactly.\n\nUser request:\n{{ $('When Chat Message Received').item.json.chatInput }}",
+        "hasOutputParser": true
+      },
+      "id": "0c24e629-3ff8-49a2-9711-f18118309b29",
+      "name": "Compose Sound Effect Prompt",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        520,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "id": "8f163fe2-04a2-4a89-a215-7ffcf1d29df0",
+      "name": "Groq Llama Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        440,
+        600
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "REPLACE_WITH_YOUR_GROQ_CREDENTIAL",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"sfx_prompt\": {\n      \"type\": \"string\",\n      \"description\": \"A literal, richly described sound-effects prompt for the ElevenLabs sound-generation API.\"\n    },\n    \"duration_seconds\": {\n      \"type\": \"number\",\n      \"minimum\": 0.5,\n      \"maximum\": 30,\n      \"description\": \"Clip length in seconds, between 0.5 and 30.\"\n    },\n    \"prompt_influence\": {\n      \"type\": \"number\",\n      \"minimum\": 0,\n      \"maximum\": 1,\n      \"description\": \"How literally to follow the prompt, between 0 and 1. About 0.3 for natural sounds, higher for precise or mechanical ones.\"\n    }\n  },\n  \"required\": [\n    \"sfx_prompt\",\n    \"duration_seconds\",\n    \"prompt_influence\"\n  ]\n}",
+        "autoFix": true
+      },
+      "id": "18426e1c-c47b-4853-8b6e-9ee703b03c2e",
+      "name": "Validate Sound Settings",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        680,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Normalize and clamp the sound director's structured output.\n// Falls back to the user's own words (then a gentle default) so an empty\n// or garbled message still produces a valid request instead of an API error.\n\nconst rawMessage = ($('When Chat Message Received').item.json.chatInput || '').toString().trim();\n\n// With an output parser wired, the Basic LLM Chain surfaces the object under `output`.\nconst parsed = ($json && typeof $json.output === 'object' && $json.output !== null) ? $json.output : $json;\n\nconst clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));\nconst toNum = (v) => {\n  const n = typeof v === 'number' ? v : parseFloat(v);\n  return Number.isFinite(n) ? n : null;\n};\n\n// Prompt: prefer the director's rewrite, fall back to the raw words, then a safe default.\nlet sfxPrompt = (parsed && typeof parsed.sfx_prompt === 'string') ? parsed.sfx_prompt.trim() : '';\nif (!sfxPrompt) sfxPrompt = rawMessage;\nif (!sfxPrompt) sfxPrompt = 'a soft, short ambient tone';\n\n// Duration: clamp to the ElevenLabs 0.5-30s window; default 3s if missing.\nlet duration = toNum(parsed ? parsed.duration_seconds : null);\nduration = duration === null ? 3 : Math.round(clamp(duration, 0.5, 30) * 10) / 10;\n\n// Prompt influence: clamp to 0-1; default 0.3 (the ElevenLabs default).\nlet influence = toNum(parsed ? parsed.prompt_influence : null);\ninfluence = influence === null ? 0.3 : clamp(influence, 0, 1);\n\nreturn { json: { sfx_prompt: sfxPrompt, duration_seconds: duration, prompt_influence: influence } };"
+      },
+      "id": "99597e70-a4d4-4d39-aa91-bc7a6da44235",
+      "name": "Clamp Sound Settings",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        920,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/sound-generation",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "specifyQuery": "keypair",
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "output_format",
+              "value": "mp3_44100_128"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"text\": $json.sfx_prompt, \"duration_seconds\": $json.duration_seconds, \"prompt_influence\": $json.prompt_influence } }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          },
+          "timeout": 60000
+        }
+      },
+      "id": "59dad42f-96b9-40df-842b-51af5b9e73a8",
+      "name": "Generate Sound With ElevenLabs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1160,
+        360
+      ],
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_YOUR_ELEVENLABS_CREDENTIAL",
+          "name": "ElevenLabs"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "name": "=sfx-{{ $('Clamp Sound Settings').item.json.sfx_prompt.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) }}-{{ $now.toFormat('yyyyLLdd-HHmmss') }}.mp3",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "REPLACE_WITH_YOUR_DRIVE_FOLDER_ID"
+        },
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "id": "8b0e2348-3986-4bf2-a7fd-b9561313d41f",
+      "name": "Upload to Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1400,
+        280
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_DRIVE_CREDENTIAL",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b6ae5e52-ae45-4105-b20c-439bb19f6ed3",
+              "name": "output",
+              "type": "string",
+              "value": "=🔊 Your sound effect is ready.\n\n**Prompt used:** {{ $('Clamp Sound Settings').item.json.sfx_prompt }}\n**Duration:** {{ $('Clamp Sound Settings').item.json.duration_seconds }}s  ·  **Prompt influence:** {{ $('Clamp Sound Settings').item.json.prompt_influence }}\n\n▶️ Open it in Google Drive: {{ $json.webViewLink || 'https://drive.google.com/file/d/' + $json.id + '/view' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f3a119c9-770c-4885-9abb-99615d36a17b",
+      "name": "Respond in Chat",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1620,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "34764df1-793a-4fcd-9c97-309853e1c129",
+              "name": "output",
+              "type": "string",
+              "value": "=⚠️ I couldn't generate that sound effect just now. The sound service may be busy, or the description was unclear. Please try again with a clear description like \"a heavy wooden door creaking open\" or \"distant thunder rumbling\"."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f9edcb62-71ab-4555-b27a-dad420ece0ea",
+      "name": "Report Sound Failure",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1400,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Generate sound effects from chat using ElevenLabs and Google Drive\n\n### How it works\n\n1. The user describes a sound in plain words in the chat.\n2. A Groq model acts as a sound-effects director and rewrites the request into a literal, richly detailed ElevenLabs prompt, then picks a duration and a prompt influence.\n3. The workflow clamps those settings to safe ranges and calls the ElevenLabs sound-generation API.\n4. The returned MP3 is uploaded to Google Drive, and the link, prompt, and duration are sent back in the chat.\n\n### Setup steps\n\n- [ ] Create a Header Auth credential named ElevenLabs with header name xi-api-key and your ElevenLabs API key, then select it on Generate Sound With ElevenLabs.\n- [ ] Select your Groq credential on Groq Llama Model (model llama-3.3-70b-versatile).\n- [ ] Select your Google Drive OAuth2 credential and set the parent folder on Upload to Google Drive.\n\n### Customization\n\nSwap the chat trigger for a form or webhook, tune the duration and prompt-influence guidance in the director prompt, or point the upload at a different Drive folder.",
+        "height": 470,
+        "width": 480
+      },
+      "id": "49027a9e-01a2-4f9e-a65f-827bd4012891",
+      "name": "Sticky Note 63fbb344",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Describe and direct the sound\n\nTakes the chat message and turns it into a clean, literal sound prompt with validated settings.",
+        "height": 480,
+        "width": 700,
+        "color": 7
+      },
+      "id": "79a3ebcf-9e1e-4fe8-80dd-c3afbe904fc4",
+      "name": "Sticky Note 04311802",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Generate the sound effect\n\nClamps the settings and calls ElevenLabs, with retries and an error path.",
+        "height": 200,
+        "width": 460,
+        "color": 7
+      },
+      "id": "6eb006d0-462e-47c9-9d93-88c33cf7f023",
+      "name": "Sticky Note c54ece70",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Store and reply in chat\n\nSaves the MP3 to Google Drive and replies with the link, or a friendly message on failure.",
+        "height": 540,
+        "width": 480,
+        "color": 7
+      },
+      "id": "535a5a79-ac6a-4c4f-abcb-4a1d8e3e3fd3",
+      "name": "Sticky Note 4a18e4db",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "When Chat Message Received": {
+      "main": [
+        [
+          {
+            "node": "Compose Sound Effect Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Llama Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Compose Sound Effect Prompt",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Validate Sound Settings",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Sound Settings": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Compose Sound Effect Prompt",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compose Sound Effect Prompt": {
+      "main": [
+        [
+          {
+            "node": "Clamp Sound Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clamp Sound Settings": {
+      "main": [
+        [
+          {
+            "node": "Generate Sound With ElevenLabs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Sound With ElevenLabs": {
+      "main": [
+        [
+          {
+            "node": "Upload to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Report Sound Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Respond in Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {},
+  "tags": []
+}
