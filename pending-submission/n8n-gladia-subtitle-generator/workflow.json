@@ -1,0 +1,535 @@
+{
+  "name": "Generate SRT and VTT subtitle files from a media URL using Gladia and Google Drive",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Generate SRT and VTT subtitle files from a media URL using Gladia and Google Drive\n\n### How it works\n\n1. Someone submits a public audio or video URL through the form.\n2. The workflow sends that URL to Gladia and asks for SRT and VTT subtitles.\n3. It waits and polls Gladia until the transcription is done, or stops after a set number of attempts.\n4. A Code node turns each subtitle track into a downloadable file.\n5. Both files upload to Google Drive and the form shows the two links.\n\n### Setup steps\n\n- [ ] Create a Header Auth credential named Gladia with header name x-gladia-key and your Gladia API key, then select it on Submit Media to Gladia and Fetch Transcription Result.\n- [ ] Connect your Google Drive account and set the destination folder on Upload Subtitles to Drive.\n- [ ] Adjust wait seconds and max attempts in Set Polling Config for longer media.\n\n### Customization\n\nChange the requested formats in Submit Media to Gladia, point the upload at a different Drive folder, or swap the form trigger for a webhook to run it from another system.",
+        "height": 520,
+        "width": 480
+      },
+      "id": "c1d2e3f4-00a1-4a01-8a01-0000000000a1",
+      "name": "Sticky Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Receive and submit request\n\nThe form collects a public media URL, config values are set, then transcription starts on Gladia.",
+        "height": 300,
+        "width": 720,
+        "color": 7
+      },
+      "id": "c1d2e3f4-00a2-4a01-8a01-0000000000a2",
+      "name": "Sticky Receive And Submit",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Poll until subtitles are ready\n\nWait, fetch the result, and route by status until Gladia returns done or the attempt limit is reached.",
+        "height": 300,
+        "width": 740,
+        "color": 7
+      },
+      "id": "c1d2e3f4-00a3-4a01-8a01-0000000000a3",
+      "name": "Sticky Poll For Result",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        760,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Build files and store them\n\nTurn each subtitle track into a file, upload both to Google Drive, then show the download links.",
+        "height": 280,
+        "width": 980,
+        "color": 7
+      },
+      "id": "c1d2e3f4-00a4-4a01-8a01-0000000000a4",
+      "name": "Sticky Build And Store",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Handle failures\n\nAny Gladia error, a timeout, or a missing subtitle track ends the form with a clear message.",
+        "height": 220,
+        "width": 320,
+        "color": 7
+      },
+      "id": "c1d2e3f4-00a5-4a01-8a01-0000000000a5",
+      "name": "Sticky Handle Failures",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "path": "c1d2e3f4-0f01-4a01-8a01-000000000f01",
+        "formTitle": "Generate subtitles from a media URL",
+        "formDescription": "Paste a public audio or video URL and get back ready-to-use SRT and VTT subtitle files, saved to Google Drive.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Media URL",
+              "placeholder": "https://example.com/episode.mp3 (a public, direct link to an audio or video file)",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Title",
+              "placeholder": "Optional name for the output files, for example episode-42",
+              "requiredField": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c1d2e3f4-0001-4a01-8a01-000000000001",
+      "name": "When Subtitle Requested",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        60,
+        320
+      ],
+      "webhookId": "c1d2e3f4-1001-4a01-8a01-000000001001"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-1",
+              "name": "wait_seconds",
+              "value": 10,
+              "type": "number"
+            },
+            {
+              "id": "cfg-2",
+              "name": "max_attempts",
+              "value": 60,
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "c1d2e3f4-0002-4a01-8a01-000000000002",
+      "name": "Set Polling Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        300,
+        320
+      ],
+      "notes": "Edit wait_seconds (poll interval) and max_attempts (timeout). Default 10s x 60 = up to 10 minutes."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.gladia.io/v2/pre-recorded",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"audio_url\": $('When Subtitle Requested').item.json['Media URL'], \"subtitles\": true, \"subtitles_config\": { \"formats\": [\"srt\", \"vtt\"] } } }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "c1d2e3f4-0003-4a01-8a01-000000000003",
+      "name": "Submit Media to Gladia",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        540,
+        320
+      ],
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_YOUR_GLADIA_CREDENTIAL",
+          "name": "Gladia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": "={{ $('Set Polling Config').item.json.wait_seconds }}",
+        "unit": "seconds"
+      },
+      "id": "c1d2e3f4-0004-4a01-8a01-000000000004",
+      "name": "Wait Between Polls",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        820,
+        320
+      ],
+      "webhookId": "c1d2e3f4-1004-4a01-8a01-000000001004"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.gladia.io/v2/pre-recorded/{{ $('Submit Media to Gladia').item.json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "c1d2e3f4-0005-4a01-8a01-000000000005",
+      "name": "Fetch Transcription Result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1060,
+        320
+      ],
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_YOUR_GLADIA_CREDENTIAL",
+          "name": "Gladia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "outputKey": "Done",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "done",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "outputKey": "Failed",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "error",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $runIndex }}",
+                    "rightValue": "={{ $('Set Polling Config').item.json.max_attempts }}",
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    }
+                  }
+                ],
+                "combinator": "or"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Still Processing"
+        }
+      },
+      "id": "c1d2e3f4-0006-4a01-8a01-000000000006",
+      "name": "Route by Status",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1300,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Turn Gladia's finished result into downloadable subtitle files.\n// One output item per requested format (SRT, VTT) so the next node\n// uploads them in a single pass. If neither track is present, throw so\n// the error output shows a clear message instead of uploading nothing.\n\nconst result = $input.first().json.result || {};\nconst tracks = (result.transcription && result.transcription.subtitles) || [];\n\nconst rawTitle = ($('When Subtitle Requested').first().json['Title'] || '').toString().trim();\nconst stem = (rawTitle || 'subtitles')\n  .toLowerCase()\n  .replace(/[^a-z0-9]+/g, '-')\n  .replace(/^-+|-+$/g, '')\n  .slice(0, 60) || 'subtitles';\n\nconst mimeByFormat = { srt: 'application/x-subrip', vtt: 'text/vtt' };\nconst out = [];\n\nfor (const format of ['srt', 'vtt']) {\n  const track = tracks.find((t) => t && t.format === format);\n  const content = track && typeof track.subtitles === 'string' ? track.subtitles.trim() : '';\n  if (!content) continue;\n  const fileName = stem + '.' + format;\n  const binaryData = await this.helpers.prepareBinaryData(Buffer.from(content, 'utf8'), fileName, mimeByFormat[format]);\n  out.push({ json: { title: rawTitle || stem, format: format, file_name: fileName }, binary: { data: binaryData } });\n}\n\nif (out.length === 0) {\n  throw new Error('Gladia returned no SRT or VTT subtitles for this media.');\n}\n\nreturn out;"
+      },
+      "id": "c1d2e3f4-0007-4a01-8a01-000000000007",
+      "name": "Build Subtitle Files",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1620,
+        240
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "name": "={{ $json.file_name }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "REPLACE_WITH_YOUR_DRIVE_FOLDER_ID"
+        },
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "id": "c1d2e3f4-0008-4a01-8a01-000000000008",
+      "name": "Upload Subtitles to Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1860,
+        240
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_DRIVE_CREDENTIAL",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Combine the two uploaded files into one confirmation carrying both links.\nconst uploaded = $input.all();\n\nconst linkFor = (fmt) => {\n  const hit = uploaded.find((i) => (i.json.name || '').toLowerCase().endsWith('.' + fmt));\n  if (!hit) return '';\n  return hit.json.webViewLink || (hit.json.id ? 'https://drive.google.com/file/d/' + hit.json.id + '/view' : '');\n};\n\nconst title = ($('When Subtitle Requested').first().json['Title'] || '').toString().trim();\n\nreturn [{ json: { title: title, srt_link: linkFor('srt'), vtt_link: linkFor('vtt') } }];"
+      },
+      "id": "c1d2e3f4-0009-4a01-8a01-000000000009",
+      "name": "Compose Download Reply",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2100,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "respondWith": "showText",
+        "responseText": "=Your subtitle files are ready.\n\nSRT: {{ $json.srt_link || 'not returned' }}\nVTT: {{ $json.vtt_link || 'not returned' }}\n\nOpen either link to view or download the file from Google Drive."
+      },
+      "id": "c1d2e3f4-0010-4a01-8a01-000000000010",
+      "name": "Show Download Links",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        2340,
+        240
+      ],
+      "webhookId": "c1d2e3f4-1010-4a01-8a01-000000001010"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "respondWith": "showText",
+        "responseText": "=We could not generate subtitles for that media.\n\nCheck that the Media URL is public and points directly to an audio or video file, then submit the form again. If the problem continues, the transcription service may be temporarily unavailable."
+      },
+      "id": "c1d2e3f4-0011-4a01-8a01-000000000011",
+      "name": "Report Subtitle Failure",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        1620,
+        520
+      ],
+      "webhookId": "c1d2e3f4-1011-4a01-8a01-000000001011"
+    }
+  ],
+  "connections": {
+    "When Subtitle Requested": {
+      "main": [
+        [
+          {
+            "node": "Set Polling Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Polling Config": {
+      "main": [
+        [
+          {
+            "node": "Submit Media to Gladia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submit Media to Gladia": {
+      "main": [
+        [
+          {
+            "node": "Wait Between Polls",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Report Subtitle Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Between Polls": {
+      "main": [
+        [
+          {
+            "node": "Fetch Transcription Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Transcription Result": {
+      "main": [
+        [
+          {
+            "node": "Route by Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Report Subtitle Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Status": {
+      "main": [
+        [
+          {
+            "node": "Build Subtitle Files",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Report Subtitle Failure",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait Between Polls",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Subtitle Files": {
+      "main": [
+        [
+          {
+            "node": "Upload Subtitles to Drive",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Report Subtitle Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Subtitles to Drive": {
+      "main": [
+        [
+          {
+            "node": "Compose Download Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compose Download Reply": {
+      "main": [
+        [
+          {
+            "node": "Show Download Links",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {},
+  "tags": []
+}

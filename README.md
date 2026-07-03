@@ -33,6 +33,7 @@ Built and tested but not yet submitted to the Creator hub. Templates move to `pe
 | [KB Inquiry Assistant (RAG)](pending-submission/n8n-kb-inquiry-assistant/) | A retrieval-augmented generation (RAG) assistant that drafts grounded replies to inbound support email from a Notion knowledge base, using Cohere embeddings and reranking plus Groq, and saves each as a Gmail draft for a human to review. |
 | [SFX Chat Generator](pending-submission/n8n-sfx-chat-generator/) | Turns a plain-language chat message into a sound effect: a Groq director rewrites it into a literal ElevenLabs prompt, generates the audio, saves it to Google Drive, and replies in chat with the link. |
 | [Sound Effect Variation Pack](pending-submission/n8n-sfx-variation-pack/) | Turns one written sound brief into several ElevenLabs takes and saves them to a dated Google Drive folder to choose from. |
+| [Gladia Subtitle Generator](pending-submission/n8n-gladia-subtitle-generator/) | Generates ready-to-use SRT and VTT subtitle files from a public audio or video URL using Gladia, and saves both to Google Drive with the download links shown on the form. |
 
 ## License
 
