@@ -4,7 +4,7 @@
     {
       "name": "When a Brief Is Submitted",
       "type": "n8n-nodes-base.formTrigger",
-      "typeVersion": 2.1,
+      "typeVersion": 2.6,
       "position": [
         0,
         300
@@ -37,6 +37,9 @@
               "placeholder": "0 to 1, leave blank for 0.3"
             }
           ]
+        },
+        "options": {
+          "appendAttribution": false
         }
       }
     },
@@ -51,7 +54,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// Read one sound brief from the form and turn it into a plan for N takes.\n// The ElevenLabs sound-generation API has no seed, so variety comes from\n// re-generating the same prompt N times. Prompt influence is spread slightly\n// across takes as a secondary variety lever.\n\n// ---- Config you may want to change ----\nconst DEFAULT_TAKES = 3;\nconst MAX_TAKES = 5;\nconst MIN_DURATION = 0.5;   // seconds, ElevenLabs lower limit\nconst MAX_DURATION = 30;    // seconds, ElevenLabs upper limit\nconst DEFAULT_INFLUENCE = 0.3;\nconst INFLUENCE_STEP = 0.1; // added per take for variety, clamped to 1\n// Paste the Google Drive folder ID that should hold the generated packs.\n// Copy it from the folder URL: drive.google.com/drive/folders/THIS_PART\nconst PARENT_FOLDER_ID = 'PASTE_YOUR_SFX_OUTPUT_FOLDER_ID_HERE';\n// ---------------------------------------\n\nconst clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));\nconst form = $input.first().json;\n\nconst brief = String(form['Description'] || '').trim();\n\nlet takes = Math.round(Number(form['Number of takes']) || DEFAULT_TAKES);\ntakes = clamp(takes, 1, MAX_TAKES);\n\nlet duration = null;\nconst rawDuration = form['Duration seconds'];\nif (rawDuration !== '' && rawDuration != null && !isNaN(Number(rawDuration))) {\n  duration = clamp(Number(rawDuration), MIN_DURATION, MAX_DURATION);\n}\n\nlet baseInfluence = DEFAULT_INFLUENCE;\nconst rawInfluence = form['Prompt influence'];\nif (rawInfluence !== '' && rawInfluence != null && !isNaN(Number(rawInfluence))) {\n  baseInfluence = clamp(Number(rawInfluence), 0, 1);\n}\n\n// Slug plus timestamp for a unique, readable subfolder name.\nconst slug = brief.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'sound-effect';\nconst now = new Date();\nconst pad = (x) => String(x).padStart(2, '0');\nconst stamp = now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate()) + '-' + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());\nconst folderName = slug + '-' + stamp;\n\nconst list = [];\nfor (let i = 0; i < takes; i++) {\n  const influence = clamp(Number((baseInfluence + i * INFLUENCE_STEP).toFixed(3)), 0, 1);\n  list.push({ takeNumber: i + 1, prompt: brief, duration: duration, prompt_influence: influence });\n}\n\nreturn [{\n  json: {\n    brief: brief,\n    totalTakes: takes,\n    duration: duration,\n    baseInfluence: baseInfluence,\n    folderName: folderName,\n    parentFolderId: PARENT_FOLDER_ID,\n    takes: list,\n  },\n}];"
+        "jsCode": "const DEFAULT_TAKES = 3;\nconst MAX_TAKES = 5;\nconst MIN_DURATION = 0.5;\nconst MAX_DURATION = 30;\nconst DEFAULT_INFLUENCE = 0.3;\nconst INFLUENCE_STEP = 0.1;\nconst PARENT_FOLDER_ID = 'PASTE_YOUR_SFX_OUTPUT_FOLDER_ID_HERE';\n\nconst clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));\nconst form = $input.first().json;\n\nconst brief = String(form['Description'] || '').trim();\n\nlet takes = Math.round(Number(form['Number of takes']) || DEFAULT_TAKES);\ntakes = clamp(takes, 1, MAX_TAKES);\n\nlet duration = null;\nconst rawDuration = form['Duration seconds'];\nif (rawDuration !== '' && rawDuration != null && !isNaN(Number(rawDuration))) {\n  duration = clamp(Number(rawDuration), MIN_DURATION, MAX_DURATION);\n}\n\nlet baseInfluence = DEFAULT_INFLUENCE;\nconst rawInfluence = form['Prompt influence'];\nif (rawInfluence !== '' && rawInfluence != null && !isNaN(Number(rawInfluence))) {\n  baseInfluence = clamp(Number(rawInfluence), 0, 1);\n}\n\nconst slug = brief.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'sound-effect';\nconst now = new Date();\nconst pad = (x) => String(x).padStart(2, '0');\nconst stamp = now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate()) + '-' + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());\nconst folderName = slug + '-' + stamp;\n\nconst list = [];\nfor (let i = 0; i < takes; i++) {\n  const influence = clamp(Number((baseInfluence + i * INFLUENCE_STEP).toFixed(3)), 0, 1);\n  list.push({ takeNumber: i + 1, prompt: brief, duration: duration, prompt_influence: influence });\n}\n\nreturn [{ json: { brief: brief, totalTakes: takes, duration: duration, baseInfluence: baseInfluence, folderName: folderName, parentFolderId: PARENT_FOLDER_ID, takes: list } }];"
       }
     },
     {
@@ -63,9 +66,9 @@
         300
       ],
       "parameters": {
-        "authentication": "oAuth2",
         "resource": "folder",
         "operation": "create",
+        "authentication": "oAuth2",
         "name": "={{ $json.folderName }}",
         "driveId": {
           "__rl": true,
@@ -89,7 +92,8 @@
       },
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 5000
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
     },
     {
       "name": "Build Take Requests",
@@ -102,13 +106,13 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// Fan out the single plan into one item per take, each carrying the exact JSON\n// body for the ElevenLabs sound-generation call. The prompt is identical on every\n// take (the API has no seed), with prompt influence already spread per take.\nconst plan = $('Plan Takes and Folder').first().json;\nconst takes = Array.isArray(plan.takes) ? plan.takes : [];\n\nreturn takes.map((t) => {\n  const body = { text: t.prompt, prompt_influence: t.prompt_influence };\n  if (t.duration != null) body.duration_seconds = t.duration;\n  return {\n    json: {\n      takeNumber: t.takeNumber,\n      totalTakes: plan.totalTakes,\n      prompt: t.prompt,\n      prompt_influence: t.prompt_influence,\n      duration: t.duration,\n      bodyJson: JSON.stringify(body),\n    },\n    pairedItem: { item: 0 },\n  };\n});"
+        "jsCode": "const plan = $('Plan Takes and Folder').first().json;\nconst takes = Array.isArray(plan.takes) ? plan.takes : [];\n\nreturn takes.map((t) => {\n  const body = { text: t.prompt, prompt_influence: t.prompt_influence };\n  if (t.duration != null) body.duration_seconds = t.duration;\n  return {\n    json: {\n      takeNumber: t.takeNumber,\n      totalTakes: plan.totalTakes,\n      prompt: t.prompt,\n      prompt_influence: t.prompt_influence,\n      duration: t.duration,\n      bodyJson: JSON.stringify(body),\n    },\n    pairedItem: { item: 0 },\n  };\n});"
       }
     },
     {
       "name": "Generate Sound Effect",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.4,
       "position": [
         880,
         300
@@ -161,9 +165,9 @@
         200
       ],
       "parameters": {
-        "authentication": "oAuth2",
         "resource": "file",
         "operation": "upload",
+        "authentication": "oAuth2",
         "inputDataFieldName": "data",
         "name": "=take-{{ $('Build Take Requests').item.json.takeNumber }}.mp3",
         "driveId": {
@@ -200,7 +204,7 @@
       "parameters": {
         "mode": "runOnceForEachItem",
         "language": "javaScript",
-        "jsCode": "// Normalize one successful upload into a uniform result row.\nconst file = $json;\nconst takeNumber = $('Build Take Requests').item.json.takeNumber;\nconst id = file.id || '';\nconst link = file.webViewLink || (id ? ('https://drive.google.com/file/d/' + id + '/view') : '');\nreturn {\n  json: {\n    takeNumber: takeNumber,\n    status: 'ok',\n    fileName: file.name || ('take-' + takeNumber + '.mp3'),\n    link: link,\n  },\n};"
+        "jsCode": "const file = $json;\nconst takeNumber = $('Build Take Requests').item.json.takeNumber;\nconst id = file.id || '';\nconst link = file.webViewLink || (id ? ('https://drive.google.com/file/d/' + id + '/view') : '');\nreturn {\n  json: {\n    takeNumber: takeNumber,\n    status: 'ok',\n    fileName: file.name || ('take-' + takeNumber + '.mp3'),\n    link: link,\n  },\n};"
       }
     },
     {
@@ -214,7 +218,7 @@
       "parameters": {
         "mode": "runOnceForEachItem",
         "language": "javaScript",
-        "jsCode": "// Normalize one failed generation or upload into a uniform result row.\nlet takeNumber = null;\ntry { takeNumber = $('Build Take Requests').item.json.takeNumber; } catch (e) {}\nif (takeNumber == null) takeNumber = ($json.takeNumber != null ? $json.takeNumber : null);\nconst err = $json.error;\nconst message = (err && (err.message || err.description)) || (typeof err === 'string' ? err : '') || 'Generation or upload failed';\nreturn {\n  json: {\n    takeNumber: takeNumber,\n    status: 'failed',\n    fileName: '',\n    link: '',\n    error: String(message),\n  },\n};"
+        "jsCode": "let takeNumber = null;\ntry { takeNumber = $('Build Take Requests').item.json.takeNumber; } catch (e) {}\nif (takeNumber == null) takeNumber = ($json.takeNumber != null ? $json.takeNumber : null);\nconst err = $json.error;\nconst message = (err && (err.message || err.description)) || (typeof err === 'string' ? err : '') || 'Generation or upload failed';\nreturn {\n  json: {\n    takeNumber: takeNumber,\n    status: 'failed',\n    fileName: '',\n    link: '',\n    error: String(message),\n  },\n};"
       }
     },
     {
@@ -228,7 +232,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// Collapse all take results into one HTML summary for the form completion page.\nconst rows = $input.all().map((i) => i.json).filter(Boolean);\nrows.sort((a, b) => (a.takeNumber || 0) - (b.takeNumber || 0));\n\nconst plan = $('Plan Takes and Folder').first().json;\nconst brief = plan.brief || '';\nconst folderId = $('Create Take Folder in Drive').first().json.id || '';\nconst folderUrl = folderId ? ('https://drive.google.com/drive/folders/' + folderId) : '';\n\nconst okRows = rows.filter((r) => r.status === 'ok');\nconst failedRows = rows.filter((r) => r.status !== 'ok');\n\nconst esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n\nconst listItems = rows.map((r) => {\n  if (r.status === 'ok') {\n    return '<li>Take ' + esc(r.takeNumber) + ': <a href=\"' + esc(r.link) + '\" target=\"_blank\" rel=\"noopener\">' + esc(r.fileName || ('take-' + r.takeNumber + '.mp3')) + '</a></li>';\n  }\n  return '<li>Take ' + esc(r.takeNumber) + ': failed (' + esc(r.error || 'unknown error') + ')</li>';\n}).join('');\n\nconst folderLine = folderUrl\n  ? '<p><strong>Folder:</strong> <a href=\"' + esc(folderUrl) + '\" target=\"_blank\" rel=\"noopener\">open the variation pack in Google Drive</a></p>'\n  : '<p>The Drive folder link is unavailable.</p>';\n\nconst html = '<div style=\"font-family:system-ui,Segoe UI,Arial,sans-serif;max-width:640px;line-height:1.55;\">' +\n  '<h2>Your sound effect variation pack</h2>' +\n  '<p><strong>Brief:</strong> ' + esc(brief) + '</p>' +\n  '<p>' + okRows.length + ' of ' + rows.length + ' takes generated' + (failedRows.length ? (', ' + failedRows.length + ' failed') : '') + '.</p>' +\n  folderLine +\n  '<ul>' + listItems + '</ul>' +\n  '</div>';\n\nreturn [{ json: { html: html, folderUrl: folderUrl, okCount: okRows.length, failedCount: failedRows.length, total: rows.length, results: rows } }];"
+        "jsCode": "const rows = $input.all().map((i) => i.json).filter(Boolean);\nrows.sort((a, b) => (a.takeNumber || 0) - (b.takeNumber || 0));\n\nconst plan = $('Plan Takes and Folder').first().json;\nconst brief = plan.brief || '';\nconst total = (plan.totalTakes != null ? plan.totalTakes : rows.length);\nconst folderId = $('Create Take Folder in Drive').first().json.id || '';\nconst folderUrl = folderId ? ('https://drive.google.com/drive/folders/' + folderId) : '';\n\nconst okRows = rows.filter((r) => r.status === 'ok');\nconst failedRows = rows.filter((r) => r.status !== 'ok');\nconst missing = Math.max(0, total - okRows.length - failedRows.length);\n\nconst esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n\nconst listItems = rows.map((r) => {\n  if (r.status === 'ok') {\n    return '<li>Take ' + esc(r.takeNumber) + ': <a href=\"' + esc(r.link) + '\" target=\"_blank\" rel=\"noopener\">' + esc(r.fileName || ('take-' + r.takeNumber + '.mp3')) + '</a></li>';\n  }\n  return '<li>Take ' + esc(r.takeNumber) + ': failed (' + esc(r.error || 'unknown error') + ')</li>';\n}).join('');\n\nconst folderLine = folderUrl\n  ? '<p><strong>Folder:</strong> <a href=\"' + esc(folderUrl) + '\" target=\"_blank\" rel=\"noopener\">open the variation pack in Google Drive</a></p>'\n  : '<p>The Drive folder link is unavailable.</p>';\n\nlet countLine = okRows.length + ' of ' + total + ' takes generated';\nif (failedRows.length) countLine += ', ' + failedRows.length + ' failed';\nif (missing) countLine += ', ' + missing + ' did not report back';\ncountLine += '.';\n\nconst html = '<div style=\"font-family:system-ui,Segoe UI,Arial,sans-serif;max-width:640px;line-height:1.55;\">' +\n  '<h2>Your sound effect variation pack</h2>' +\n  '<p><strong>Brief:</strong> ' + esc(brief) + '</p>' +\n  '<p>' + countLine + '</p>' +\n  folderLine +\n  '<ul>' + listItems + '</ul>' +\n  '</div>';\n\nreturn [{ json: { html: html, folderUrl: folderUrl, okCount: okRows.length, failedCount: failedRows.length, missingCount: missing, total: total, results: rows } }];"
       }
     },
     {
@@ -244,6 +248,21 @@
         "operation": "completion",
         "respondWith": "showText",
         "responseText": "={{ $json.html }}"
+      }
+    },
+    {
+      "name": "Explain Folder Problem",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        520,
+        540
+      ],
+      "webhookId": "33333333-3333-4333-8333-333333333333",
+      "parameters": {
+        "operation": "completion",
+        "respondWith": "showText",
+        "responseText": "<div style=\"font-family:system-ui,Segoe UI,Arial,sans-serif;max-width:640px;line-height:1.55;\"><h2>Output folder not ready</h2><p>The workflow could not create the Drive subfolder for this run. This usually means the output folder has not been set yet.</p><p>Open the <strong>Plan Takes and Folder</strong> node and set <code>PARENT_FOLDER_ID</code> to a real Google Drive folder ID, and make sure the Google Drive credential is connected on both Drive nodes. Then submit again.</p></div>"
       }
     },
     {
@@ -271,7 +290,7 @@
       "parameters": {
         "content": "## Collect the brief\n\nOne form takes the sound description, the take count, and optional duration and influence.",
         "height": 320,
-        "width": 260,
+        "width": 200,
         "color": 7
       }
     },
@@ -285,8 +304,8 @@
       ],
       "parameters": {
         "content": "## Plan takes and make a folder\n\nClamp the inputs, build one request per take, and create a dated Drive subfolder for this run.",
-        "height": 320,
-        "width": 680,
+        "height": 480,
+        "width": 640,
         "color": 7
       }
     },
@@ -349,6 +368,13 @@
         [
           {
             "node": "Build Take Requests",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Explain Folder Problem",
             "type": "main",
             "index": 0
           }
