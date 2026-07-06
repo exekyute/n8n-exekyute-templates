@@ -4,7 +4,7 @@ Describe a sound in a chat message and get back a ready to use audio clip. I bui
 
 Built with n8n, plus Groq, ElevenLabs, and Google Drive.
 
-![The sound effect generator workflow](images/workflow.png)
+![The workflow on the n8n canvas after a run, with the chat reply](images/workflow.png)
 
 ## How it works
 
@@ -42,6 +42,12 @@ The model is asked to return only JSON. The Code node parses it, and if the repl
 
 One sound is generated per message. ElevenLabs bills sound generation from your ElevenLabs plan (around 40 credits per second of audio), so the clamped duration is also the cost control.
 
+## What you get
+
+Each message drops a ready MP3 into your Google Drive, named from the prompt and a timestamp:
+
+![Generated sound clips sitting in Google Drive](images/clips-in-drive.png)
+
 ## What is in this folder
 
 | File | What it is |
@@ -49,7 +55,7 @@ One sound is generated per message. ElevenLabs bills sound generation from your 
 | `README.md` | This overview |
 | `TEMPLATE-DESCRIPTION.md` | The n8n Creator hub listing text |
 | `workflow.json` | The importable n8n workflow |
-| `images/` | The workflow overview image |
+| `images/` | The canvas screenshot and the generated clips in Drive |
 
 ---
 
