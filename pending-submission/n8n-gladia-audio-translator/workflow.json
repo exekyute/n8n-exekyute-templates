@@ -87,13 +87,19 @@
         },
         "responseMode": "onReceived",
         "options": {
-          "formSubmittedText": "Thanks. Your recording is being transcribed and translated. When it finishes, the result is saved to your Google Drive and logged to your sheet. You can close this page."
+          "appendAttribution": false,
+          "respondWithOptions": {
+            "values": {
+              "respondWith": "text",
+              "formSubmittedText": "Thanks. Your recording is being transcribed and translated. When it finishes, the result is saved to your Google Drive and logged to your sheet. You can close this page."
+            }
+          }
         }
       },
       "id": "a0b1c2d3-0006-4a06-8a06-000000000006",
       "name": "When Translation Requested",
       "type": "n8n-nodes-base.formTrigger",
-      "typeVersion": 2.2,
+      "typeVersion": 2.6,
       "position": [40, 300],
       "webhookId": "b7e1c0a2-3d44-4f55-9a66-77c0a1b2c3d4"
     },
@@ -152,7 +158,7 @@
       "id": "a0b1c2d3-0008-4a08-8a08-000000000008",
       "name": "Start Gladia Translation",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.4,
       "position": [520, 300],
       "onError": "continueErrorOutput",
       "retryOnFail": true,
@@ -189,7 +195,7 @@
       "id": "a0b1c2d3-0010-4a10-8a10-000000000010",
       "name": "Get Translation Result",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.4,
       "position": [1020, 300],
       "onError": "continueErrorOutput",
       "retryOnFail": true,
@@ -266,7 +272,7 @@
       "id": "a0b1c2d3-0011-4a11-8a11-000000000011",
       "name": "Route by Status",
       "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.2,
+      "typeVersion": 3.4,
       "position": [1280, 300]
     },
     {
@@ -410,7 +416,7 @@
       "id": "a0b1c2d3-0014-4a14-8a14-000000000014",
       "name": "Log Translation in Sheets",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "typeVersion": 4.7,
       "position": [2040, 220],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -516,7 +522,7 @@
       "id": "a0b1c2d3-0015-4a15-8a15-000000000015",
       "name": "Log Failure in Sheets",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "typeVersion": 4.7,
       "position": [1560, 480],
       "credentials": {
         "googleSheetsOAuth2Api": {
