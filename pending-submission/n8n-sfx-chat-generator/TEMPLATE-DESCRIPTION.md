@@ -4,7 +4,7 @@ A chat-triggered sound effect generator. You describe a sound in plain words and
 
 ## How it works
 
-Send a message like "a heavy wooden door creaking open" to the chat. The director step turns it into a precise ElevenLabs prompt and chooses a duration between 0.5 and 30 seconds and a prompt influence between 0 and 1. A short Code step clamps those values to safe ranges and falls back to your own words if the description is unclear, so every message still produces something. The workflow calls the ElevenLabs sound-generation endpoint, receives an MP3, uploads it to a Google Drive folder, and replies with the link, the exact prompt used, and the duration. If the sound service is busy or errors after retries, you get a friendly message instead of a broken chat.
+Send a message like "a heavy wooden door creaking open" to the chat. The director step turns it into a precise ElevenLabs prompt and returns a small JSON object with the prompt, a duration between 0.5 and 30 seconds, and a prompt influence between 0 and 1. A short Code step parses that JSON and clamps the values to safe ranges, falling back to your own words if the reply is unclear, so every message still produces something. The workflow calls the ElevenLabs sound-generation endpoint, receives an MP3, uploads it to a Google Drive folder, and replies with the link, the exact prompt used, and the duration. If the sound service is busy or errors after retries, you get a friendly message instead of a broken chat.
 
 ## How to set up
 
@@ -16,7 +16,7 @@ n8n, an ElevenLabs API key (as a Header Auth credential), a Groq API credential,
 
 ## Good to know
 
-One sound is generated per message. Clips are capped at 30 seconds by the ElevenLabs API. ElevenLabs sound generation is a paid feature of your ElevenLabs plan and is billed by them per generation, so check your plan before heavy use.
+One sound is generated per message. Clips are capped at 30 seconds by the ElevenLabs API. ElevenLabs sound generation is a paid feature of your ElevenLabs plan (around 40 credits per second of audio), so the clamped duration is also the cost control. Check your plan before heavy use.
 
 ## How to customize the workflow
 

@@ -13,8 +13,8 @@ You send one message. A Groq model acts as a sound-effects director and rewrites
 | Stage | What happens |
 |---|---|
 | Chat trigger | You type a plain description of a sound. |
-| Sound director | A Groq model (Basic LLM Chain) rewrites it into a literal ElevenLabs prompt and picks a duration and a prompt influence, validated by a structured output parser with auto-fix. |
-| Clamp settings | A Code node clamps duration to 0.5 to 30 seconds and prompt influence to 0 to 1, and falls back to your raw words if the description is unclear. |
+| Sound director | A Groq model (Basic LLM Chain) rewrites it into a literal ElevenLabs prompt and returns a small JSON object with the prompt, a duration, and a prompt influence. |
+| Parse and clamp | A Code node parses that JSON, clamps duration to 0.5 to 30 seconds and prompt influence to 0 to 1, and falls back to your raw words if the reply is unclear. |
 | Generate | An HTTP request calls the ElevenLabs sound-generation endpoint and gets back an MP3. It retries three times and has an error path. |
 | Store and reply | The MP3 is uploaded to Google Drive, and the chat gets the link, the exact prompt, and the duration. On failure it sends a friendly message instead. |
 
@@ -38,7 +38,9 @@ The whole idea is turning casual words into a good ElevenLabs prompt. The direct
 | `duration_seconds` | Clip length, 0.5 to 30. Short impacts stay short, ambiences run longer. |
 | `prompt_influence` | 0 to 1. Around 0.3 for natural sounds, higher for precise or mechanical ones. |
 
-To change the style, edit the guidance in that node's prompt. The Code node clamps whatever the model returns, so a bad value never reaches the API. One sound is generated per message.
+The model is asked to return only JSON. The Code node parses it, and if the reply is ever malformed or empty it falls back to your own words, so a bad value never reaches the API and every message still makes a sound. To change the style, edit the guidance in that node's prompt.
+
+One sound is generated per message. ElevenLabs bills sound generation from your ElevenLabs plan (around 40 credits per second of audio), so the clamped duration is also the cost control.
 
 ## What is in this folder
 
