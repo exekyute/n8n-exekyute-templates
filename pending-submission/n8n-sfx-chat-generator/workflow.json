@@ -4,42 +4,52 @@
     {
       "parameters": {
         "public": false,
-        "initialMessages": "Hi! Describe a sound and I'll generate it with ElevenLabs.\nTry: \"a heavy wooden door creaking open\" or \"distant thunder rumbling\".",
         "options": {
           "responseMode": "lastNode"
         }
       },
-      "id": "7bd0f184-6872-4898-9b98-45dd612caf41",
+      "id": "b46a4e45-a265-44b0-bb7e-ec875d1af22b",
       "name": "When Chat Message Received",
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
-      "typeVersion": 1.1,
+      "typeVersion": 1.4,
       "position": [
-        280,
+        260,
         360
       ],
-      "webhookId": "2bf344ca-1c02-4ca4-b0f6-117305edd0f5"
+      "webhookId": "73b6a763-6829-4608-bb47-bb85dad2decf"
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=You are an expert sound-effects director for the ElevenLabs sound-generation API. Turn the user's casual description into ONE richly detailed, literal sound-effects prompt, then choose sensible settings.\n\nWrite sfx_prompt so it describes the sound literally: the source, material, action, environment, and how it evolves over time. Prefer concrete audio detail (for example, \"a heavy oak door slowly creaking open, hinges groaning, faint echo in a stone hall\") over vague labels (for example, \"door sound\"). Keep it to one continuous sound event unless the user clearly asks for a sequence. Do not add music or narration unless asked.\n\nChoose duration_seconds between 0.5 and 30. Use 0.5 to 2 for short impacts like clicks or thuds, and 8 to 20 for ambiences or drones.\n\nChoose prompt_influence between 0 and 1. Use about 0.3 for organic or natural sounds, and 0.6 to 0.8 for precise, mechanical, or branded sounds that must match exactly.\n\nUser request:\n{{ $('When Chat Message Received').item.json.chatInput }}",
-        "hasOutputParser": true
+        "text": "={{ $json.chatInput }}",
+        "hasOutputParser": false,
+        "messages": {
+          "messageValues": [
+            {
+              "type": "SystemMessagePromptTemplate",
+              "message": "You are an expert sound-effects director for the ElevenLabs sound-generation API. Turn the user's casual description into ONE richly detailed, literal sound-effects prompt, then choose sensible settings.\n\nWrite the prompt so it describes the sound literally: the source, material, action, environment, and how it evolves over time. Prefer concrete audio detail (for example, \"a heavy oak door slowly creaking open, hinges groaning, faint echo in a stone hall\") over vague labels (for example, \"door sound\"). Keep it to one continuous sound event unless the user clearly asks for a sequence. Do not add music or narration unless asked.\n\nPick duration_seconds between 0.5 and 30 (0.5 to 2 for short impacts like clicks or thuds, 8 to 20 for ambiences or drones). Pick prompt_influence between 0 and 1 (about 0.3 for organic or natural sounds, 0.6 to 0.8 for precise, mechanical, or branded sounds).\n\nReturn ONLY a JSON object and nothing else. No markdown, no code fences, no commentary. Use exactly these keys:\n{\"sfx_prompt\": \"a literal detailed description\", \"duration_seconds\": 6, \"prompt_influence\": 0.3}"
+            }
+          ]
+        }
       },
-      "id": "0c24e629-3ff8-49a2-9711-f18118309b29",
+      "id": "7206900c-3d65-4970-ba25-34a51634f797",
       "name": "Compose Sound Effect Prompt",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.5,
+      "typeVersion": 1.9,
       "position": [
-        520,
+        540,
         360
-      ]
+      ],
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
         "model": "llama-3.3-70b-versatile",
-        "options": {}
+        "options": {
+          "temperature": 0.2
+        }
       },
-      "id": "8f163fe2-04a2-4a89-a215-7ffcf1d29df0",
+      "id": "d575ed05-a485-4d49-93ac-7078991e0bc6",
       "name": "Groq Llama Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
@@ -56,30 +66,15 @@
     },
     {
       "parameters": {
-        "schemaType": "manual",
-        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"sfx_prompt\": {\n      \"type\": \"string\",\n      \"description\": \"A literal, richly described sound-effects prompt for the ElevenLabs sound-generation API.\"\n    },\n    \"duration_seconds\": {\n      \"type\": \"number\",\n      \"minimum\": 0.5,\n      \"maximum\": 30,\n      \"description\": \"Clip length in seconds, between 0.5 and 30.\"\n    },\n    \"prompt_influence\": {\n      \"type\": \"number\",\n      \"minimum\": 0,\n      \"maximum\": 1,\n      \"description\": \"How literally to follow the prompt, between 0 and 1. About 0.3 for natural sounds, higher for precise or mechanical ones.\"\n    }\n  },\n  \"required\": [\n    \"sfx_prompt\",\n    \"duration_seconds\",\n    \"prompt_influence\"\n  ]\n}",
-        "autoFix": true
-      },
-      "id": "18426e1c-c47b-4853-8b6e-9ee703b03c2e",
-      "name": "Validate Sound Settings",
-      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
-      "position": [
-        680,
-        600
-      ]
-    },
-    {
-      "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "// Normalize and clamp the sound director's structured output.\n// Falls back to the user's own words (then a gentle default) so an empty\n// or garbled message still produces a valid request instead of an API error.\n\nconst rawMessage = ($('When Chat Message Received').item.json.chatInput || '').toString().trim();\n\n// With an output parser wired, the Basic LLM Chain surfaces the object under `output`.\nconst parsed = ($json && typeof $json.output === 'object' && $json.output !== null) ? $json.output : $json;\n\nconst clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));\nconst toNum = (v) => {\n  const n = typeof v === 'number' ? v : parseFloat(v);\n  return Number.isFinite(n) ? n : null;\n};\n\n// Prompt: prefer the director's rewrite, fall back to the raw words, then a safe default.\nlet sfxPrompt = (parsed && typeof parsed.sfx_prompt === 'string') ? parsed.sfx_prompt.trim() : '';\nif (!sfxPrompt) sfxPrompt = rawMessage;\nif (!sfxPrompt) sfxPrompt = 'a soft, short ambient tone';\n\n// Duration: clamp to the ElevenLabs 0.5-30s window; default 3s if missing.\nlet duration = toNum(parsed ? parsed.duration_seconds : null);\nduration = duration === null ? 3 : Math.round(clamp(duration, 0.5, 30) * 10) / 10;\n\n// Prompt influence: clamp to 0-1; default 0.3 (the ElevenLabs default).\nlet influence = toNum(parsed ? parsed.prompt_influence : null);\ninfluence = influence === null ? 0.3 : clamp(influence, 0, 1);\n\nreturn { json: { sfx_prompt: sfxPrompt, duration_seconds: duration, prompt_influence: influence } };"
+        "jsCode": "// Parse the sound director's JSON reply, then normalize and clamp it.\n// Robust by design: any parse failure falls back to the user's own words,\n// so an empty, garbled, or non-JSON reply still yields a valid request.\n\nconst rawMessage = ($('When Chat Message Received').item.json.chatInput || '').toString().trim();\n\n// Basic LLM Chain returns the model text; be liberal about where it sits.\nconst text = ($json.text ?? $json.response?.text ?? $json.output ?? $json.data ?? '').toString();\n\nlet parsed = {};\ntry {\n  // Drop any markdown fences, then grab the first {...} block if prose surrounds it.\n  const cleaned = text.replace(/```(?:json)?/gi, '').trim();\n  const match = cleaned.match(/\\{[\\s\\S]*\\}/);\n  parsed = JSON.parse(match ? match[0] : cleaned);\n} catch (e) {\n  parsed = {};\n}\n\nconst clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));\nconst toNum = (v) => {\n  const n = typeof v === 'number' ? v : parseFloat(v);\n  return Number.isFinite(n) ? n : null;\n};\n\n// Prompt: prefer the director's rewrite, fall back to the raw words, then a safe default.\nlet sfxPrompt = (parsed && typeof parsed.sfx_prompt === 'string') ? parsed.sfx_prompt.trim() : '';\nif (!sfxPrompt) sfxPrompt = rawMessage;\nif (!sfxPrompt) sfxPrompt = 'a soft, short ambient tone';\n\n// Duration: clamp to the ElevenLabs 0.5-30s window; default 3s if missing.\nlet duration = toNum(parsed ? parsed.duration_seconds : null);\nduration = duration === null ? 3 : Math.round(clamp(duration, 0.5, 30) * 10) / 10;\n\n// Prompt influence: clamp to 0-1; default 0.3 (the ElevenLabs default).\nlet influence = toNum(parsed ? parsed.prompt_influence : null);\ninfluence = influence === null ? 0.3 : clamp(influence, 0, 1);\n\nreturn { json: { sfx_prompt: sfxPrompt, duration_seconds: duration, prompt_influence: influence } };"
       },
-      "id": "99597e70-a4d4-4d39-aa91-bc7a6da44235",
+      "id": "2db0ba0d-a430-4a24-b9c0-c39132cae958",
       "name": "Clamp Sound Settings",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        920,
+        800,
         360
       ]
     },
@@ -102,7 +97,7 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { \"text\": $json.sfx_prompt, \"duration_seconds\": $json.duration_seconds, \"prompt_influence\": $json.prompt_influence } }}",
+        "jsonBody": "={{ JSON.stringify({ text: $json.sfx_prompt, duration_seconds: $json.duration_seconds, prompt_influence: $json.prompt_influence }) }}",
         "options": {
           "response": {
             "response": {
@@ -110,15 +105,15 @@
               "outputPropertyName": "data"
             }
           },
-          "timeout": 60000
+          "timeout": 120000
         }
       },
-      "id": "59dad42f-96b9-40df-842b-51af5b9e73a8",
+      "id": "6d75c15d-e622-4627-89f3-4032abdbd180",
       "name": "Generate Sound With ElevenLabs",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.4,
       "position": [
-        1160,
+        1060,
         360
       ],
       "onError": "continueErrorOutput",
@@ -136,6 +131,7 @@
       "parameters": {
         "resource": "file",
         "operation": "upload",
+        "inputDataFieldName": "data",
         "name": "=sfx-{{ $('Clamp Sound Settings').item.json.sfx_prompt.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) }}-{{ $now.toFormat('yyyyLLdd-HHmmss') }}.mp3",
         "driveId": {
           "__rl": true,
@@ -145,18 +141,20 @@
         },
         "folderId": {
           "__rl": true,
-          "mode": "id",
-          "value": "REPLACE_WITH_YOUR_DRIVE_FOLDER_ID"
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
         },
-        "inputDataFieldName": "data",
-        "options": {}
+        "options": {
+          "simplifyOutput": false
+        }
       },
-      "id": "8b0e2348-3986-4bf2-a7fd-b9561313d41f",
+      "id": "73189208-7d95-4192-884e-d4bbd74e3fed",
       "name": "Upload to Google Drive",
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1400,
+        1320,
         280
       ],
       "credentials": {
@@ -171,7 +169,7 @@
         "assignments": {
           "assignments": [
             {
-              "id": "b6ae5e52-ae45-4105-b20c-439bb19f6ed3",
+              "id": "6e951218-6862-4f98-8e29-1290d8d242df",
               "name": "output",
               "type": "string",
               "value": "=🔊 Your sound effect is ready.\n\n**Prompt used:** {{ $('Clamp Sound Settings').item.json.sfx_prompt }}\n**Duration:** {{ $('Clamp Sound Settings').item.json.duration_seconds }}s  ·  **Prompt influence:** {{ $('Clamp Sound Settings').item.json.prompt_influence }}\n\n▶️ Open it in Google Drive: {{ $json.webViewLink || 'https://drive.google.com/file/d/' + $json.id + '/view' }}"
@@ -180,12 +178,12 @@
         },
         "options": {}
       },
-      "id": "f3a119c9-770c-4885-9abb-99615d36a17b",
+      "id": "577a99e2-c7ca-4073-8cdb-185edfea84de",
       "name": "Respond in Chat",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1620,
+        1580,
         280
       ]
     },
@@ -194,7 +192,7 @@
         "assignments": {
           "assignments": [
             {
-              "id": "34764df1-793a-4fcd-9c97-309853e1c129",
+              "id": "a8a6f577-a5ca-4f47-8965-c0d2892c4c20",
               "name": "output",
               "type": "string",
               "value": "=⚠️ I couldn't generate that sound effect just now. The sound service may be busy, or the description was unclear. Please try again with a clear description like \"a heavy wooden door creaking open\" or \"distant thunder rumbling\"."
@@ -203,75 +201,75 @@
         },
         "options": {}
       },
-      "id": "f9edcb62-71ab-4555-b27a-dad420ece0ea",
+      "id": "66dff494-66e0-468c-9a2e-bdd0bc3b96ea",
       "name": "Report Sound Failure",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1400,
+        1320,
         520
       ]
     },
     {
       "parameters": {
-        "content": "## Generate sound effects from chat using ElevenLabs and Google Drive\n\n### How it works\n\n1. The user describes a sound in plain words in the chat.\n2. A Groq model acts as a sound-effects director and rewrites the request into a literal, richly detailed ElevenLabs prompt, then picks a duration and a prompt influence.\n3. The workflow clamps those settings to safe ranges and calls the ElevenLabs sound-generation API.\n4. The returned MP3 is uploaded to Google Drive, and the link, prompt, and duration are sent back in the chat.\n\n### Setup steps\n\n- [ ] Create a Header Auth credential named ElevenLabs with header name xi-api-key and your ElevenLabs API key, then select it on Generate Sound With ElevenLabs.\n- [ ] Select your Groq credential on Groq Llama Model (model llama-3.3-70b-versatile).\n- [ ] Select your Google Drive OAuth2 credential and set the parent folder on Upload to Google Drive.\n\n### Customization\n\nSwap the chat trigger for a form or webhook, tune the duration and prompt-influence guidance in the director prompt, or point the upload at a different Drive folder.",
+        "content": "## Generate sound effects from chat using ElevenLabs and Google Drive\n\n### How it works\n\n1. The user describes a sound in plain words in the chat.\n2. A Groq model acts as a sound-effects director and rewrites the request into a literal, richly detailed ElevenLabs prompt, then picks a duration and a prompt influence.\n3. A Code node parses that JSON and clamps the settings to safe ranges, then calls the ElevenLabs sound-generation API.\n4. The returned MP3 is uploaded to Google Drive, and the link, prompt, and duration are sent back in the chat.\n\n### Setup steps\n\n- [ ] Create a Header Auth credential with header name xi-api-key and your ElevenLabs API key, then select it on Generate Sound With ElevenLabs.\n- [ ] Select your Groq credential on Groq Llama Model (model llama-3.3-70b-versatile).\n- [ ] Select your Google Drive credential on Upload to Google Drive. Clips upload to your Drive root by default; set a parent folder to organize them.\n\n### Customization\n\nSwap the chat trigger for a form or webhook, tune the duration and prompt-influence guidance in the director prompt, or point the upload at a different Drive folder.",
         "height": 470,
         "width": 480
       },
-      "id": "49027a9e-01a2-4f9e-a65f-827bd4012891",
-      "name": "Sticky Note 63fbb344",
+      "id": "76091ccb-487b-4f87-b4f9-d1e2eca2ad60",
+      "name": "Sticky Note 79c5a91a",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -380,
-        220
+        -360,
+        240
       ]
     },
     {
       "parameters": {
-        "content": "## Describe and direct the sound\n\nTakes the chat message and turns it into a clean, literal sound prompt with validated settings.",
-        "height": 480,
-        "width": 700,
+        "content": "## Describe and direct the sound\n\nTakes the chat message and turns it into a clean, literal sound prompt with parsed, clamped settings.",
+        "height": 460,
+        "width": 560,
         "color": 7
       },
-      "id": "79a3ebcf-9e1e-4fe8-80dd-c3afbe904fc4",
-      "name": "Sticky Note 04311802",
+      "id": "662e100b-7313-431c-9c42-30438de0ec64",
+      "name": "Sticky Note a0a443d0",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
         200,
-        260
+        280
       ]
     },
     {
       "parameters": {
-        "content": "## Generate the sound effect\n\nClamps the settings and calls ElevenLabs, with retries and an error path.",
+        "content": "## Generate the sound effect\n\nBuilds a safely escaped JSON body and calls ElevenLabs, with retries and an error path.",
         "height": 200,
         "width": 460,
         "color": 7
       },
-      "id": "6eb006d0-462e-47c9-9d93-88c33cf7f023",
-      "name": "Sticky Note c54ece70",
+      "id": "42ed3405-544d-4613-ac7f-155fdb2c1169",
+      "name": "Sticky Note 691c01a8",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        920,
-        260
+        780,
+        280
       ]
     },
     {
       "parameters": {
         "content": "## Store and reply in chat\n\nSaves the MP3 to Google Drive and replies with the link, or a friendly message on failure.",
         "height": 540,
-        "width": 480,
+        "width": 500,
         "color": 7
       },
-      "id": "535a5a79-ac6a-4c4f-abcb-4a1d8e3e3fd3",
-      "name": "Sticky Note 4a18e4db",
+      "id": "210daa64-32f0-4812-9dd5-5515dd46f379",
+      "name": "Sticky Note 138dfdf1",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1380,
+        1280,
         200
       ]
     }
@@ -295,28 +293,19 @@
             "node": "Compose Sound Effect Prompt",
             "type": "ai_languageModel",
             "index": 0
-          },
-          {
-            "node": "Validate Sound Settings",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Validate Sound Settings": {
-      "ai_outputParser": [
-        [
-          {
-            "node": "Compose Sound Effect Prompt",
-            "type": "ai_outputParser",
-            "index": 0
           }
         ]
       ]
     },
     "Compose Sound Effect Prompt": {
       "main": [
+        [
+          {
+            "node": "Clamp Sound Settings",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "Clamp Sound Settings",
