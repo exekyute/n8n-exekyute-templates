@@ -34,6 +34,7 @@ The one design choice that matters: variety comes from re-generating the same pr
 - Duration is optional and clamped to 0.5 to 30 seconds. Leave it blank to let ElevenLabs choose a natural length.
 - Prompt influence is optional (0 to 1, default 0.3). Each take nudges it up a little for extra variety, which you can change in the Code node.
 - A take that fails to generate or upload is recorded as failed and still listed, so a partial pack never looks like a total success.
+- If the output folder ID is not set or the Google Drive credential is not connected, the form returns a clear setup message instead of a generic error.
 
 ## Requirements
 
