@@ -8,26 +8,26 @@ Live in the n8n template library, grouped by area. Hover a template name to see 
 
 ```mermaid
 mindmap
-  root((Published))
-    AI
-      KB Inquiry Assistant
-      Legal Research Assistant
-      SFX Chat Generator
-    Data & Records
-      Notion Deduplicator
-      Notion Overdue Roller
-      Notion Property Normalizer
-    Files & Documents
-      CSV Folder Reconciler
-      Drive Auto-Filer
-    DevOps & Monitoring
-      API Contract Drift Watcher
-      Backup Freshness Auditor
-    Sales & Marketing
-      Lead Enricher
-      Media Monitor
-    Operations
-      frAIday Delivery Planner
+  root((🚀 Published))
+    (🤖 AI)
+      (KB Inquiry Assistant)
+      (Legal Research Assistant)
+      (SFX Chat Generator)
+    (🗃️ Data & Records)
+      (Notion Deduplicator)
+      (Notion Overdue Roller)
+      (Notion Property Normalizer)
+    (📁 Files & Documents)
+      (CSV Folder Reconciler)
+      (Drive Auto-Filer)
+    (📡 DevOps & Monitoring)
+      (API Contract Drift Watcher)
+      (Backup Freshness Auditor)
+    (📣 Sales & Marketing)
+      (Lead Enricher)
+      (Media Monitor)
+    (⚙️ Operations)
+      (frAIday Delivery Planner)
 ```
 
 <details open>
