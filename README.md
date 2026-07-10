@@ -26,19 +26,22 @@ Live in the n8n template library.
 
 Submitted to the n8n Creator hub and awaiting approval. Templates move up to `published/` once they are live in the library.
 
+| Template | What it does |
+|---|---|
+| [Sound Effect Variation Pack](pending-review/n8n-sfx-variation-pack/) | Turns one written sound brief into several ElevenLabs takes and saves them to a dated Google Drive folder to choose from. |
+| [Gladia Drive Transcriber](pending-review/n8n-gladia-drive-transcriber/) | Transcribes new audio and video files dropped into a Google Drive folder with Gladia, saves the transcript back to Drive as a Markdown file, and logs every run to a Google Sheet. |
+| [SFX Library Builder](pending-review/n8n-sfx-library-builder/) | Batch-generates ElevenLabs sound effects from a Google Sheet, saving each MP3 to Google Drive and writing the status and link back to each row. |
+| [Gladia Notion Meetings](pending-review/n8n-gladia-notion-meetings/) | Transcribes a meeting recording added to a Notion database with Gladia, then writes the summary and full transcript back onto the same Notion page. Self-hosted only, uses the n8n-nodes-gladia community node. |
+
 ## Pending submission
 
 Built and tested but not yet submitted to the Creator hub. Templates move to `pending-review/` once submitted.
 
 | Template | What it does |
 |---|---|
-| [Sound Effect Variation Pack](pending-submission/n8n-sfx-variation-pack/) | Turns one written sound brief into several ElevenLabs takes and saves them to a dated Google Drive folder to choose from. |
 | [Gladia Subtitle Generator](pending-submission/n8n-gladia-subtitle-generator/) | Generates ready-to-use SRT and VTT subtitle files from a public audio or video URL using Gladia, and saves both to Google Drive with the download links shown on the form. |
 | [Gladia Speaker Transcript](pending-submission/n8n-gladia-speaker-transcript/) | Transcribes a public call or interview recording into a clean speaker-labeled transcript with Gladia diarization, saves it to Google Drive as Markdown, and posts the link to Slack. |
-| [Gladia Drive Transcriber](pending-submission/n8n-gladia-drive-transcriber/) | Transcribes new audio and video files dropped into a Google Drive folder with Gladia, saves the transcript back to Drive as a Markdown file, and logs every run to a Google Sheet. |
 | [Gladia Audio Translator](pending-submission/n8n-gladia-audio-translator/) | Translates a foreign-language audio or video recording into a target language with Gladia in a single call, saving both the original transcript and the translation to Google Drive as a Markdown file and logging every run to a Google Sheet. |
-| [SFX Library Builder](pending-submission/n8n-sfx-library-builder/) | Batch-generates ElevenLabs sound effects from a Google Sheet, saving each MP3 to Google Drive and writing the status and link back to each row. |
-| [Gladia Notion Meetings](pending-submission/n8n-gladia-notion-meetings/) | Transcribes a meeting recording added to a Notion database with Gladia, then writes the summary and full transcript back onto the same Notion page. Self-hosted only, uses the n8n-nodes-gladia community node. |
 
 ## License
 
