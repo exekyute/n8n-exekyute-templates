@@ -1,5 +1,7 @@
 # Generate sound effects from chat using ElevenLabs and Google Drive
 
+[Published n8n template](https://n8n.io/workflows/16881-generate-sound-effects-from-chat-with-groq-elevenlabs-and-google-drive/)
+
 Describe a sound in a chat message and get back a ready to use audio clip. I built this so making a quick sound effect is as easy as typing "a heavy wooden door creaking open" and waiting a second for the link.
 
 Built with n8n, plus Groq, ElevenLabs, and Google Drive.

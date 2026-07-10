@@ -6,8 +6,8 @@
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.6,
       "position": [
-        0,
-        300
+        48,
+        288
       ],
       "webhookId": "11111111-1111-4111-8111-111111111111",
       "parameters": {
@@ -48,8 +48,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        220,
-        300
+        336,
+        336
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
@@ -62,8 +62,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        440,
-        300
+        528,
+        336
       ],
       "parameters": {
         "resource": "folder",
@@ -100,8 +100,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        660,
-        300
+        752,
+        256
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
@@ -114,8 +114,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        880,
-        300
+        1104,
+        336
       ],
       "parameters": {
         "method": "POST",
@@ -161,8 +161,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1120,
-        200
+        1344,
+        256
       ],
       "parameters": {
         "resource": "file",
@@ -198,8 +198,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1340,
-        200
+        1584,
+        240
       ],
       "parameters": {
         "mode": "runOnceForEachItem",
@@ -212,8 +212,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1340,
-        440
+        1584,
+        416
       ],
       "parameters": {
         "mode": "runOnceForEachItem",
@@ -226,8 +226,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1580,
-        320
+        1856,
+        304
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
@@ -240,8 +240,8 @@
       "type": "n8n-nodes-base.form",
       "typeVersion": 2.5,
       "position": [
-        1800,
-        320
+        2064,
+        304
       ],
       "webhookId": "22222222-2222-4222-8222-222222222222",
       "parameters": {
@@ -255,8 +255,8 @@
       "type": "n8n-nodes-base.form",
       "typeVersion": 2.5,
       "position": [
-        520,
-        540
+        752,
+        416
       ],
       "webhookId": "33333333-3333-4333-8333-333333333333",
       "parameters": {
@@ -270,13 +270,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -560,
-        40
+        -48,
+        -496
       ],
       "parameters": {
         "content": "## Generate a sound effect variation pack from one brief using ElevenLabs and Google Drive\n\n### How it works\n\n1. A user submits one sound brief and a take count from 1 to 5 through an n8n form.\n2. A code step clamps the inputs and prepares one request per take, and a dated Drive subfolder is created for the run.\n3. Each take calls the ElevenLabs sound-generation API on its own, and because the API has no seed, every call returns a different result.\n4. Each returned MP3 is uploaded into the subfolder as take-1.mp3 through take-N.mp3.\n5. The form shows a link to the folder plus a per-take list marking each take ok or failed.\n\n### Setup steps\n\n- [ ] Create an ElevenLabs Header Auth credential named ElevenLabs with header name xi-api-key.\n- [ ] Create a Google Drive OAuth2 credential and select it on both Drive nodes.\n- [ ] Open Plan Takes and Folder and paste your output folder ID into PARENT_FOLDER_ID.\n- [ ] Leave the workflow inactive until both credentials and the folder ID are set.\n\n### Customization\n\nChange the default and maximum take count, adjust the duration clamp, or change how prompt influence is spread across takes in the Plan Takes and Folder node.",
-        "height": 620,
-        "width": 480
+        "height": 572,
+        "width": 1264
       }
     },
     {
@@ -284,13 +284,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        180
+        -48,
+        96
       ],
       "parameters": {
         "content": "## Collect the brief\n\nOne form takes the sound description, the take count, and optional duration and influence.",
-        "height": 320,
-        "width": 200,
+        "height": 384,
+        "width": 280,
         "color": 7
       }
     },
@@ -299,13 +299,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        180,
-        180
+        272,
+        96
       ],
       "parameters": {
         "content": "## Plan takes and make a folder\n\nClamp the inputs, build one request per take, and create a dated Drive subfolder for this run.",
-        "height": 480,
-        "width": 640,
+        "height": 496,
+        "width": 720,
         "color": 7
       }
     },
@@ -314,13 +314,13 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        840,
-        100
+        1024,
+        96
       ],
       "parameters": {
         "content": "## Generate and store each take\n\nCall ElevenLabs once per take for a different result, upload each MP3, and record ok or failed.",
-        "height": 520,
-        "width": 700,
+        "height": 472,
+        "width": 732,
         "color": 7
       }
     },
@@ -329,12 +329,12 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1540,
-        200
+        1792,
+        96
       ],
       "parameters": {
         "content": "## Return the variation pack\n\nCollapse the take results and show the folder link plus a per-take status list.",
-        "height": 300,
+        "height": 396,
         "width": 470,
         "color": 7
       }

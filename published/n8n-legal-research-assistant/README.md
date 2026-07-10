@@ -1,5 +1,7 @@
 # Answer legal questions with grounded citations from CanLII and CourtListener
 
+[Published n8n template](https://n8n.io/workflows/16814-answer-legal-questions-with-groq-using-canlii-and-courtlistener/)
+
 Ask a legal question and get an answer built only from authorities pulled live from a real legal database, with a verified citation behind every point. If the retrieved sources do not support an answer, the workflow says so instead of inventing case law.
 
 Built with n8n, plus CourtListener, CanLII, and Groq.
