@@ -1,5 +1,7 @@
 # Draft grounded support replies from a Notion knowledge base using Groq and Gmail
 
+[Published n8n template](https://n8n.io/workflows/16813-draft-grounded-gmail-support-replies-from-a-notion-kb-with-groq-and-cohere/)
+
 Turn inbound support email into sourced, ready-to-review replies grounded in your own Notion knowledge base. This is a retrieval-augmented generation (RAG) assistant: every answer is drafted from articles retrieved for that specific question, and saved as a Gmail draft for a person to approve. Nothing is auto-sent.
 
 Built with n8n, plus Notion, Groq, Cohere, and Gmail.

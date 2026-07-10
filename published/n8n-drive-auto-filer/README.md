@@ -1,5 +1,7 @@
 # Auto-file Google Drive inbox files into dated folders by filename rules
 
+[Published n8n template](https://n8n.io/workflows/16812-file-google-drive-inbox-documents-into-dated-folders-with-a-google-sheets-audit-log/)
+
 Drop files into one Google Drive inbox folder and this workflow files each one into a dated Year/Month/Type folder tree, named by a rules table you control, and writes an audit row for every move. No AI, fully rule based, so the same filename always lands in the same place.
 
 Built with n8n, plus Google Drive and Google Sheets.
