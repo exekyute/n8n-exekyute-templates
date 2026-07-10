@@ -3,101 +3,6 @@
   "nodes": [
     {
       "parameters": {
-        "width": 480,
-        "height": 580,
-        "content": "## Transcribe new audio files from Google Drive using Gladia and Google Sheets\n\n### How it works\n\n1. A Google Drive trigger fires when a new audio or video file lands in a watched folder.\n2. The file is downloaded and sent to Gladia, which transcribes it asynchronously.\n3. The workflow polls Gladia until the transcript is ready, then saves it as a Markdown file in a Drive folder.\n4. Every run is logged to a Google Sheet, and failures are logged with a reason so nothing is lost silently.\n\n### Setup steps\n\n- [ ] Create a Header Auth credential named Gladia with header name x-gladia-key and your Gladia API key.\n- [ ] Connect a Google Drive credential, then set the watched folder on the trigger and the Transcripts folder on Save Transcript to Drive.\n- [ ] Connect a Google Sheets credential and pick the spreadsheet and tab that hold the log.\n- [ ] Adjust wait_seconds and max_attempts in Prepare Config Values if your files run long.\n\n### Customization\n\nPoint the trigger at any Drive folder, change the transcript layout in Build Transcript File, or add a Slack node after the log to get a ping when a transcript is ready."
-      },
-      "id": "aa000000-0000-4000-8000-000000000001",
-      "name": "Overview",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -560,
-        100
-      ]
-    },
-    {
-      "parameters": {
-        "width": 700,
-        "height": 240,
-        "color": 7,
-        "content": "## Watch and download the file\n\nA new file in the Drive folder triggers the run, config values are prepared, then the file is downloaded to binary."
-      },
-      "id": "aa000000-0000-4000-8000-000000000002",
-      "name": "Group Watch And Download",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -40,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "width": 440,
-        "height": 240,
-        "color": 7,
-        "content": "## Send audio to Gladia\n\nUpload the file to Gladia, then start an asynchronous transcription job."
-      },
-      "id": "aa000000-0000-4000-8000-000000000003",
-      "name": "Group Send To Gladia",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        660,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "width": 660,
-        "height": 240,
-        "color": 7,
-        "content": "## Poll until transcription is done\n\nWait, fetch the result, and route by status. Loop back until Gladia returns done or the attempt limit is reached."
-      },
-      "id": "aa000000-0000-4000-8000-000000000004",
-      "name": "Group Poll For Result",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1120,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "width": 720,
-        "height": 260,
-        "color": 7,
-        "content": "## Save transcript and log\n\nBuild a Markdown transcript, save it to Drive, and append a row to the log sheet."
-      },
-      "id": "aa000000-0000-4000-8000-000000000005",
-      "name": "Group Save And Log",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1820,
-        120
-      ]
-    },
-    {
-      "parameters": {
-        "width": 340,
-        "height": 200,
-        "color": 7,
-        "content": "## Handle failures\n\nAny API error or a timeout writes a Failed row with a reason, so nothing fails silently."
-      },
-      "id": "aa000000-0000-4000-8000-000000000006",
-      "name": "Group Handle Failures",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1820,
-        420
-      ]
-    },
-    {
-      "parameters": {
         "pollTimes": {
           "item": [
             {
@@ -114,13 +19,13 @@
         "event": "fileCreated",
         "options": {}
       },
-      "id": "bb000000-0000-4000-8000-000000000001",
+      "id": "3f6d2b7d-c7e9-4543-9b9a-cfa7b2d2baa7",
       "name": "Google Drive Audio Trigger",
       "type": "n8n-nodes-base.googleDriveTrigger",
       "typeVersion": 1,
       "position": [
-        0,
-        300
+        -16,
+        704
       ],
       "credentials": {
         "googleDriveOAuth2Api": {
@@ -150,13 +55,13 @@
           ]
         }
       },
-      "id": "bb000000-0000-4000-8000-000000000002",
+      "id": "72166108-75e5-4b98-90af-026316c77a2a",
       "name": "Prepare Config Values",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        220,
-        300
+        208,
+        704
       ]
     },
     {
@@ -168,15 +73,17 @@
           "mode": "id",
           "value": "={{ $('Google Drive Audio Trigger').item.json.id }}"
         },
-        "options": {}
+        "options": {
+          "binaryPropertyName": "data"
+        }
       },
-      "id": "bb000000-0000-4000-8000-000000000003",
+      "id": "25b2175b-fcfb-4918-ab1c-05642a0be3cd",
       "name": "Download File from Drive",
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        440,
-        300
+        432,
+        704
       ],
       "credentials": {
         "googleDriveOAuth2Api": {
@@ -206,18 +113,18 @@
           "timeout": 120000
         }
       },
-      "id": "bb000000-0000-4000-8000-000000000004",
+      "id": "ba1499c8-97bf-4054-af90-ca9785aa2aeb",
       "name": "Upload Audio to Gladia",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.4,
       "position": [
-        680,
-        300
+        688,
+        704
       ],
-      "onError": "continueErrorOutput",
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
       "credentials": {
         "httpHeaderAuth": {
           "id": "REPLACE_WITH_YOUR_GLADIA_CREDENTIAL",
@@ -239,18 +146,18 @@
           "timeout": 30000
         }
       },
-      "id": "bb000000-0000-4000-8000-000000000005",
+      "id": "285cbe8b-c58e-4fa2-a8d2-292152acaaba",
       "name": "Start Transcription Job",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.4,
       "position": [
-        900,
-        300
+        928,
+        688
       ],
-      "onError": "continueErrorOutput",
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
       "credentials": {
         "httpHeaderAuth": {
           "id": "REPLACE_WITH_YOUR_GLADIA_CREDENTIAL",
@@ -260,18 +167,19 @@
     },
     {
       "parameters": {
+        "resume": "timeInterval",
         "amount": "={{ $('Prepare Config Values').item.json.wait_seconds }}",
         "unit": "seconds"
       },
-      "id": "bb000000-0000-4000-8000-000000000006",
+      "id": "9d170652-3c50-4cbe-97f0-df9e34835907",
       "name": "Wait for Processing",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        1140,
-        300
+        1200,
+        544
       ],
-      "webhookId": "d7c1b8a2-6f0e-4b1a-9c3d-2e5f7a9b0c11"
+      "webhookId": "5fbeb244-60c9-4517-8c30-cf2efa4a65fe"
     },
     {
       "parameters": {
@@ -283,18 +191,18 @@
           "timeout": 30000
         }
       },
-      "id": "bb000000-0000-4000-8000-000000000007",
+      "id": "7279d3f5-ad94-4fe9-ad0e-955a2809eff7",
       "name": "Get Transcription Result",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.4,
       "position": [
         1360,
-        300
+        544
       ],
-      "onError": "continueErrorOutput",
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
       "credentials": {
         "httpHeaderAuth": {
           "id": "REPLACE_WITH_YOUR_GLADIA_CREDENTIAL",
@@ -307,12 +215,12 @@
         "rules": {
           "values": [
             {
-              "outputKey": "done",
               "conditions": {
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict"
+                  "typeValidation": "strict",
+                  "version": 1
                 },
                 "conditions": [
                   {
@@ -328,12 +236,12 @@
               }
             },
             {
-              "outputKey": "failed",
               "conditions": {
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "loose"
+                  "typeValidation": "loose",
+                  "version": 1
                 },
                 "conditions": [
                   {
@@ -363,28 +271,27 @@
           "renameFallbackOutput": "Still Processing"
         }
       },
-      "id": "bb000000-0000-4000-8000-000000000008",
+      "id": "7499c9d7-66d7-4ac7-992d-1e7e7099dacf",
       "name": "Route by Status",
       "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.2,
+      "typeVersion": 3.4,
       "position": [
-        1580,
-        300
+        1568,
+        512
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "language": "javaScript",
-        "jsCode": "// Build a Markdown transcript file from Gladia's result.\n// Runs once per completed transcription (the Route by Status \"done\" output).\n\nconst result = $json.result || {};\nconst transcription = result.transcription || {};\n\nconst fullTranscript = (transcription.full_transcript || '').trim();\nconst utterances = Array.isArray(transcription.utterances) ? transcription.utterances : [];\n\n// Duration can sit in a couple of places depending on the response shape.\nconst duration =\n  result.metadata?.audio_duration ??\n  $json.file?.audio_duration ??\n  $('Upload Audio to Gladia').item.json.audio_metadata?.audio_duration ??\n  null;\n\nconst sourceName = $('Google Drive Audio Trigger').item.json.name || 'audio-file';\nconst baseName = sourceName.replace(/\\.[^/.]+$/, '');\nconst stamp = $now.toFormat('yyyyLLdd-HHmmss');\nconst fileName = baseName + '-transcript-' + stamp + '.md';\n\n// Assemble a readable Markdown document. Speaker-labelled lines when Gladia\n// returns utterances, otherwise the plain full transcript.\nlet body = '# Transcript: ' + sourceName + '\\n\\n';\nbody += '- Source file: ' + sourceName + '\\n';\nbody += '- Duration: ' + (duration != null ? duration + ' seconds' : 'unknown') + '\\n';\nbody += '- Transcribed: ' + $now.toISO() + '\\n\\n---\\n\\n';\n\nif (utterances.length) {\n  for (const u of utterances) {\n    const who = (u.speaker !== undefined && u.speaker !== null) ? ('Speaker ' + u.speaker) : 'Speaker';\n    body += '**' + who + ':** ' + (u.text || '').trim() + '\\n\\n';\n  }\n} else {\n  body += (fullTranscript || '(No transcript text was returned.)') + '\\n';\n}\n\nconst preview = fullTranscript.slice(0, 180);\n\nreturn {\n  json: {\n    source_file: sourceName,\n    audio_duration: duration,\n    file_name: fileName,\n    preview: preview,\n    status: 'Transcribed',\n  },\n  binary: {\n    data: {\n      data: Buffer.from(body, 'utf-8').toString('base64'),\n      mimeType: 'text/markdown',\n      fileName: fileName,\n      fileExtension: 'md',\n    },\n  },\n};"
+        "jsCode": "const result = $json.result || {};\nconst transcription = result.transcription || {};\nconst fullTranscript = (transcription.full_transcript || '').trim();\nconst utterances = Array.isArray(transcription.utterances) ? transcription.utterances : [];\nconst duration = result.metadata?.audio_duration ?? $json.file?.audio_duration ?? $('Upload Audio to Gladia').item.json.audio_metadata?.audio_duration ?? null;\nconst sourceName = $('Google Drive Audio Trigger').item.json.name || 'audio-file';\nconst dot = sourceName.lastIndexOf('.');\nconst baseName = dot > 0 ? sourceName.slice(0, dot) : sourceName;\nconst stamp = $now.toFormat('yyyyLLdd-HHmmss');\nconst fileName = baseName + '-transcript-' + stamp + '.md';\nconst NL = String.fromCharCode(10);\nconst lines = [];\nlines.push('# Transcript: ' + sourceName);\nlines.push('');\nlines.push('- Source file: ' + sourceName);\nlines.push('- Duration: ' + (duration != null ? duration + ' seconds' : 'unknown'));\nlines.push('- Transcribed: ' + $now.toISO());\nlines.push('');\nlines.push('---');\nlines.push('');\nif (utterances.length) {\n  for (const u of utterances) {\n    const who = (u.speaker !== undefined && u.speaker !== null) ? ('Speaker ' + u.speaker) : 'Speaker';\n    lines.push('**' + who + ':** ' + (u.text || '').trim());\n    lines.push('');\n  }\n} else {\n  lines.push(fullTranscript || '(No transcript text was returned.)');\n}\nconst body = lines.join(NL);\nconst preview = fullTranscript.slice(0, 180);\nreturn { json: { source_file: sourceName, audio_duration: duration, file_name: fileName, preview: preview, status: 'Transcribed' }, binary: { data: { data: Buffer.from(body, 'utf-8').toString('base64'), mimeType: 'text/markdown', fileName: fileName, fileExtension: 'md' } } };"
       },
-      "id": "bb000000-0000-4000-8000-000000000009",
+      "id": "9447b3e3-71f2-4f7a-9471-02e530d36834",
       "name": "Build Transcript File",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1860,
-        220
+        1824,
+        496
       ]
     },
     {
@@ -406,13 +313,13 @@
         "inputDataFieldName": "data",
         "options": {}
       },
-      "id": "bb000000-0000-4000-8000-000000000010",
+      "id": "691fccab-9fd5-4ba6-8618-8e214e2fb2a1",
       "name": "Save Transcript to Drive",
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        2080,
-        220
+        2016,
+        496
       ],
       "onError": "continueErrorOutput",
       "credentials": {
@@ -506,13 +413,13 @@
         },
         "options": {}
       },
-      "id": "bb000000-0000-4000-8000-000000000011",
+      "id": "f1224ff7-e5cf-41a9-9684-5ce4026642f5",
       "name": "Log Transcript in Sheets",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "typeVersion": 4.7,
       "position": [
-        2300,
-        220
+        2208,
+        480
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -605,13 +512,13 @@
         },
         "options": {}
       },
-      "id": "bb000000-0000-4000-8000-000000000012",
+      "id": "7f6f7a25-e326-448e-804e-26d3b22dea56",
       "name": "Log Failure in Sheets",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "typeVersion": 4.7,
       "position": [
-        1860,
-        480
+        2144,
+        864
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -619,6 +526,101 @@
           "name": "Google Sheets account"
         }
       }
+    },
+    {
+      "parameters": {
+        "content": "## Transcribe new audio files from Google Drive using Gladia and Google Sheets\n\n### How it works\n\n1. A Google Drive trigger fires when a new audio or video file lands in a watched folder.\n2. The file is downloaded and sent to Gladia, which transcribes it asynchronously.\n3. The workflow polls Gladia until the transcript is ready, then saves it as a Markdown file in a Drive folder.\n4. Every run is logged to a Google Sheet, and failures are logged with a reason so nothing is lost silently.\n\n### Setup steps\n\n- [ ] Create a Header Auth credential named Gladia with header name x-gladia-key and your Gladia API key, then select it on the three Gladia HTTP nodes.\n- [ ] Set the watched folder on the trigger and the Transcripts folder on Save Transcript to Drive.\n- [ ] Pick the log spreadsheet and tab on both Sheets nodes.\n- [ ] Adjust wait_seconds and max_attempts in Prepare Config Values if your files run long.\n\n### Customization\n\nPoint the trigger at any Drive folder, change the transcript layout in Build Transcript File, or add a Slack node after the log to get a ping when a transcript is ready.",
+        "height": 532,
+        "width": 1232
+      },
+      "id": "5f71244f-9393-4b18-8c2d-640457307d09",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Watch and download the file\n\nA new file in the Drive folder triggers the run, config values are prepared, then the file is downloaded to binary.",
+        "height": 384,
+        "width": 668,
+        "color": 7
+      },
+      "id": "2e3aa313-7621-4a57-83c7-7afde87e3032",
+      "name": "Group Watch And Download",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Send audio to Gladia\n\nUpload the file to Gladia, then start an asynchronous transcription job.",
+        "height": 368,
+        "width": 472,
+        "color": 7
+      },
+      "id": "28504a13-cd04-40b8-bb3b-41b6f0451ae3",
+      "name": "Group Send To Gladia",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        624,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Poll until transcription is done\n\nWait, fetch the result, and route by status. Loop back until Gladia returns done or the attempt limit is reached.",
+        "height": 416,
+        "width": 628,
+        "color": 7
+      },
+      "id": "2380a42a-a9ce-4834-b6fb-ee0d0b3a542b",
+      "name": "Group Poll For Result",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Save transcript and log\n\nBuild a Markdown transcript, save it to Drive, and append a row to the log sheet.",
+        "height": 308,
+        "width": 640,
+        "color": 7
+      },
+      "id": "dfe9c1f2-3cab-4721-bfce-b8e3c6d4da03",
+      "name": "Group Save And Log",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1776,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Handle failures\n\nAny API error or a timeout writes a Failed row with a reason, so nothing fails silently.",
+        "height": 344,
+        "width": 340,
+        "color": 7
+      },
+      "id": "fb183416-6279-4697-acd1-48162079ba8b",
+      "name": "Group Handle Failures",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2032,
+        688
+      ]
     }
   ],
   "connections": {
