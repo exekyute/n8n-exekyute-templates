@@ -4,23 +4,92 @@ A collection of n8n workflow templates I have built, organized by their status i
 
 ## Published
 
-Live in the n8n template library.
+Live in the n8n template library, grouped by area. Hover a template name to see what it does, or hit **View** to open its listing on n8n.io.
 
-| Template | What it does | n8n library |
-|---|---|:---:|
-| [Media Monitor](published/n8n-media-monitor/) | Watches RSS feeds, scores each article for relevance, sentiment, and entities, and emails a digest grouped by topic. | [View](https://n8n.io/workflows/16296-send-scored-media-monitoring-digests-from-rss-feeds-via-smtp-email/) |
-| [frAIday Delivery Planner](published/n8n-frAIday-delivery-planner/) | Batches food delivery orders into Saturday and Sunday route plans, geocoded via OpenStreetMap, emailed every Friday. | [View](https://n8n.io/workflows/16154-plan-delivery-routes-from-notion-orders-with-nominatim-and-email/) |
-| [Lead Enricher](published/n8n-lead-enricher/) | Researches an inbound company with You.com, writes a profile and fit score with Groq, alerts Slack for hot leads, and logs every lead to Notion. | [View](https://n8n.io/workflows/16504-enrich-and-route-inbound-leads-using-youcom-groq-notion-and-slack/) |
-| [API Contract Drift Watcher](published/n8n-api-contract-drift-watcher/) | Polls a JSON or OpenAPI endpoint on a schedule, snapshots its response schema in a Data Table, and posts a severity-tagged Slack alert only when the contract breaks, ignoring ordinary value churn. | [View](https://n8n.io/workflows/16699-alert-on-api-contract-drift-using-data-tables-and-slack/) |
-| [Backup Freshness Auditor](published/n8n-backup-freshness-auditor/) | Audits a Google Drive folder of externally produced backups against a per-source SLA table in Sheets, flags stale, missing, or shrunken dumps, logs a scorecard, and alerts Slack only on failures. | [View](https://n8n.io/workflows/16701-audit-google-drive-backup-freshness-with-google-sheets-and-slack/) |
-| [CSV Folder Reconciler](published/n8n-csv-folder-reconciler/) | Merges the daily CSV exports in a Google Drive folder into one deduped master, quarantines every bad row to a dated reject file with a reason, and posts a rows in, merged, quarantined, duplicates recap to Slack. | [View](https://n8n.io/workflows/16700-reconcile-daily-google-drive-csv-exports-into-a-master-file-and-send-a-slack-recap/) |
-| [Notion Deduplicator](published/n8n-notion-deduplicator/) | Removes duplicate rows from a Notion database on a schedule, keeping the newest or most complete record in each group, archiving the rest to the Notion trash, and logging a recap of every run. | [View](https://n8n.io/workflows/16801-deduplicate-and-archive-notion-database-rows-daily-with-an-audit-log/) |
-| [Notion Overdue Roller](published/n8n-notion-overdue-roller/) | Rolls overdue Notion tasks forward in place on a schedule, incrementing a per-task roll counter and setting a Stale flag once a task has been pushed too many times, without sending any reminder. | [View](https://n8n.io/workflows/16802-roll-overdue-notion-tasks-forward-and-flag-stale-ones-on-a-schedule/) |
-| [Notion Property Normalizer](published/n8n-notion-property-normalizer/) | Cleans up one Notion database on a schedule with no AI: backfills a missing Status default, canonicalizes inconsistent Status spellings, derives a slug key and a created-week stamp, and writes only the rows that actually change. | [View](https://n8n.io/workflows/16800-normalize-and-backfill-notion-database-properties-with-rules-and-logging/) |
-| [KB Inquiry Assistant (RAG)](published/n8n-kb-inquiry-assistant/) | A retrieval-augmented generation (RAG) assistant that drafts grounded replies to inbound support email from a Notion knowledge base, using Cohere embeddings and reranking plus Groq, and saves each as a Gmail draft for a human to review. | [View](https://n8n.io/workflows/16813-draft-grounded-gmail-support-replies-from-a-notion-kb-with-groq-and-cohere/) |
-| [Drive Auto-Filer](published/n8n-drive-auto-filer/) | Sorts new Google Drive inbox files into a dated Year/Month/Type folder tree by filename rules, and logs every move to a Google Sheet. | [View](https://n8n.io/workflows/16812-file-google-drive-inbox-documents-into-dated-folders-with-a-google-sheets-audit-log/) |
-| [Legal Research Assistant](published/n8n-legal-research-assistant/) | Answers a legal question using only authorities retrieved from CourtListener or CanLII, and verifies every citation against the retrieved sources so invented case law never reaches the reader. | [View](https://n8n.io/workflows/16814-answer-legal-questions-with-groq-using-canlii-and-courtlistener/) |
-| [SFX Chat Generator](published/n8n-sfx-chat-generator/) | Turns a plain-language chat message into a sound effect: a Groq director rewrites it into a literal ElevenLabs prompt, generates the audio, saves it to Google Drive, and replies in chat with the link. | [View](https://n8n.io/workflows/16881-generate-sound-effects-from-chat-with-groq-elevenlabs-and-google-drive/) |
+```mermaid
+mindmap
+  root((Published))
+    AI
+      KB Inquiry Assistant
+      Legal Research Assistant
+      SFX Chat Generator
+    Data & Records
+      Notion Deduplicator
+      Notion Overdue Roller
+      Notion Property Normalizer
+    Files & Documents
+      CSV Folder Reconciler
+      Drive Auto-Filer
+    DevOps & Monitoring
+      API Contract Drift Watcher
+      Backup Freshness Auditor
+    Sales & Marketing
+      Lead Enricher
+      Media Monitor
+    Operations
+      frAIday Delivery Planner
+```
+
+<details open>
+<summary><b>AI</b> &middot; 3</summary>
+
+| Template | n8n library |
+|:---|:---:|
+| [KB Inquiry Assistant (RAG)](published/n8n-kb-inquiry-assistant/ "A retrieval-augmented generation (RAG) assistant that drafts grounded replies to inbound support email from a Notion knowledge base, using Cohere embeddings and reranking plus Groq, and saves each as a Gmail draft for a human to review.") | [View](https://n8n.io/workflows/16813-draft-grounded-gmail-support-replies-from-a-notion-kb-with-groq-and-cohere/) |
+| [Legal Research Assistant](published/n8n-legal-research-assistant/ "Answers a legal question using only authorities retrieved from CourtListener or CanLII, and verifies every citation against the retrieved sources so invented case law never reaches the reader.") | [View](https://n8n.io/workflows/16814-answer-legal-questions-with-groq-using-canlii-and-courtlistener/) |
+| [SFX Chat Generator](published/n8n-sfx-chat-generator/ "Turns a plain-language chat message into a sound effect: a Groq director rewrites it into a literal ElevenLabs prompt, generates the audio, saves it to Google Drive, and replies in chat with the link.") | [View](https://n8n.io/workflows/16881-generate-sound-effects-from-chat-with-groq-elevenlabs-and-google-drive/) |
+
+</details>
+
+<details>
+<summary><b>Data &amp; Records</b> &middot; 3</summary>
+
+| Template | n8n library |
+|:---|:---:|
+| [Notion Deduplicator](published/n8n-notion-deduplicator/ "Removes duplicate rows from a Notion database on a schedule, keeping the newest or most complete record in each group, archiving the rest to the Notion trash, and logging a recap of every run.") | [View](https://n8n.io/workflows/16801-deduplicate-and-archive-notion-database-rows-daily-with-an-audit-log/) |
+| [Notion Overdue Roller](published/n8n-notion-overdue-roller/ "Rolls overdue Notion tasks forward in place on a schedule, incrementing a per-task roll counter and setting a Stale flag once a task has been pushed too many times, without sending any reminder.") | [View](https://n8n.io/workflows/16802-roll-overdue-notion-tasks-forward-and-flag-stale-ones-on-a-schedule/) |
+| [Notion Property Normalizer](published/n8n-notion-property-normalizer/ "Cleans up one Notion database on a schedule with no AI: backfills a missing Status default, canonicalizes inconsistent Status spellings, derives a slug key and a created-week stamp, and writes only the rows that actually change.") | [View](https://n8n.io/workflows/16800-normalize-and-backfill-notion-database-properties-with-rules-and-logging/) |
+
+</details>
+
+<details>
+<summary><b>Files &amp; Documents</b> &middot; 2</summary>
+
+| Template | n8n library |
+|:---|:---:|
+| [CSV Folder Reconciler](published/n8n-csv-folder-reconciler/ "Merges the daily CSV exports in a Google Drive folder into one deduped master, quarantines every bad row to a dated reject file with a reason, and posts a rows in, merged, quarantined, duplicates recap to Slack.") | [View](https://n8n.io/workflows/16700-reconcile-daily-google-drive-csv-exports-into-a-master-file-and-send-a-slack-recap/) |
+| [Drive Auto-Filer](published/n8n-drive-auto-filer/ "Sorts new Google Drive inbox files into a dated Year/Month/Type folder tree by filename rules, and logs every move to a Google Sheet.") | [View](https://n8n.io/workflows/16812-file-google-drive-inbox-documents-into-dated-folders-with-a-google-sheets-audit-log/) |
+
+</details>
+
+<details>
+<summary><b>DevOps &amp; Monitoring</b> &middot; 2</summary>
+
+| Template | n8n library |
+|:---|:---:|
+| [API Contract Drift Watcher](published/n8n-api-contract-drift-watcher/ "Polls a JSON or OpenAPI endpoint on a schedule, snapshots its response schema in a Data Table, and posts a severity-tagged Slack alert only when the contract breaks, ignoring ordinary value churn.") | [View](https://n8n.io/workflows/16699-alert-on-api-contract-drift-using-data-tables-and-slack/) |
+| [Backup Freshness Auditor](published/n8n-backup-freshness-auditor/ "Audits a Google Drive folder of externally produced backups against a per-source SLA table in Sheets, flags stale, missing, or shrunken dumps, logs a scorecard, and alerts Slack only on failures.") | [View](https://n8n.io/workflows/16701-audit-google-drive-backup-freshness-with-google-sheets-and-slack/) |
+
+</details>
+
+<details>
+<summary><b>Sales &amp; Marketing</b> &middot; 2</summary>
+
+| Template | n8n library |
+|:---|:---:|
+| [Lead Enricher](published/n8n-lead-enricher/ "Researches an inbound company with You.com, writes a profile and fit score with Groq, alerts Slack for hot leads, and logs every lead to Notion.") | [View](https://n8n.io/workflows/16504-enrich-and-route-inbound-leads-using-youcom-groq-notion-and-slack/) |
+| [Media Monitor](published/n8n-media-monitor/ "Watches RSS feeds, scores each article for relevance, sentiment, and entities, and emails a digest grouped by topic.") | [View](https://n8n.io/workflows/16296-send-scored-media-monitoring-digests-from-rss-feeds-via-smtp-email/) |
+
+</details>
+
+<details>
+<summary><b>Operations</b> &middot; 1</summary>
+
+| Template | n8n library |
+|:---|:---:|
+| [frAIday Delivery Planner](published/n8n-frAIday-delivery-planner/ "Batches food delivery orders into Saturday and Sunday route plans, geocoded via OpenStreetMap, emailed every Friday.") | [View](https://n8n.io/workflows/16154-plan-delivery-routes-from-notion-orders-with-nominatim-and-email/) |
+
+</details>
 
 ## Pending review
 
