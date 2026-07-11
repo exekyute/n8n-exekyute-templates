@@ -112,6 +112,7 @@ Submitted to the n8n Creator hub and awaiting approval. Templates move up to `pu
 | [Gladia Notion Meetings](pending-review/n8n-gladia-notion-meetings/) | Transcribes a meeting recording added to a Notion database with Gladia, then writes the summary and full transcript back onto the same Notion page. Self-hosted only, uses the n8n-nodes-gladia community node. |
 | [Litigation Limitation Calculator](pending-review/n8n-litigation-limitation-calculator/) | Calculates the limitation and procedural deadlines for a Canadian litigation matter across nine jurisdictions, then writes them to Google Calendar, logs them to Google Sheets, and summarizes them to Slack and Gmail. |
 | [Gladia Subtitle Generator](pending-review/n8n-gladia-subtitle-generator/) | Generates ready-to-use SRT and VTT subtitle files from a public audio or video URL using Gladia, and saves both to Google Drive with the download links shown on the form. |
+| [Project Health Roll-up](pending-review/n8n-project-health-rollup/) | Reads active projects from Notion each morning, scores each Red, Yellow, or Green with Groq, leads with what changed overnight, and posts one standup to Slack. |
 
 ## Pending submission
 
