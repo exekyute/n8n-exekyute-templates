@@ -122,6 +122,7 @@ Built and tested but not yet submitted to the Creator hub. Templates move to `pe
 |---|---|
 | [Gladia Speaker Transcript](pending-submission/n8n-gladia-speaker-transcript/) | Transcribes a public call or interview recording into a clean speaker-labeled transcript with Gladia diarization, saves it to Google Drive as Markdown, and posts the link to Slack. |
 | [Gladia Audio Translator](pending-submission/n8n-gladia-audio-translator/) | Translates a foreign-language audio or video recording into a target language with Gladia in a single call, saving both the original transcript and the translation to Google Drive as a Markdown file and logging every run to a Google Sheet. |
+| [Local Business Proximity](pending-submission/n8n-local-business-proximity/) | Looks up businesses near a location from OpenStreetMap by category, flags which ones list a website, and appends the results to a Google Sheet. |
 
 ## License
 
