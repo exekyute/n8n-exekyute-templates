@@ -137,6 +137,7 @@ Submitted to the n8n Creator hub and awaiting approval. Templates move up to `pu
 | [Litigation Limitation Calculator](pending-review/n8n-litigation-limitation-calculator/) | Calculates the limitation and procedural deadlines for a Canadian litigation matter across nine jurisdictions, then writes them to Google Calendar, logs them to Google Sheets, and summarizes them to Slack and Gmail. |
 | [Gladia Subtitle Generator](pending-review/n8n-gladia-subtitle-generator/) | Generates ready-to-use SRT and VTT subtitle files from a public audio or video URL using Gladia, and saves both to Google Drive with the download links shown on the form. |
 | [Project Health Roll-up](pending-review/n8n-project-health-rollup/) | Reads active projects from Notion each morning, scores each Red, Yellow, or Green with Groq, leads with what changed overnight, and posts one standup to Slack. |
+| [Local Business Proximity](pending-review/n8n-local-business-proximity/) | Looks up businesses near a location from OpenStreetMap by category, flags which ones list a website, and appends the results to a Google Sheet. |
 
 ## Pending submission
 
@@ -146,7 +147,6 @@ Built and tested but not yet submitted to the Creator hub. Templates move to `pe
 |---|---|
 | [Gladia Speaker Transcript](pending-submission/n8n-gladia-speaker-transcript/) | Transcribes a public call or interview recording into a clean speaker-labeled transcript with Gladia diarization, saves it to Google Drive as Markdown, and posts the link to Slack. |
 | [Gladia Audio Translator](pending-submission/n8n-gladia-audio-translator/) | Translates a foreign-language audio or video recording into a target language with Gladia in a single call, saving both the original transcript and the translation to Google Drive as a Markdown file and logging every run to a Google Sheet. |
-| [Local Business Proximity](pending-submission/n8n-local-business-proximity/) | Looks up businesses near a location from OpenStreetMap by category, flags which ones list a website, and appends the results to a Google Sheet. |
 
 ## License
 
