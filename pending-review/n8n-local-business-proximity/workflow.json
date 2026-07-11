@@ -196,7 +196,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        688,
+        496,
         368
       ],
       "alwaysOutputData": true
@@ -229,7 +229,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        928,
+        656,
         368
       ]
     },
@@ -242,8 +242,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1168,
-        272
+        848,
+        352
       ]
     },
     {
@@ -276,8 +276,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1392,
-        272
+        1008,
+        352
       ]
     },
     {
@@ -289,8 +289,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1616,
-        272
+        1200,
+        368
       ]
     },
     {
@@ -312,8 +312,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        1824,
-        272
+        1392,
+        368
       ]
     },
     {
@@ -323,14 +323,14 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1168,
-        512
+        976,
+        736
       ]
     },
     {
       "parameters": {
         "content": "## Find nearby businesses by proximity using OpenStreetMap and save to Google Sheets\n\nLook up businesses around any location and record which ones list a website. Useful for local market research, building area directories, and territory mapping.\n\n### How it works\n1. Submit the form with a location, business category, search radius, and result limit.\n2. Nominatim geocodes the location to coordinates (1 request).\n3. A single Overpass API call returns every matching business in the radius, with their OpenStreetMap tags (website, phone, hours).\n4. Each business is normalized and appended to your Google Sheet, with a `website_on_file` yes/no flag.\n\n### Setup steps\n- [ ] Connect a Google Sheets credential and pick a destination sheet on \"Append to results sheet\".\n- [ ] Open the Settings node and put a real contact address in the User-Agent value (OpenStreetMap policy requires it).\n\n### Customization\n- Edit the category to OpenStreetMap tag map in **Build Overpass query**.\n- Adjust the radius options or add columns in **Normalize businesses**.\n- Filter your sheet to `website_on_file = no` to focus your research.",
-        "height": 380,
+        "height": 796,
         "width": 460
       },
       "id": "8f36ca5d-9d18-4173-9867-1d9e6c75003d",
@@ -338,8 +338,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -496,
-        -160
+        -400,
+        48
       ]
     },
     {
@@ -361,8 +361,8 @@
     {
       "parameters": {
         "content": "## 2. Geocode + find businesses\nNominatim turns the location into coordinates; one Overpass call returns all matching businesses nearby.",
-        "height": 200,
-        "width": 940,
+        "height": 360,
+        "width": 668,
         "color": 7
       },
       "id": "857a7e1f-28ad-4754-9da8-6b52d8c5bb4a",
@@ -370,15 +370,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        624,
+        464,
         192
       ]
     },
     {
       "parameters": {
         "content": "## 3. Save to Google Sheets\nEach business becomes a row, flagged by whether it lists a website.",
-        "height": 200,
-        "width": 360,
+        "height": 360,
+        "width": 440,
         "color": 7
       },
       "id": "0174eca2-a1d6-47fc-a403-6df1010df424",
@@ -386,15 +386,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1584,
+        1136,
         192
       ]
     },
     {
       "parameters": {
         "content": "## Respect the OpenStreetMap usage policy\nSet a real contact in the Settings User-Agent and keep volume modest (about 1 request per second). A missing website tag means \"worth checking\", not \"no site exists\".",
-        "height": 180,
-        "width": 300,
+        "height": 196,
+        "width": 396,
         "color": 3
       },
       "id": "4bb650a8-f65e-4f2d-8c56-65f43ea8025d",
@@ -402,14 +402,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        624,
-        416
+        464,
+        560
       ]
     },
     {
       "parameters": {
         "content": "## Handle no match\nIf the location cannot be geocoded, the IF false branch stops here, so no bad coordinates are queried.",
-        "height": 190,
+        "height": 318,
         "width": 300,
         "color": 7
       },
@@ -418,8 +418,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1120,
-        440
+        864,
+        560
       ]
     }
   ],
