@@ -1,0 +1,13 @@
+{
+  "name": "litigation-limitation-calculator-verification",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Date-math verification harness for the litigation limitation calculator n8n template",
+  "scripts": {
+    "verify": "node verification/date-math-check.mjs"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "luxon": "^3.7.2"
+  }
+}
