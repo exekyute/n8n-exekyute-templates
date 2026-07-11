@@ -110,6 +110,7 @@ Submitted to the n8n Creator hub and awaiting approval. Templates move up to `pu
 | [Gladia Drive Transcriber](pending-review/n8n-gladia-drive-transcriber/) | Transcribes new audio and video files dropped into a Google Drive folder with Gladia, saves the transcript back to Drive as a Markdown file, and logs every run to a Google Sheet. |
 | [SFX Library Builder](pending-review/n8n-sfx-library-builder/) | Batch-generates ElevenLabs sound effects from a Google Sheet, saving each MP3 to Google Drive and writing the status and link back to each row. |
 | [Gladia Notion Meetings](pending-review/n8n-gladia-notion-meetings/) | Transcribes a meeting recording added to a Notion database with Gladia, then writes the summary and full transcript back onto the same Notion page. Self-hosted only, uses the n8n-nodes-gladia community node. |
+| [Litigation Limitation Calculator](pending-review/n8n-litigation-limitation-calculator/) | Calculates the limitation and procedural deadlines for a Canadian litigation matter across nine jurisdictions, then writes them to Google Calendar, logs them to Google Sheets, and summarizes them to Slack and Gmail. |
 
 ## Pending submission
 
