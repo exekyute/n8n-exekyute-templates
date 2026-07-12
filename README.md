@@ -149,6 +149,7 @@ Built and tested but not yet submitted to the Creator hub. Templates move to `pe
 | [Gladia Audio Translator](pending-submission/n8n-gladia-audio-translator/) | Translates a foreign-language audio or video recording into a target language with Gladia in a single call, saving both the original transcript and the translation to Google Drive as a Markdown file and logging every run to a Google Sheet. |
 | [Grounded Support Drafter](pending-submission/n8n-grounded-support-drafter/) | Answers a support question about a public source, a third-party API, a public standard, or a help or regulatory page, by researching the live web with You.com, then saves the cited reply as a Gmail draft for a support agent to review and send. |
 | [Asana Hygiene Auditor](pending-submission/n8n-asana-hygiene-auditor/) | Scans one Asana project each week for open tasks missing an assignee or due date, logs each flagged task to Google Sheets with reason codes, and posts a field-completeness scorecard to Slack. |
+| [Asana Status Digest](pending-submission/n8n-asana-status-digest/) | Reads one Asana project every weekday morning and posts a Slack digest of overdue, due-today, due-this-week, unassigned, and just-completed tasks, plus per-assignee open load, with no AI in the delivery path. |
 
 ## License
 
