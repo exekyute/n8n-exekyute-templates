@@ -22,6 +22,7 @@ A schedule triggers the run. An HTTP Request reads the project's tasks from the 
 | Route Upsert and Soft-Delete | Sends upserts and soft-deletes down their own branches |
 | Upsert Rows in Sheets | Appends or updates each live task, keyed on the `gid` column |
 | Flag Removed Rows in Sheets | Sets `present` = `No` on rows whose task left Asana, without deleting them |
+| Merge Write Results | Brings the two write branches back together so the summary runs once |
 | Build Run Summary | Writes a one-line count of created, updated, and removed |
 | Finish Sync Run | A no-op that keeps the summary so each run is inspectable |
 
@@ -30,7 +31,7 @@ The whole mirror is keyed on the Asana task GID, so a task that is renamed or re
 ## Setup
 
 1. Import `workflow.json` into n8n. It imports inactive, so configure it before activating.
-2. Add an Asana credential (Personal Access Token) and assign it to "Fetch Asana Tasks". The same credential authorizes the raw REST call.
+2. Create a Bearer Auth credential with your Asana Personal Access Token as the token, and assign it to "Fetch Asana Tasks". The HTTP Request node calls the Asana REST API with that token.
 3. Add a Google Sheets credential, assign it to the three Google Sheets nodes, and pick your spreadsheet and the `Tasks` tab on each.
 4. Add a header row to the tab with these columns: gid, name, assignee, section, due_on, completed, permalink, modified_at, synced_at, present.
 5. Open "Set Sync Config" and set `asana_project_gid` (the number in your Asana project URL), `sheet_id` (the spreadsheet ID from its URL), and `sheet_tab`.
