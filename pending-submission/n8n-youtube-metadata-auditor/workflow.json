@@ -2,14 +2,6 @@
   "name": "Audit YouTube video metadata changes against a saved snapshot",
   "nodes": [
     {
-      "id": "b393d9be-6d43-4aeb-9153-c5ad18c0b793",
-      "name": "Run Daily Audit",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.3,
-      "position": [
-        0,
-        304
-      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -18,17 +10,17 @@
             }
           ]
         }
-      }
+      },
+      "id": "b393d9be-6d43-4aeb-9153-c5ad18c0b793",
+      "name": "Run Daily Audit",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        304
+      ]
     },
     {
-      "id": "d9c5cd6a-ed15-4a3e-9013-c6cef3a69383",
-      "name": "Set Audit Options",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        160,
-        304
-      ],
       "parameters": {
         "assignments": {
           "assignments": [
@@ -47,17 +39,17 @@
           ]
         },
         "options": {}
-      }
+      },
+      "id": "d9c5cd6a-ed15-4a3e-9013-c6cef3a69383",
+      "name": "Set Audit Options",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        304
+      ]
     },
     {
-      "id": "c757ff45-aadc-4226-ad43-83a48c87ea85",
-      "name": "Get Channel Details",
-      "type": "n8n-nodes-base.youTube",
-      "typeVersion": 1,
-      "position": [
-        368,
-        304
-      ],
       "parameters": {
         "operation": "get",
         "channelId": "={{ $('Set Audit Options').first().json.channelId }}",
@@ -65,17 +57,17 @@
           "snippet",
           "contentDetails"
         ]
-      }
-    },
-    {
-      "id": "8bf0e214-0e4c-4c85-baee-46e4550ed027",
-      "name": "List Uploads Playlist",
+      },
+      "id": "c757ff45-aadc-4226-ad43-83a48c87ea85",
+      "name": "Get Channel Details",
       "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
       "position": [
-        544,
+        400,
         304
-      ],
+      ]
+    },
+    {
       "parameters": {
         "resource": "playlistItem",
         "operation": "getAll",
@@ -86,17 +78,17 @@
         ],
         "returnAll": true,
         "options": {}
-      }
-    },
-    {
-      "id": "79db1c78-f8ca-432a-9b9c-a1782b3ce426",
-      "name": "Get Video Metadata",
+      },
+      "id": "8bf0e214-0e4c-4c85-baee-46e4550ed027",
+      "name": "List Uploads Playlist",
       "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
       "position": [
-        720,
+        576,
         304
-      ],
+      ]
+    },
+    {
       "parameters": {
         "resource": "video",
         "operation": "get",
@@ -106,63 +98,58 @@
           "status"
         ],
         "options": {}
-      }
+      },
+      "id": "79db1c78-f8ca-432a-9b9c-a1782b3ce426",
+      "name": "Get Video Metadata",
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        752,
+        304
+      ]
     },
     {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Your Spreadsheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 0,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "options": {}
+      },
       "id": "489fa3aa-ccdb-44c2-aa0e-6a9fcf57902b",
       "name": "Read Saved Snapshot",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        928,
+        992,
         304
       ],
-      "parameters": {
-        "resource": "sheet",
-        "operation": "read",
-        "documentId": {
-          "__rl": true,
-          "mode": "id",
-          "value": "",
-          "cachedResultName": "Metadata audit spreadsheet"
-        },
-        "sheetName": {
-          "__rl": true,
-          "mode": "name",
-          "value": "Snapshot"
-        },
-        "options": {}
-      },
-      "executeOnce": true,
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "",
-          "name": "Google Sheets account"
-        }
-      }
+      "executeOnce": true
     },
     {
+      "parameters": {
+        "jsCode": "const trackedFields = ['title', 'description', 'tags', 'privacyStatus', 'categoryId'];\nconst checkedAt = new Date().toISOString();\n\nconst options = $('Set Audit Options').first().json;\nconst alwaysNotify = options.alwaysNotify === true || options.alwaysNotify === 'true';\n\nconst toStr = (x) => (x === undefined || x === null ? '' : String(x));\n\nconst currentRows = $('Get Video Metadata').all().map((item) => {\n  const v = item.json || {};\n  const s = v.snippet || {};\n  const st = v.status || {};\n  const tags = Array.isArray(s.tags) ? s.tags.slice().sort() : [];\n  return {\n    videoId: toStr(v.id),\n    title: toStr(s.title),\n    description: toStr(s.description),\n    tags: tags.join(' | '),\n    privacyStatus: toStr(st.privacyStatus),\n    categoryId: toStr(s.categoryId)\n  };\n});\n\nconst previousRows = $('Read Saved Snapshot').all().map((i) => i.json || {});\nconst isFirstRun = previousRows.length === 0;\n\nconst prevMap = {};\nfor (const r of previousRows) {\n  const id = toStr(r.videoId);\n  if (id) prevMap[id] = r;\n}\nconst currMap = {};\nfor (const r of currentRows) currMap[r.videoId] = r;\n\nconst changes = [];\nif (!isFirstRun) {\n  for (const cur of currentRows) {\n    const prev = prevMap[cur.videoId];\n    if (!prev) {\n      changes.push({ checkedAt, videoId: cur.videoId, videoTitle: cur.title, field: 'video', oldValue: 'not in snapshot', newValue: 'added to channel' });\n      continue;\n    }\n    for (const f of trackedFields) {\n      const oldV = toStr(prev[f]);\n      const newV = toStr(cur[f]);\n      if (oldV !== newV) {\n        changes.push({ checkedAt, videoId: cur.videoId, videoTitle: cur.title, field: f, oldValue: oldV, newValue: newV });\n      }\n    }\n  }\n  for (const prev of previousRows) {\n    const id = toStr(prev.videoId);\n    if (id && !currMap[id]) {\n      changes.push({ checkedAt, videoId: id, videoTitle: toStr(prev.title), field: 'video', oldValue: 'present in snapshot', newValue: 'removed or hidden' });\n    }\n  }\n}\n\nconst changeCount = changes.length;\nconst videosChanged = [...new Set(changes.map((c) => c.videoId))];\nconst channelTitle = toStr(($('Get Channel Details').first().json.snippet || {}).title) || 'your channel';\n\nlet summaryText;\nif (isFirstRun) {\n  summaryText = '*YouTube metadata audit*\\nBaseline saved for ' + currentRows.length + ' video(s) on ' + channelTitle + '. The first run only records the snapshot, so there is nothing to compare yet.';\n} else if (changeCount === 0) {\n  summaryText = '*YouTube metadata audit*\\nNo metadata changes detected across ' + currentRows.length + ' video(s) on ' + channelTitle + '.';\n} else {\n  const lines = changes.slice(0, 30).map((c) => '- [' + c.videoId + '] ' + c.field + ': ' + JSON.stringify(c.oldValue) + ' to ' + JSON.stringify(c.newValue));\n  let body = lines.join('\\n');\n  if (changeCount > 30) body += '\\n...and ' + (changeCount - 30) + ' more change(s).';\n  summaryText = '*YouTube metadata changes detected*\\n' + channelTitle + ': ' + changeCount + ' change(s) across ' + videosChanged.length + ' video(s).\\n' + body;\n}\n\nconst shouldNotify = changeCount > 0 || alwaysNotify;\n\nreturn [{ json: { isFirstRun, changeCount, hasChanges: changeCount > 0, shouldNotify, videosChanged, channelTitle, checkedAt, summaryText, changes, currentRows } }];"
+      },
       "id": "8f6d8474-f9f9-4379-9dc0-c55c9782b9b8",
       "name": "Diff Metadata Fields",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1120,
+        1184,
         304
-      ],
-      "parameters": {
-        "jsCode": "const trackedFields = ['title', 'description', 'tags', 'privacyStatus', 'categoryId'];\nconst checkedAt = new Date().toISOString();\n\nconst options = $('Set Audit Options').first().json;\nconst alwaysNotify = options.alwaysNotify === true || options.alwaysNotify === 'true';\n\nconst toStr = (x) => (x === undefined || x === null ? '' : String(x));\n\nconst currentRows = $('Get Video Metadata').all().map((item) => {\n  const v = item.json || {};\n  const s = v.snippet || {};\n  const st = v.status || {};\n  const tags = Array.isArray(s.tags) ? s.tags.slice().sort() : [];\n  return {\n    videoId: toStr(v.id),\n    title: toStr(s.title),\n    description: toStr(s.description),\n    tags: tags.join(' | '),\n    privacyStatus: toStr(st.privacyStatus),\n    categoryId: toStr(s.categoryId)\n  };\n});\n\nconst previousRows = $('Read Saved Snapshot').all().map((i) => i.json || {});\nconst isFirstRun = previousRows.length === 0;\n\nconst prevMap = {};\nfor (const r of previousRows) {\n  const id = toStr(r.videoId);\n  if (id) prevMap[id] = r;\n}\nconst currMap = {};\nfor (const r of currentRows) currMap[r.videoId] = r;\n\nconst changes = [];\nif (!isFirstRun) {\n  for (const cur of currentRows) {\n    const prev = prevMap[cur.videoId];\n    if (!prev) {\n      changes.push({ checkedAt, videoId: cur.videoId, videoTitle: cur.title, field: 'video', oldValue: 'not in snapshot', newValue: 'added to channel' });\n      continue;\n    }\n    for (const f of trackedFields) {\n      const oldV = toStr(prev[f]);\n      const newV = toStr(cur[f]);\n      if (oldV !== newV) {\n        changes.push({ checkedAt, videoId: cur.videoId, videoTitle: cur.title, field: f, oldValue: oldV, newValue: newV });\n      }\n    }\n  }\n  for (const prev of previousRows) {\n    const id = toStr(prev.videoId);\n    if (id && !currMap[id]) {\n      changes.push({ checkedAt, videoId: id, videoTitle: toStr(prev.title), field: 'video', oldValue: 'present in snapshot', newValue: 'removed or hidden' });\n    }\n  }\n}\n\nconst changeCount = changes.length;\nconst videosChanged = [...new Set(changes.map((c) => c.videoId))];\nconst channelTitle = toStr(($('Get Channel Details').first().json.snippet || {}).title) || 'your channel';\n\nlet summaryText;\nif (isFirstRun) {\n  summaryText = '*YouTube metadata audit*\\nBaseline saved for ' + currentRows.length + ' video(s) on ' + channelTitle + '. The first run only records the snapshot, so there is nothing to compare yet.';\n} else if (changeCount === 0) {\n  summaryText = '*YouTube metadata audit*\\nNo metadata changes detected across ' + currentRows.length + ' video(s) on ' + channelTitle + '.';\n} else {\n  const lines = changes.slice(0, 30).map((c) => '- [' + c.videoId + '] ' + c.field + ': ' + JSON.stringify(c.oldValue) + ' to ' + JSON.stringify(c.newValue));\n  let body = lines.join('\\n');\n  if (changeCount > 30) body += '\\n...and ' + (changeCount - 30) + ' more change(s).';\n  summaryText = '*YouTube metadata changes detected*\\n' + channelTitle + ': ' + changeCount + ' change(s) across ' + videosChanged.length + ' video(s).\\n' + body;\n}\n\nconst shouldNotify = changeCount > 0 || alwaysNotify;\n\nreturn [{ json: { isFirstRun, changeCount, hasChanges: changeCount > 0, shouldNotify, videosChanged, channelTitle, checkedAt, summaryText, changes, currentRows } }];"
-      }
+      ]
     },
     {
-      "id": "ab28f29c-f0d5-4b16-bf55-03ad169ab240",
-      "name": "Route by Run Outcome",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
-      "position": [
-        1312,
-        304
-      ],
       "parameters": {
         "rules": {
           "values": [
@@ -218,193 +205,151 @@
         "options": {
           "fallbackOutput": "none"
         }
-      }
+      },
+      "id": "ab28f29c-f0d5-4b16-bf55-03ad169ab240",
+      "name": "Route by Run Outcome",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1376,
+        304
+      ]
     },
     {
+      "parameters": {
+        "fieldToSplitOut": "changes",
+        "options": {}
+      },
       "id": "24cd254a-d617-4acb-8113-6b9598d00090",
       "name": "Split Out Changes",
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        1568,
+        1664,
         208
-      ],
-      "parameters": {
-        "fieldToSplitOut": "changes",
-        "options": {}
-      }
+      ]
     },
     {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Your Spreadsheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 0,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Column A",
+              "displayName": "Column A",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Column B",
+              "displayName": "Column B",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
       "id": "38b324f0-244a-49bd-be35-ab24a9bc98fb",
       "name": "Append to Change Log",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        1792,
+        1888,
         208
-      ],
+      ]
+    },
+    {
       "parameters": {
-        "resource": "sheet",
-        "operation": "append",
+        "operation": "clear",
         "documentId": {
           "__rl": true,
-          "mode": "id",
-          "value": "",
-          "cachedResultName": "Metadata audit spreadsheet"
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Your Spreadsheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "mode": "name",
-          "value": "Change Log"
-        },
-        "columns": {
-          "mappingMode": "autoMapInputData",
-          "value": {},
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "checkedAt",
-              "displayName": "checkedAt",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "videoId",
-              "displayName": "videoId",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "videoTitle",
-              "displayName": "videoTitle",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "field",
-              "displayName": "field",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "oldValue",
-              "displayName": "oldValue",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "newValue",
-              "displayName": "newValue",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            }
-          ]
-        },
-        "options": {}
-      },
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "",
-          "name": "Google Sheets account"
+          "value": 0,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
         }
-      }
-    },
-    {
+      },
       "id": "9387194a-a020-40d9-aa50-d2c456c6a561",
       "name": "Clear Snapshot Tab",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        2048,
+        2176,
         320
       ],
-      "parameters": {
-        "resource": "sheet",
-        "operation": "clear",
-        "documentId": {
-          "__rl": true,
-          "mode": "id",
-          "value": "",
-          "cachedResultName": "Metadata audit spreadsheet"
-        },
-        "sheetName": {
-          "__rl": true,
-          "mode": "name",
-          "value": "Snapshot"
-        },
-        "clear": "wholeSheet",
-        "keepFirstRow": true
-      },
-      "executeOnce": true,
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "",
-          "name": "Google Sheets account"
-        }
-      }
+      "executeOnce": true
     },
     {
+      "parameters": {
+        "jsCode": "const rows = $('Diff Metadata Fields').first().json.currentRows || [];\nreturn rows.map((r) => ({ json: r }));"
+      },
       "id": "dab35e22-c814-442e-95b6-2faf7b8c70f0",
       "name": "Load Current Rows",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2224,
+        2352,
         320
-      ],
-      "parameters": {
-        "jsCode": "const rows = $('Diff Metadata Fields').first().json.currentRows || [];\nreturn rows.map((r) => ({ json: r }));"
-      }
+      ]
     },
     {
-      "id": "b8bb264f-a0f3-446d-9d4d-806e49c392fc",
-      "name": "Refresh Snapshot Rows",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.7,
-      "position": [
-        2416,
-        320
-      ],
       "parameters": {
-        "resource": "sheet",
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "mode": "id",
-          "value": "",
-          "cachedResultName": "Metadata audit spreadsheet"
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Your Spreadsheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
-          "mode": "name",
-          "value": "Snapshot"
+          "value": 0,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
         },
         "columns": {
-          "mappingMode": "autoMapInputData",
+          "mappingMode": "defineBelow",
           "value": {},
           "matchingColumns": [],
           "schema": [
             {
-              "id": "videoId",
-              "displayName": "videoId",
+              "id": "Column A",
+              "displayName": "Column A",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -412,70 +357,30 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "title",
-              "displayName": "title",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "description",
-              "displayName": "description",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "tags",
-              "displayName": "tags",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "privacyStatus",
-              "displayName": "privacyStatus",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "categoryId",
-              "displayName": "categoryId",
+              "id": "Column B",
+              "displayName": "Column B",
               "required": false,
               "defaultMatch": false,
               "display": true,
               "type": "string",
               "canBeUsedToMatch": true
             }
-          ]
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
         },
         "options": {}
       },
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "",
-          "name": "Google Sheets account"
-        }
-      }
+      "id": "b8bb264f-a0f3-446d-9d4d-806e49c392fc",
+      "name": "Refresh Snapshot Rows",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2544,
+        320
+      ]
     },
     {
-      "id": "5be0f1c6-33af-4f00-afc1-8ede2743a6b1",
-      "name": "Should Send Alert",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        1568,
-        480
-      ],
       "parameters": {
         "conditions": {
           "options": {
@@ -498,41 +403,46 @@
         },
         "looseTypeValidation": true,
         "options": {}
-      }
+      },
+      "id": "5be0f1c6-33af-4f00-afc1-8ede2743a6b1",
+      "name": "Should Send Alert",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1664,
+        480
+      ]
     },
     {
-      "id": "5ce20482-0b50-45de-8263-600e4eeb9509",
-      "name": "Post Summary to Slack",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.5,
-      "position": [
-        1792,
-        464
-      ],
       "parameters": {
-        "resource": "message",
-        "operation": "post",
         "select": "channel",
         "channelId": {
           "__rl": true,
           "mode": "list",
-          "value": "",
-          "cachedResultName": "Your alert channel"
+          "value": "YOUR_SLACK_CHANNEL_ID",
+          "cachedResultName": "your-channel"
         },
-        "messageType": "text",
         "text": "={{ $('Diff Metadata Fields').first().json.summaryText }}",
         "otherOptions": {
           "includeLinkToWorkflow": false
         }
       },
-      "credentials": {
-        "slackApi": {
-          "id": "",
-          "name": "Slack account"
-        }
-      }
+      "id": "5ce20482-0b50-45de-8263-600e4eeb9509",
+      "name": "Post Summary to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        1888,
+        464
+      ],
+      "webhookId": "48491806-8b91-47ba-8016-66f25db5585c"
     },
     {
+      "parameters": {
+        "content": "## Audit YouTube video metadata changes against a saved snapshot\n\n### How it works\n1. A daily schedule reads your channel, lists every upload, and pulls each video's current title, description, tags, privacy status, and category.\n2. Each field is compared against the snapshot saved on the previous run, and every difference is collected as an old value to new value pair.\n3. Changed fields are appended to a Change Log tab, then the current values overwrite the Snapshot tab so the next run compares against today.\n4. Slack receives a summary of what changed, and stays quiet when nothing changed unless you turn on alwaysNotify.\n\n### Setup steps\n- [ ] Connect a YouTube (Google) OAuth2 credential on the three YouTube nodes.\n- [ ] Enter your channel ID in `Set Audit Options`.\n- [ ] Connect your Google Sheets credential and select your audit spreadsheet in all four Google Sheets nodes.\n- [ ] Add a tab named `Snapshot` and a tab named `Change Log` in that spreadsheet.\n- [ ] Connect your Slack credential and pick the alert channel in `Post Summary to Slack`.\n\n### Customization\nChange the schedule interval, add or remove tracked fields in `Diff Metadata Fields`, or set `alwaysNotify` to true to also post when nothing changed.",
+        "height": 820,
+        "width": 460
+      },
       "id": "36c79282-b090-4017-9c33-78531c5f6998",
       "name": "Sticky Note 35e885bb",
       "type": "n8n-nodes-base.stickyNote",
@@ -540,14 +450,15 @@
       "position": [
         -528,
         -96
-      ],
-      "parameters": {
-        "content": "## Audit YouTube video metadata changes against a saved snapshot\n\n### How it works\n1. A daily schedule reads your channel, lists every upload, and pulls each video's current title, description, tags, privacy status, and category.\n2. Each field is compared against the snapshot saved on the previous run, and every difference is collected as an old value to new value pair.\n3. Changed fields are appended to a Change Log tab, then the current values overwrite the Snapshot tab so the next run compares against today.\n4. Slack receives a summary of what changed, and stays quiet when nothing changed unless you turn on alwaysNotify.\n\n### Setup steps\n- [ ] Connect a YouTube (Google) OAuth2 credential on the three YouTube nodes.\n- [ ] Enter your channel ID in `Set Audit Options`.\n- [ ] Connect your Google Sheets credential and select your audit spreadsheet in all four Google Sheets nodes.\n- [ ] Add a tab named `Snapshot` and a tab named `Change Log` in that spreadsheet.\n- [ ] Connect your Slack credential and pick the alert channel in `Post Summary to Slack`.\n\n### Customization\nChange the schedule interval, add or remove tracked fields in `Diff Metadata Fields`, or set `alwaysNotify` to true to also post when nothing changed.",
-        "height": 820,
-        "width": 460
-      }
+      ]
     },
     {
+      "parameters": {
+        "content": "## Set up the daily run\n\nEnter your channel ID and the alert toggle here. This is a read-only audit and never writes to YouTube.",
+        "height": 344,
+        "width": 356,
+        "color": 7
+      },
       "id": "c0c4f82b-9838-4641-af37-7bb45da737cc",
       "name": "Sticky Note cfa0e5c1",
       "type": "n8n-nodes-base.stickyNote",
@@ -555,77 +466,71 @@
       "position": [
         -48,
         144
-      ],
-      "parameters": {
-        "content": "## Set up the daily run\n\nEnter your channel ID and the alert toggle here. This is a read-only audit and never writes to YouTube.",
-        "height": 344,
-        "width": 356,
-        "color": 7
-      }
+      ]
     },
     {
-      "id": "e75fa883-03bd-4683-8613-6319d970e0d9",
-      "name": "Sticky Note 71b979d3",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        320,
-        144
-      ],
       "parameters": {
         "content": "## Enumerate the channel library\n\nResolves the uploads playlist and reads current metadata for every video. Connect your YouTube (Google) OAuth2 credential on these three nodes.",
         "height": 344,
         "width": 544,
         "color": 7
-      }
-    },
-    {
-      "id": "a2c102e7-c7d4-46cd-8eda-6319bbd7241a",
-      "name": "Sticky Note 5bfa387b",
+      },
+      "id": "e75fa883-03bd-4683-8613-6319d970e0d9",
+      "name": "Sticky Note 71b979d3",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        880,
+        352,
         144
-      ],
+      ]
+    },
+    {
       "parameters": {
         "content": "## Diff against the snapshot\n\nReads the last snapshot and compares each tracked field. The first run just records a baseline.",
         "height": 344,
         "width": 628,
         "color": 7
-      }
-    },
-    {
-      "id": "0bfc2894-b13a-40f2-a4f2-9138c7f7cc0d",
-      "name": "Sticky Note 0800ad36",
+      },
+      "id": "a2c102e7-c7d4-46cd-8eda-6319bbd7241a",
+      "name": "Sticky Note 5bfa387b",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1520,
-        16
-      ],
+        944,
+        144
+      ]
+    },
+    {
       "parameters": {
         "content": "## Log changes and alert\n\nAppends each changed field to the Change Log, then posts a Slack summary when there is something to report.",
         "height": 612,
         "width": 464,
         "color": 7
-      }
-    },
-    {
-      "id": "302e0045-246b-4c9b-8762-abdb3b619711",
-      "name": "Sticky Note 105d0824",
+      },
+      "id": "0bfc2894-b13a-40f2-a4f2-9138c7f7cc0d",
+      "name": "Sticky Note 0800ad36",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2000,
-        144
-      ],
+        1616,
+        16
+      ]
+    },
+    {
       "parameters": {
         "content": "## Refresh the snapshot\n\nOverwrites the Snapshot tab with the current values so the next run compares against today. Runs after the Change Log write.",
         "height": 344,
         "width": 608,
         "color": 7
-      }
+      },
+      "id": "302e0045-246b-4c9b-8762-abdb3b619711",
+      "name": "Sticky Note 105d0824",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2128,
+        144
+      ]
     }
   ],
   "connections": {
@@ -787,8 +692,15 @@
   },
   "active": false,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
   },
   "pinData": {},
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "templateCredsSetupCompleted": false
+  },
   "tags": []
 }
