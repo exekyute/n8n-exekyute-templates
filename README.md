@@ -149,7 +149,7 @@ Submitted to the n8n Creator hub and awaiting approval. Templates move up to `pu
 | [Gladia Subtitle Generator](pending-review/n8n-gladia-subtitle-generator/) | Generates ready-to-use SRT and VTT subtitle files from a public audio or video URL using Gladia, and saves both to Google Drive with the download links shown on the form. |
 | [Project Health Roll-up](pending-review/n8n-project-health-rollup/) | Reads active projects from Notion each morning, scores each Red, Yellow, or Green with Groq, leads with what changed overnight, and posts one standup to Slack. |
 | [YouTube Tag Normalizer](pending-review/n8n-youtube-tag-normalizer/) | Enforces a controlled tag vocabulary from Google Sheets across a channel by mapping aliases, stripping banned tags, adding required ones, and updating only the videos whose tags actually changed. |
-| [YouTube Banner Scheduler](pending-review/n8n-youtube-banner-scheduler/) | Swaps the channel banner on the dates listed in a Google Sheets schedule, downloading the art from Google Drive and setting it live with the native YouTube uploadBanner operation. |
+| [YouTube Metadata Auditor](pending-review/n8n-youtube-metadata-auditor/) | Snapshots every video title, description, tag set, and privacy status daily, diffs the library against the previous snapshot, logs each change to Google Sheets, and alerts Slack when something changed. |
 
 ## Pending submission
 
@@ -165,7 +165,7 @@ Built and tested but not yet submitted to the Creator hub. Templates move to `pe
 | [Open Questions Researcher](pending-submission/n8n-open-questions-researcher/) | Picks up each new question dropped into a Notion database, researches it with You.com, and writes a cited answer and its sources back into the same row before flipping the status to Answered. |
 | [YouTube Embargo](pending-submission/n8n-youtube-embargo/) | Reads a Google Sheet of videos with unpublish dates, sets each one back to private or unlisted once its date passes, marks the row Expired, and posts a Slack recap. |
 | [Playlist Janitor](pending-submission/n8n-playlist-janitor/) | Scans a YouTube playlist every week for duplicate entries and dead videos, posts a cleanup summary to Slack, and prunes the flagged items once dry run is switched off. |
-| [YouTube Metadata Auditor](pending-submission/n8n-youtube-metadata-auditor/) | Snapshots every video title, description, tag set, and privacy status daily, diffs the library against the previous snapshot, logs each change to Google Sheets, and alerts Slack when something changed. |
+| [YouTube Banner Scheduler](pending-submission/n8n-youtube-banner-scheduler/) | Swaps the channel banner on the dates listed in a Google Sheets schedule, downloading the art from Google Drive and setting it live with the native YouTube uploadBanner operation. |
 
 ## License
 
