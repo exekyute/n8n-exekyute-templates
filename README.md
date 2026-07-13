@@ -4,7 +4,7 @@ A collection of n8n workflow templates I have built, organized by their status i
 
 ## Published
 
-**17 templates** are live in the n8n template library right now, grouped by area in the mindmap below. Hover a template name for a one-line summary of what it does, or hit **View** to open its listing on n8n.io.
+**19 templates** are live in the n8n template library right now, grouped by area in the mindmap below. Hover a template name for a one-line summary of what it does, or hit **View** to open its listing on n8n.io.
 
 ```mermaid
 mindmap
@@ -34,8 +34,10 @@ mindmap
     (📣 Sales & Marketing)
       (Lead Enricher)
       (Media Monitor)
+      (Local Business Proximity)
     (⚙️ Operations)
       (frAIday Delivery Planner)
+      (Litigation Limitation Calculator)
 ```
 
 <table>
@@ -124,6 +126,16 @@ mindmap
 <a href="published/n8n-frAIday-delivery-planner/" title="Batches food delivery orders into Saturday and Sunday route plans, geocoded via OpenStreetMap, emailed every Friday.">frAIday Delivery Planner</a> &middot; <a href="https://n8n.io/workflows/16154-plan-delivery-routes-from-notion-orders-with-nominatim-and-email/">View</a><br>
 <code>⚙️ Operations</code> <code>Notion</code> <code>Nominatim</code> <code>Email</code>
 </td>
+<td valign="top">
+<a href="published/n8n-local-business-proximity/" title="Looks up businesses near a location from OpenStreetMap by category, flags which ones list a website, and appends the results to a Google Sheet.">Local Business Proximity</a> &middot; <a href="https://n8n.io/workflows/16997-log-nearby-businesses-from-openstreetmap-to-google-sheets-by-proximity/">View</a><br>
+<code>📣 Sales &amp; Marketing</code> <code>OpenStreetMap</code> <code>Google Sheets</code>
+</td>
+</tr>
+<tr>
+<td valign="top">
+<a href="published/n8n-litigation-limitation-calculator/" title="Calculates the limitation and procedural deadlines for a Canadian litigation matter across nine jurisdictions, then writes them to Google Calendar, logs them to Google Sheets, and summarizes them to Slack and Gmail.">Litigation Limitation Calculator</a> &middot; <a href="https://n8n.io/workflows/16993-calculate-litigation-deadlines-from-intake-forms-with-google-calendar-sheets-slack-and-gmail/">View</a><br>
+<code>⚙️ Operations</code> <code>Google Calendar</code> <code>Google Sheets</code> <code>Slack</code> <code>Gmail</code>
+</td>
 <td valign="top"></td>
 </tr>
 </table>
@@ -134,10 +146,8 @@ Submitted to the n8n Creator hub and awaiting approval. Templates move up to `pu
 
 | Template | What it does |
 |---|---|
-| [Litigation Limitation Calculator](pending-review/n8n-litigation-limitation-calculator/) | Calculates the limitation and procedural deadlines for a Canadian litigation matter across nine jurisdictions, then writes them to Google Calendar, logs them to Google Sheets, and summarizes them to Slack and Gmail. |
 | [Gladia Subtitle Generator](pending-review/n8n-gladia-subtitle-generator/) | Generates ready-to-use SRT and VTT subtitle files from a public audio or video URL using Gladia, and saves both to Google Drive with the download links shown on the form. |
 | [Project Health Roll-up](pending-review/n8n-project-health-rollup/) | Reads active projects from Notion each morning, scores each Red, Yellow, or Green with Groq, leads with what changed overnight, and posts one standup to Slack. |
-| [Local Business Proximity](pending-review/n8n-local-business-proximity/) | Looks up businesses near a location from OpenStreetMap by category, flags which ones list a website, and appends the results to a Google Sheet. |
 
 ## Pending submission
 
