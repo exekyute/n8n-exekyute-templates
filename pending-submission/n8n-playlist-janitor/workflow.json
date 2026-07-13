@@ -2,14 +2,6 @@
   "name": "Clean duplicate and dead videos from a playlist using YouTube and Slack",
   "nodes": [
     {
-      "id": "442d6aaf-a5ca-4825-9d40-7756b3e35018",
-      "name": "Run Weekly Cleanup",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.3,
-      "position": [
-        0,
-        304
-      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -22,17 +14,17 @@
             }
           ]
         }
-      }
+      },
+      "id": "442d6aaf-a5ca-4825-9d40-7756b3e35018",
+      "name": "Run Weekly Cleanup",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        304
+      ]
     },
     {
-      "id": "a9de28c1-b751-4708-9ce5-83a384c33590",
-      "name": "Set Playlist and Options",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        192,
-        304
-      ],
       "parameters": {
         "assignments": {
           "assignments": [
@@ -57,34 +49,34 @@
           ]
         },
         "options": {}
-      }
+      },
+      "id": "a9de28c1-b751-4708-9ce5-83a384c33590",
+      "name": "Set Playlist and Options",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        304
+      ]
     },
     {
-      "id": "814b1a4f-cd07-42ee-839d-e266fba3abbe",
-      "name": "List Playlist Items",
-      "type": "n8n-nodes-base.youTube",
-      "typeVersion": 1,
-      "position": [
-        400,
-        304
-      ],
       "parameters": {
         "resource": "playlistItem",
         "operation": "getAll",
         "playlistId": "={{ $json.playlistId }}",
         "returnAll": true,
         "options": {}
-      }
-    },
-    {
-      "id": "156fff3b-6f1a-4402-895a-033b6e3ed6e9",
-      "name": "Check Video Status",
+      },
+      "id": "814b1a4f-cd07-42ee-839d-e266fba3abbe",
+      "name": "List Playlist Items",
       "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
       "position": [
-        576,
+        432,
         304
-      ],
+      ]
+    },
+    {
       "parameters": {
         "resource": "video",
         "operation": "get",
@@ -95,17 +87,17 @@
         ],
         "options": {}
       },
+      "id": "156fff3b-6f1a-4402-895a-033b6e3ed6e9",
+      "name": "Check Video Status",
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        608,
+        304
+      ],
       "onError": "continueErrorOutput"
     },
     {
-      "id": "9a8e930a-8285-4588-b5dd-ca7eed59e490",
-      "name": "Mark Dead Videos",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        816,
-        432
-      ],
       "parameters": {
         "assignments": {
           "assignments": [
@@ -148,28 +140,28 @@
           ]
         },
         "options": {}
-      }
+      },
+      "id": "9a8e930a-8285-4588-b5dd-ca7eed59e490",
+      "name": "Mark Dead Videos",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        432
+      ]
     },
     {
+      "parameters": {},
       "id": "f4de87a7-a6d5-4b6d-bf3b-68e8944dbe81",
       "name": "Combine Checked Items",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        1008,
+        1072,
         304
-      ],
-      "parameters": {}
+      ]
     },
     {
-      "id": "f4c07bc6-b0b8-43c0-b48e-6ef0c16b7de2",
-      "name": "Mark Live Videos",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        816,
-        208
-      ],
       "parameters": {
         "assignments": {
           "assignments": [
@@ -212,30 +204,30 @@
           ]
         },
         "options": {}
-      }
+      },
+      "id": "f4c07bc6-b0b8-43c0-b48e-6ef0c16b7de2",
+      "name": "Mark Live Videos",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        208
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "const cfg = $('Set Playlist and Options').first().json;\nconst dryRun = cfg.dryRun !== false;\nconst rows = $input.all().map(function (i) { return i.json; });\nrows.sort(function (a, b) { return (Number(a.position) || 0) - (Number(b.position) || 0); });\nconst seen = {};\nconst out = [];\nfor (const r of rows) {\n  const videoId = r.videoId || \"\";\n  const privacy = String(r.privacyStatus || \"\").toLowerCase();\n  const videoFound = r.videoFound === true || r.videoFound === \"true\";\n  const isDead = !videoFound || privacy === \"private\" || privacy === \"privacystatusunspecified\";\n  let isDuplicate = false;\n  if (videoId) {\n    if (seen[videoId]) isDuplicate = true;\n    else seen[videoId] = true;\n  }\n  const reasons = [];\n  if (isDead) reasons.push(videoFound ? \"Private video\" : \"Deleted or unavailable video\");\n  if (isDuplicate) reasons.push(\"Duplicate entry\");\n  const flagged = isDead || isDuplicate;\n  out.push({ json: {\n    playlistItemId: r.playlistItemId,\n    videoId: videoId,\n    title: r.title || \"(no title)\",\n    position: r.position,\n    privacyStatus: r.privacyStatus || \"\",\n    videoFound: videoFound,\n    isDead: isDead,\n    isDuplicate: isDuplicate,\n    flagged: flagged,\n    toDelete: flagged && !dryRun,\n    reason: reasons.join(\" and \") || \"Active\",\n    dryRun: dryRun,\n    liveRun: !dryRun\n  } });\n}\nreturn out;"
+      },
       "id": "c030d71a-e645-475f-b981-820810d8fd9e",
       "name": "Flag Duplicates and Dead",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1248,
+        1344,
         304
-      ],
-      "parameters": {
-        "jsCode": "const cfg = $('Set Playlist and Options').first().json;\nconst dryRun = cfg.dryRun !== false;\nconst rows = $input.all().map(function (i) { return i.json; });\nrows.sort(function (a, b) { return (Number(a.position) || 0) - (Number(b.position) || 0); });\nconst seen = {};\nconst out = [];\nfor (const r of rows) {\n  const videoId = r.videoId || \"\";\n  const privacy = String(r.privacyStatus || \"\").toLowerCase();\n  const videoFound = r.videoFound === true || r.videoFound === \"true\";\n  const isDead = !videoFound || privacy === \"private\" || privacy === \"privacystatusunspecified\";\n  let isDuplicate = false;\n  if (videoId) {\n    if (seen[videoId]) isDuplicate = true;\n    else seen[videoId] = true;\n  }\n  const reasons = [];\n  if (isDead) reasons.push(videoFound ? \"Private video\" : \"Deleted or unavailable video\");\n  if (isDuplicate) reasons.push(\"Duplicate entry\");\n  const flagged = isDead || isDuplicate;\n  out.push({ json: {\n    playlistItemId: r.playlistItemId,\n    videoId: videoId,\n    title: r.title || \"(no title)\",\n    position: r.position,\n    privacyStatus: r.privacyStatus || \"\",\n    videoFound: videoFound,\n    isDead: isDead,\n    isDuplicate: isDuplicate,\n    flagged: flagged,\n    toDelete: flagged && !dryRun,\n    reason: reasons.join(\" and \") || \"Active\",\n    dryRun: dryRun,\n    liveRun: !dryRun\n  } });\n}\nreturn out;"
-      }
+      ]
     },
     {
-      "id": "6dd8e267-bde9-4965-8c26-186243076f23",
-      "name": "Select Items to Delete",
-      "type": "n8n-nodes-base.filter",
-      "typeVersion": 2.3,
-      "position": [
-        1408,
-        192
-      ],
       "parameters": {
         "conditions": {
           "options": {
@@ -258,115 +250,121 @@
           "combinator": "and"
         },
         "options": {}
-      }
+      },
+      "id": "6dd8e267-bde9-4965-8c26-186243076f23",
+      "name": "Select Items to Delete",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1504,
+        192
+      ]
     },
     {
-      "id": "237eac67-50f8-4f78-873c-8a111283d85e",
-      "name": "Delete Playlist Item",
-      "type": "n8n-nodes-base.youTube",
-      "typeVersion": 1,
-      "position": [
-        1856,
-        208
-      ],
       "parameters": {
         "resource": "playlistItem",
         "operation": "delete",
         "playlistItemId": "={{ $json.playlistItemId }}",
         "options": {}
       },
+      "id": "237eac67-50f8-4f78-873c-8a111283d85e",
+      "name": "Delete Playlist Item",
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        208
+      ],
       "onError": "continueRegularOutput"
     },
     {
+      "parameters": {
+        "options": {}
+      },
       "id": "d8d2f9a0-0194-4c0b-bddf-2a402ef23abe",
       "name": "Loop Items to Remove",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1632,
+        1728,
         192
-      ],
-      "parameters": {
-        "options": {}
-      }
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "const cfg = $('Set Playlist and Options').first().json;\nconst dryRun = cfg.dryRun !== false;\nconst rows = $input.all().map(function (i) { return i.json; });\nconst flagged = rows.filter(function (r) { return r.flagged; });\nconst dead = flagged.filter(function (r) { return r.isDead; });\nconst dupes = flagged.filter(function (r) { return r.isDuplicate && !r.isDead; });\nconst lines = flagged.map(function (r) {\n  return \"- \" + (r.title || \"(no title)\") + \" (\" + (r.videoId || \"no id\") + \") - \" + r.reason;\n}).join(\"\\n\");\nconst verb = dryRun ? \"would be removed\" : \"removed\";\nlet text;\nif (flagged.length === 0) {\n  text = \"Playlist Janitor: playlist is clean. Checked \" + rows.length + \" item(s), nothing to remove.\";\n} else {\n  const mode = dryRun ? \"DRY RUN (report only, nothing deleted)\" : \"LIVE RUN (items deleted)\";\n  text = \"Playlist Janitor - \" + mode + \"\\n\"\n    + \"Checked \" + rows.length + \" item(s). \" + flagged.length + \" \" + verb + \": \"\n    + dead.length + \" dead, \" + dupes.length + \" duplicate.\\n\\n\" + lines;\n}\nreturn [{ json: {\n  summary: text,\n  checked: rows.length,\n  flaggedCount: flagged.length,\n  deadCount: dead.length,\n  duplicateCount: dupes.length,\n  dryRun: dryRun\n} }];"
+      },
       "id": "19c2d91b-cd42-4853-8917-455b8931219e",
       "name": "Build Cleanup Summary",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1424,
-        560
-      ],
-      "parameters": {
-        "jsCode": "const cfg = $('Set Playlist and Options').first().json;\nconst dryRun = cfg.dryRun !== false;\nconst rows = $input.all().map(function (i) { return i.json; });\nconst flagged = rows.filter(function (r) { return r.flagged; });\nconst dead = flagged.filter(function (r) { return r.isDead; });\nconst dupes = flagged.filter(function (r) { return r.isDuplicate && !r.isDead; });\nconst lines = flagged.map(function (r) {\n  return \"- \" + (r.title || \"(no title)\") + \" (\" + (r.videoId || \"no id\") + \") - \" + r.reason;\n}).join(\"\\n\");\nconst verb = dryRun ? \"would be removed\" : \"removed\";\nlet text;\nif (flagged.length === 0) {\n  text = \"Playlist Janitor: playlist is clean. Checked \" + rows.length + \" item(s), nothing to remove.\";\n} else {\n  const mode = dryRun ? \"DRY RUN (report only, nothing deleted)\" : \"LIVE RUN (items deleted)\";\n  text = \"Playlist Janitor - \" + mode + \"\\n\"\n    + \"Checked \" + rows.length + \" item(s). \" + flagged.length + \" \" + verb + \": \"\n    + dead.length + \" dead, \" + dupes.length + \" duplicate.\\n\\n\" + lines;\n}\nreturn [{ json: {\n  summary: text,\n  checked: rows.length,\n  flaggedCount: flagged.length,\n  deadCount: dead.length,\n  duplicateCount: dupes.length,\n  dryRun: dryRun\n} }];"
-      }
+        1520,
+        592
+      ]
     },
     {
-      "id": "4aa4cac4-78cd-4c29-aefa-896452d85839",
-      "name": "Post Cleanup Summary",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.5,
-      "position": [
-        1648,
-        560
-      ],
       "parameters": {
-        "resource": "message",
-        "operation": "post",
         "select": "channel",
         "channelId": {
           "__rl": true,
           "mode": "id",
           "value": "={{ $('Set Playlist and Options').first().json.slackChannelId }}"
         },
-        "messageType": "text",
         "text": "={{ $json.summary }}",
         "otherOptions": {
           "includeLinkToWorkflow": false
         }
       },
+      "id": "4aa4cac4-78cd-4c29-aefa-896452d85839",
+      "name": "Post Cleanup Summary",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        1744,
+        592
+      ],
       "executeOnce": true,
-      "credentials": {
-        "slackApi": {
-          "id": "YOUR_SLACK_CREDENTIAL_ID",
-          "name": "Slack account"
-        }
-      }
+      "webhookId": "dc0a1f1e-9132-4492-ac82-9ad2dfcdc3c7"
     },
     {
+      "parameters": {
+        "content": "## Clean duplicate and dead videos from a playlist using YouTube and Slack\n\n### How it works\n\n1. A schedule trigger runs the cleanup on a weekly cadence.\n2. The workflow lists every item in the target playlist and looks up each video.\n3. A code step flags duplicates (same video more than once, first kept) and dead entries (deleted, unavailable, or private).\n4. In dry run it only reports; with dry run off it deletes each flagged playlist item in a loop.\n5. Slack receives a summary of what was removed, or a note that the playlist is clean.\n\n### Setup steps\n\n- [ ] Connect a YouTube (Google) OAuth2 credential on the three YouTube nodes.\n- [ ] Set `playlistId` in the Set Playlist and Options node to your playlist ID.\n- [ ] Connect a Slack credential and set `slackChannelId` to your channel.\n- [ ] Keep `dryRun` set to true for the first run, then set it to false to delete for real.\n\n### Customization\n\nChange the schedule interval, or edit the flagging rules in the code node (for example, treat unlisted videos as dead too).",
+        "height": 560,
+        "width": 480
+      },
       "id": "681ba7b4-4055-412a-ad03-dd52074d2b00",
       "name": "Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -544,
+        -576,
         48
-      ],
-      "parameters": {
-        "content": "## Clean duplicate and dead videos from a playlist using YouTube and Slack\n\n### How it works\n\n1. A schedule trigger runs the cleanup on a weekly cadence.\n2. The workflow lists every item in the target playlist and looks up each video.\n3. A code step flags duplicates (same video more than once, first kept) and dead entries (deleted, unavailable, or private).\n4. In dry run it only reports; with dry run off it deletes each flagged playlist item in a loop.\n5. Slack receives a summary of what was removed, or a note that the playlist is clean.\n\n### Setup steps\n\n- [ ] Connect a YouTube (Google) OAuth2 credential on the three YouTube nodes.\n- [ ] Set `playlistId` in the Set Playlist and Options node to your playlist ID.\n- [ ] Connect a Slack credential and set `slackChannelId` to your channel.\n- [ ] Keep `dryRun` set to true for the first run, then set it to false to delete for real.\n\n### Customization\n\nChange the schedule interval, or edit the flagging rules in the code node (for example, treat unlisted videos as dead too).",
-        "height": 560,
-        "width": 480
-      }
+      ]
     },
     {
+      "parameters": {
+        "content": "## Safety: dry run is on by default\n\nThis workflow can permanently remove items from your playlist. It ships with `dryRun` set to true, so the first run only reports what it would remove and deletes nothing. Review the Slack summary, then set `dryRun` to false in the Set Playlist and Options node to enable real deletion.",
+        "height": 182,
+        "width": 744,
+        "color": 3
+      },
       "id": "b4486b46-625a-493e-9e94-51d089f94278",
       "name": "Dry Run Warning",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
         -16,
-        480
-      ],
-      "parameters": {
-        "content": "## Safety: dry run is on by default\n\nThis workflow can permanently remove items from your playlist. It ships with `dryRun` set to true, so the first run only reports what it would remove and deletes nothing. Review the Slack summary, then set `dryRun` to false in the Set Playlist and Options node to enable real deletion.",
-        "height": 182,
-        "width": 744,
-        "color": 3
-      }
+        544
+      ]
     },
     {
+      "parameters": {
+        "content": "## Schedule and options",
+        "height": 256,
+        "width": 396,
+        "color": 7
+      },
       "id": "a4e53941-d715-44a2-aa62-23b307f0ecd7",
       "name": "Section Schedule",
       "type": "n8n-nodes-base.stickyNote",
@@ -374,77 +372,71 @@
       "position": [
         -48,
         208
-      ],
-      "parameters": {
-        "content": "## Schedule and options",
-        "height": 256,
-        "width": 396,
-        "color": 7
-      }
+      ]
     },
     {
-      "id": "8aa7a8ea-e3f4-411c-b76d-c7f515831564",
-      "name": "Section List Check",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        368,
-        208
-      ],
       "parameters": {
         "content": "## List and check videos",
         "height": 256,
         "width": 378,
         "color": 7
-      }
-    },
-    {
-      "id": "378aab73-6ad9-46a5-ac0e-5289f6854234",
-      "name": "Section Classify",
+      },
+      "id": "8aa7a8ea-e3f4-411c-b76d-c7f515831564",
+      "name": "Section List Check",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        768,
-        112
-      ],
+        400,
+        208
+      ]
+    },
+    {
       "parameters": {
         "content": "## Classify live and dead",
         "height": 488,
         "width": 404,
         "color": 7
-      }
-    },
-    {
-      "id": "5e0a057d-cbfc-4d93-be61-ef0b2583eafa",
-      "name": "Section Flag Prune",
+      },
+      "id": "378aab73-6ad9-46a5-ac0e-5289f6854234",
+      "name": "Section Classify",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1200,
+        832,
         112
-      ],
+      ]
+    },
+    {
       "parameters": {
         "content": "## Flag and prune items",
         "height": 348,
         "width": 824,
         "color": 7
-      }
-    },
-    {
-      "id": "fd513b95-d350-4817-b755-56616b3d0491",
-      "name": "Section Report",
+      },
+      "id": "5e0a057d-cbfc-4d93-be61-ef0b2583eafa",
+      "name": "Section Flag Prune",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1360,
-        480
-      ],
+        1296,
+        112
+      ]
+    },
+    {
       "parameters": {
         "content": "## Report to Slack",
         "height": 238,
         "width": 486,
         "color": 7
-      }
+      },
+      "id": "fd513b95-d350-4817-b755-56616b3d0491",
+      "name": "Section Report",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1456,
+        512
+      ]
     }
   ],
   "connections": {
@@ -594,7 +586,17 @@
       ]
     }
   },
+  "active": false,
   "settings": {
-    "executionOrder": "v1"
-  }
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "pinData": {},
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
 }
