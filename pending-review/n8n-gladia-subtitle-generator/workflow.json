@@ -4,7 +4,7 @@
     {
       "parameters": {
         "content": "## Generate SRT and VTT subtitle files from a media URL using Gladia and Google Drive\n\n### How it works\n\n1. Someone submits a public audio or video URL through the form.\n2. The workflow sends that URL to Gladia and asks for SRT and VTT subtitles.\n3. It waits and polls Gladia until the transcription is done, or stops after a set number of attempts.\n4. A Code node turns each subtitle track into a downloadable file.\n5. Both files upload to Google Drive and the form shows the two links.\n\n### Setup steps\n\n- [ ] Create a Header Auth credential named Gladia with header name x-gladia-key and your Gladia API key, then select it on Submit Media to Gladia and Fetch Transcription Result.\n- [ ] Connect your Google Drive account and set the destination folder on Upload Subtitles to Drive.\n- [ ] Adjust wait seconds and max attempts in Set Polling Config for longer media.\n\n### Customization\n\nChange the requested formats in Submit Media to Gladia, point the upload at a different Drive folder, or swap the form trigger for a webhook to run it from another system.",
-        "height": 520,
+        "height": 744,
         "width": 480
       },
       "id": "c1d2e3f4-00a1-4a01-8a01-0000000000a1",
@@ -12,15 +12,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -560,
-        80
+        -544,
+        -80
       ]
     },
     {
       "parameters": {
         "content": "## Receive and submit request\n\nThe form collects a public media URL, config values are set, then transcription starts on Gladia.",
-        "height": 300,
-        "width": 720,
+        "height": 316,
+        "width": 608,
         "color": 7
       },
       "id": "c1d2e3f4-00a2-4a01-8a01-0000000000a2",
@@ -29,14 +29,14 @@
       "typeVersion": 1,
       "position": [
         0,
-        200
+        176
       ]
     },
     {
       "parameters": {
         "content": "## Poll until subtitles are ready\n\nWait, fetch the result, and route by status until Gladia returns done or the attempt limit is reached.",
-        "height": 300,
-        "width": 740,
+        "height": 428,
+        "width": 676,
         "color": 7
       },
       "id": "c1d2e3f4-00a3-4a01-8a01-0000000000a3",
@@ -44,15 +44,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        760,
-        200
+        656,
+        -64
       ]
     },
     {
       "parameters": {
         "content": "## Build files and store them\n\nTurn each subtitle track into a file, upload both to Google Drive, then show the download links.",
-        "height": 280,
-        "width": 980,
+        "height": 344,
+        "width": 836,
         "color": 7
       },
       "id": "c1d2e3f4-00a4-4a01-8a01-0000000000a4",
@@ -60,15 +60,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1540,
-        120
+        1392,
+        -64
       ]
     },
     {
       "parameters": {
         "content": "## Handle failures\n\nAny Gladia error, a timeout, or a missing subtitle track ends the form with a clear message.",
-        "height": 220,
-        "width": 320,
+        "height": 348,
+        "width": 416,
         "color": 7
       },
       "id": "c1d2e3f4-00a5-4a01-8a01-0000000000a5",
@@ -76,8 +76,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1540,
-        460
+        1808,
+        336
       ]
     },
     {
@@ -108,7 +108,7 @@
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.6,
       "position": [
-        60,
+        64,
         320
       ],
       "webhookId": "c1d2e3f4-1001-4a01-8a01-000000001001"
@@ -139,7 +139,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        300,
+        240,
         320
       ],
       "notes": "Edit wait_seconds (poll interval) and max_attempts (timeout). Default 10s x 60 = up to 10 minutes."
@@ -163,7 +163,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        540,
+        432,
         320
       ],
       "onError": "continueErrorOutput",
@@ -187,8 +187,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        820,
-        320
+        736,
+        144
       ],
       "webhookId": "c1d2e3f4-1004-4a01-8a01-000000001004"
     },
@@ -206,8 +206,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1060,
-        320
+        912,
+        144
       ],
       "onError": "continueErrorOutput",
       "retryOnFail": true,
@@ -290,8 +290,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        1300,
-        320
+        1104,
+        112
       ]
     },
     {
@@ -305,8 +305,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1620,
-        240
+        1440,
+        96
       ],
       "onError": "continueErrorOutput"
     },
@@ -334,8 +334,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1860,
-        240
+        1664,
+        80
       ],
       "retryOnFail": true,
       "maxTries": 3,
@@ -358,8 +358,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2100,
-        240
+        1856,
+        80
       ]
     },
     {
@@ -373,8 +373,8 @@
       "type": "n8n-nodes-base.form",
       "typeVersion": 2.5,
       "position": [
-        2340,
-        240
+        2032,
+        80
       ],
       "webhookId": "c1d2e3f4-1010-4a01-8a01-000000001010"
     },
@@ -389,8 +389,8 @@
       "type": "n8n-nodes-base.form",
       "typeVersion": 2.5,
       "position": [
-        1620,
-        520
+        1952,
+        512
       ],
       "webhookId": "c1d2e3f4-1011-4a01-8a01-000000001011"
     }
