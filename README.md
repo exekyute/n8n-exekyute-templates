@@ -4,7 +4,7 @@ A collection of n8n workflow templates I have built, organized by their status i
 
 ## Published
 
-**19 templates** are live in the n8n template library right now, grouped by area in the mindmap below. Hover a template name for a one-line summary of what it does, or hit **View** to open its listing on n8n.io.
+**23 templates** are live in the n8n template library right now, grouped by area in the mindmap below. Hover a template name for a one-line summary of what it does, or hit **View** to open its listing on n8n.io.
 
 ```mermaid
 mindmap
@@ -18,12 +18,15 @@ mindmap
       (Gladia Drive Transcriber)
       (Gladia Notion Meetings)
       (Lead Enricher)
+      (Gladia Subtitle Generator)
+      (Project Health Roll-up)
     (🗃️ Data & Records)
       (Notion Deduplicator)
       (Notion Overdue Roller)
       (Notion Property Normalizer)
       (Gladia Notion Meetings)
       (CSV Folder Reconciler)
+      (YouTube Tag Normalizer)
     (📁 Files & Documents)
       (CSV Folder Reconciler)
       (Drive Auto-Filer)
@@ -31,6 +34,7 @@ mindmap
     (📡 DevOps & Monitoring)
       (API Contract Drift Watcher)
       (Backup Freshness Auditor)
+      (YouTube Metadata Auditor)
     (📣 Sales & Marketing)
       (Lead Enricher)
       (Media Monitor)
@@ -136,6 +140,26 @@ mindmap
 <a href="published/n8n-litigation-limitation-calculator/" title="Calculates the limitation and procedural deadlines for a Canadian litigation matter across nine jurisdictions, then writes them to Google Calendar, logs them to Google Sheets, and summarizes them to Slack and Gmail.">Litigation Limitation Calculator</a> &middot; <a href="https://n8n.io/workflows/16993-calculate-litigation-deadlines-from-intake-forms-with-google-calendar-sheets-slack-and-gmail/">View</a><br>
 <code>⚙️ Operations</code> <code>Google Calendar</code> <code>Google Sheets</code> <code>Slack</code> <code>Gmail</code>
 </td>
+<td valign="top">
+<a href="published/n8n-gladia-subtitle-generator/" title="Generates ready-to-use SRT and VTT subtitle files from a public audio or video URL with Gladia, and saves both to Google Drive with the download links shown on the form.">Gladia Subtitle Generator</a> &middot; <a href="https://n8n.io/workflows/16994-generate-srt-and-vtt-subtitles-from-media-urls-with-gladia-and-google-drive/">View</a><br>
+<code>🤖 AI</code> <code>Gladia</code> <code>Google Drive</code>
+</td>
+</tr>
+<tr>
+<td valign="top">
+<a href="published/n8n-project-health-rollup/" title="Reads active projects from Notion each morning, scores each Red, Yellow, or Green with Groq, leads with what changed overnight, and posts one standup to Slack.">Project Health Roll-up</a> &middot; <a href="https://n8n.io/workflows/16996-post-a-daily-project-health-standup-to-slack-with-notion-and-groq/">View</a><br>
+<code>🤖 AI</code> <code>Notion</code> <code>Groq</code> <code>Slack</code>
+</td>
+<td valign="top">
+<a href="published/n8n-youtube-tag-normalizer/" title="Enforces a controlled tag vocabulary from Google Sheets across a channel by mapping aliases, stripping banned tags, adding required ones, and updating only the videos whose tags actually changed.">YouTube Tag Normalizer</a> &middot; <a href="https://n8n.io/workflows/17071-normalize-youtube-video-tags-using-google-sheets-vocabulary-rules/">View</a><br>
+<code>🗃️ Data &amp; Records</code> <code>YouTube</code> <code>Google Sheets</code>
+</td>
+</tr>
+<tr>
+<td valign="top">
+<a href="published/n8n-youtube-metadata-auditor/" title="Snapshots every video title, description, tag set, and privacy status daily, diffs the library against the previous snapshot, logs each change to Google Sheets, and alerts Slack when something changed.">YouTube Metadata Auditor</a> &middot; <a href="https://n8n.io/workflows/17072-audit-youtube-video-metadata-changes-with-google-sheets-and-slack/">View</a><br>
+<code>📡 DevOps &amp; Monitoring</code> <code>YouTube</code> <code>Google Sheets</code> <code>Slack</code>
+</td>
 <td valign="top"></td>
 </tr>
 </table>
@@ -143,13 +167,6 @@ mindmap
 ## Pending review
 
 Submitted to the n8n Creator hub and awaiting approval. Templates move up to `published/` once they are live in the library.
-
-| Template | What it does |
-|---|---|
-| [Gladia Subtitle Generator](pending-review/n8n-gladia-subtitle-generator/) | Generates ready-to-use SRT and VTT subtitle files from a public audio or video URL using Gladia, and saves both to Google Drive with the download links shown on the form. |
-| [Project Health Roll-up](pending-review/n8n-project-health-rollup/) | Reads active projects from Notion each morning, scores each Red, Yellow, or Green with Groq, leads with what changed overnight, and posts one standup to Slack. |
-| [YouTube Tag Normalizer](pending-review/n8n-youtube-tag-normalizer/) | Enforces a controlled tag vocabulary from Google Sheets across a channel by mapping aliases, stripping banned tags, adding required ones, and updating only the videos whose tags actually changed. |
-| [YouTube Metadata Auditor](pending-review/n8n-youtube-metadata-auditor/) | Snapshots every video title, description, tag set, and privacy status daily, diffs the library against the previous snapshot, logs each change to Google Sheets, and alerts Slack when something changed. |
 
 ## Pending submission
 
