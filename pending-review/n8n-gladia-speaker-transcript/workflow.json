@@ -1,0 +1,538 @@
+{
+  "name": "Transcribe recordings into speaker-labeled notes using Gladia and Google Drive",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Speaker-labeled transcript",
+        "formDescription": "Paste a public link to an audio or video recording. Gladia will transcribe it and label who spoke.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Media URL",
+              "placeholder": "https://example.com/interview.mp3",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Number of speakers",
+              "fieldType": "number",
+              "placeholder": "Optional hint, leave blank to auto-detect"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "Thanks. Your recording is being transcribed. The speaker-labeled transcript will be saved to Google Drive and a link posted to Slack when it is ready."
+            }
+          }
+        }
+      },
+      "id": "47652118-931a-4875-b23a-16193f73d181",
+      "name": "Receive Recording Request",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -160,
+        320
+      ],
+      "webhookId": "b7d3f1a2-4c56-4e78-9a01-1122334455aa"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1",
+              "name": "wait_seconds",
+              "value": 10,
+              "type": "number"
+            },
+            {
+              "id": "c2",
+              "name": "max_attempts",
+              "value": 60,
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "4739c658-4b0a-47fc-8476-715e4bc6010e",
+      "name": "Configure Polling",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        64,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.gladia.io/v2/pre-recorded",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ audio_url: $('Receive Recording Request').first().json['Media URL'], diarization: true, ...(Number($('Receive Recording Request').first().json['Number of speakers']) > 0 ? { diarization_config: { number_of_speakers: Number($('Receive Recording Request').first().json['Number of speakers']) } } : {}) }) }}",
+        "options": {}
+      },
+      "id": "dfcd82fb-838d-4751-aa28-fa35e57417ef",
+      "name": "Start Gladia Transcription",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        400,
+        320
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_YOUR_GLADIA_CREDENTIAL",
+          "name": "Gladia"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "amount": "={{ $('Configure Polling').first().json.wait_seconds }}"
+      },
+      "id": "e3a247e7-8caf-4eae-83af-13befa356af9",
+      "name": "Wait For Processing",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        304
+      ],
+      "webhookId": "c8e4f2b3-5d67-4f89-ab12-223344556677"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.gladia.io/v2/pre-recorded/{{ $('Start Gladia Transcription').first().json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "e9e35cb4-427d-4bb3-a8b1-d67b189fb207",
+      "name": "Get Transcription Result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        848,
+        304
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_YOUR_GLADIA_CREDENTIAL",
+          "name": "Gladia"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "done",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "done"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "error",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $runIndex }}",
+                    "rightValue": "={{ $('Configure Polling').first().json.max_attempts }}",
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    }
+                  }
+                ],
+                "combinator": "or"
+              },
+              "renameOutput": true,
+              "outputKey": "failed"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Still Processing"
+        }
+      },
+      "id": "0380f3d5-a7e4-43d7-bf1d-800927740702",
+      "name": "Route By Status",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1088,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================================\n// FORMAT SPEAKER TRANSCRIPT\n// Turns Gladia's diarized utterances into a clean, readable Markdown transcript.\n// Consecutive lines from the same speaker are grouped into one block, the\n// zero-based speaker index (0, 1, 2...) is relabeled to Speaker 1 / 2 / 3, and\n// each block is stamped with its start time as [mm:ss]. If no utterances came\n// back, it falls back to the plain full_transcript so nothing is lost. The\n// finished Markdown is attached as a binary file for the Drive upload.\n// ============================================================================\n\nconst result = $json.result || {};\nconst transcription = result.transcription || {};\nconst utterances = Array.isArray(transcription.utterances) ? transcription.utterances : [];\n\nconst mediaUrl = $('Receive Recording Request').first().json['Media URL'] || '';\n\n// Seconds -> mm:ss (or hh:mm:ss past an hour).\nfunction stamp(sec) {\n  const total = Math.max(0, Math.floor(Number(sec) || 0));\n  const h = Math.floor(total / 3600);\n  const m = Math.floor((total % 3600) / 60);\n  const s = total % 60;\n  const pad = (n) => String(n).padStart(2, '0');\n  return h > 0 ? h + ':' + pad(m) + ':' + pad(s) : pad(m) + ':' + pad(s);\n}\n\n// Group consecutive utterances that share a speaker into one spoken block.\nconst blocks = [];\nlet current = null;\nfor (const u of utterances) {\n  const speaker = Number.isFinite(Number(u.speaker)) ? Number(u.speaker) : 0;\n  const text = String(u.text || '').trim();\n  if (!text) continue;\n  if (!current || current.speaker !== speaker) {\n    current = { speaker, start: u.start, parts: [text] };\n    blocks.push(current);\n  } else {\n    current.parts.push(text);\n  }\n}\n\nconst speakerCount = new Set(blocks.map((b) => b.speaker)).size;\n\nlet bodyLines;\nif (blocks.length) {\n  // Relabel 0 -> Speaker 1, and stamp each block with its start time.\n  bodyLines = blocks.map(\n    (b) => 'Speaker ' + (b.speaker + 1) + ' [' + stamp(b.start) + ']: ' + b.parts.join(' ')\n  );\n} else {\n  bodyLines = [String(transcription.full_transcript || 'No transcript was returned.')];\n}\n\nconst header = [\n  '# Speaker-labeled transcript',\n  '',\n  '- Source: ' + (mediaUrl || 'unknown'),\n  '- Speakers detected: ' + (speakerCount || 'n/a'),\n  '- Transcribed with Gladia diarization',\n  '',\n  '---',\n  '',\n].join('\\n');\n\nconst transcriptMd = header + bodyLines.join('\\n\\n') + '\\n';\n\n// Deterministic, filesystem-safe file name derived from the media URL.\nconst rawName = (mediaUrl.split('/').pop() || 'recording').split('?')[0].replace(/\\.[^.]+$/, '');\nconst slug =\n  rawName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'recording';\nconst day = new Date().toISOString().slice(0, 10);\nconst filename = 'transcript-' + slug + '-' + day + '.md';\n\nconst binary = await this.helpers.prepareBinaryData(Buffer.from(transcriptMd, 'utf8'), filename, 'text/markdown');\n\nreturn [\n  {\n    json: {\n      filename,\n      speaker_count: speakerCount,\n      media_url: mediaUrl,\n      character_count: transcriptMd.length,\n    },\n    binary: { data: binary },\n  },\n];\n"
+      },
+      "id": "d0db58cb-1896-4542-b906-d1ae59bccd5d",
+      "name": "Format Speaker Transcript",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "name": "={{ $json.filename }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "id": "3bfa4f78-ce53-409d-88a1-1ad3b5141609",
+      "name": "Save Transcript To Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1632,
+        256
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_DRIVE_CREDENTIAL",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "text": "=Transcript ready for {{ $('Receive Recording Request').first().json['Media URL'] }}\n{{ $('Format Speaker Transcript').first().json.speaker_count }} speaker(s), saved to Google Drive:\n{{ $json.webViewLink || ('https://drive.google.com/file/d/' + $json.id + '/view') }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "a0a3d60b-8656-4c9d-9a26-2ecabaa18111",
+      "name": "Notify Transcript Ready",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        1856,
+        240
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "slackApi": {
+          "id": "REPLACE_WITH_YOUR_SLACK_CREDENTIAL",
+          "name": "Slack account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "text": "=Transcription failed for {{ $('Receive Recording Request').first().json['Media URL'] }}\nReason: {{ $json.error?.message || ($json.status ? ('Gladia status ' + $json.status + ' (timed out or errored)') : 'API request failed') }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "c7b535c9-522b-4f01-8cc2-4666965ed1bb",
+      "name": "Report Transcription Failure",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        1824,
+        672
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "slackApi": {
+          "id": "REPLACE_WITH_YOUR_SLACK_CREDENTIAL",
+          "name": "Slack account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## Transcribe recordings into speaker-labeled notes with Gladia\n\n### How it works\n1. Someone submits the form with a public recording URL and, optionally, how many speakers to expect.\n2. The workflow sends the recording to Gladia and turns on speaker diarization.\n3. It waits and re-checks Gladia until the transcript is ready, or stops after a set number of attempts.\n4. A Code node groups the utterances by speaker into a clean transcript like \"Speaker 1 [00:12]: ...\".\n5. The transcript is saved to Google Drive as a Markdown file and a link is posted to Slack. Errors and timeouts are reported too.\n\n### Setup steps\n- [ ] Create a Header Auth credential named Gladia with header name x-gladia-key, then select it on both Gladia HTTP nodes.\n- [ ] Connect Google Drive and choose the folder for transcripts on Save Transcript To Drive.\n- [ ] Connect Slack and pick the channel on Notify Transcript Ready and Report Transcription Failure.\n- [ ] Open the form, paste a public audio or video URL, and submit.\n\n### Customization\nChange wait seconds and max attempts in Configure Polling to tune the poll interval and timeout. Adjust the file name or transcript layout in Format Speaker Transcript.",
+        "height": 560,
+        "width": 1276
+      },
+      "id": "894ff627-0e91-40b3-958d-c9e3c6ef5e99",
+      "name": "Sticky Note 0ec76b3f",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        -512
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Collect the recording request\nA form takes a public media URL and an optional speaker count, then Configure Polling sets the poll interval and timeout.",
+        "height": 376,
+        "width": 504,
+        "color": 7
+      },
+      "id": "c47eb1e6-fde8-48ad-a5f3-c55f62b318ea",
+      "name": "Sticky Note 770a78f2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Start and poll Gladia\nGladia is asynchronous: start the job, then wait and re-check until the status is done, error, or the attempt limit is reached. Both HTTP nodes continue on error so a failure is routed, not swallowed.",
+        "height": 408,
+        "width": 992,
+        "color": 7
+      },
+      "id": "70c36ca1-0ebe-4ae1-bbe4-c55622aa8af1",
+      "name": "Sticky Note 3ecbd11b",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        320,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Format and save the transcript\nGroup the utterances by speaker into a readable Markdown transcript, save it to Google Drive, and post the link to Slack.",
+        "height": 344,
+        "width": 740,
+        "color": 7
+      },
+      "id": "a9c6f5ee-144f-41b8-a28d-fb11bf709691",
+      "name": "Sticky Note f7a7973b",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Handle failures\nAny API error or a timeout posts a clear reason to Slack so a run never fails silently.",
+        "height": 360,
+        "width": 412,
+        "color": 7
+      },
+      "id": "83187d53-4e66-483d-b4b4-6c8f30d0fc05",
+      "name": "Sticky Note 66a277ae",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1664,
+        496
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receive Recording Request": {
+      "main": [
+        [
+          {
+            "node": "Configure Polling",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configure Polling": {
+      "main": [
+        [
+          {
+            "node": "Start Gladia Transcription",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Gladia Transcription": {
+      "main": [
+        [
+          {
+            "node": "Wait For Processing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Report Transcription Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait For Processing": {
+      "main": [
+        [
+          {
+            "node": "Get Transcription Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Transcription Result": {
+      "main": [
+        [
+          {
+            "node": "Route By Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Report Transcription Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route By Status": {
+      "main": [
+        [
+          {
+            "node": "Format Speaker Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Report Transcription Failure",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait For Processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Speaker Transcript": {
+      "main": [
+        [
+          {
+            "node": "Save Transcript To Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Transcript To Drive": {
+      "main": [
+        [
+          {
+            "node": "Notify Transcript Ready",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Report Transcription Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {},
+  "tags": []
+}
