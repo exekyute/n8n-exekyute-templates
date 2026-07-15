@@ -172,6 +172,11 @@ mindmap
 
 Submitted to the n8n Creator hub and awaiting approval. Templates move up to `published/` once they are live in the library.
 
+| Template | What it does |
+|---|---|
+| [YouTube Banner Scheduler](pending-review/n8n-youtube-banner-scheduler/) | Rotates your YouTube channel banner on a schedule from a Google Sheets plan: downloads each dated banner from Drive, sets it live with the native uploadBanner operation, catches up on any missed day, and preserves the rest of your channel branding. |
+| [Playlist Janitor](pending-review/n8n-playlist-janitor/) | Scans a YouTube playlist every week for duplicate entries and dead videos, posts a cleanup summary to Slack, and prunes the flagged items once dry run is switched off. |
+
 ## Pending submission
 
 Built and tested but not yet submitted to the Creator hub. Templates move to `pending-review/` once submitted.
@@ -184,8 +189,6 @@ Built and tested but not yet submitted to the Creator hub. Templates move to `pe
 | [Asana Hygiene Auditor](pending-submission/n8n-asana-hygiene-auditor/) | Scans one Asana project each week for open tasks missing an assignee or due date, logs each flagged task to Google Sheets with reason codes, and posts a field-completeness scorecard to Slack. |
 | [Asana Status Digest](pending-submission/n8n-asana-status-digest/) | Reads one Asana project every weekday morning and posts a Slack digest of overdue, due-today, due-this-week, unassigned, and just-completed tasks, plus per-assignee open load, with no AI in the delivery path. |
 | [Open Questions Researcher](pending-submission/n8n-open-questions-researcher/) | Picks up each new question dropped into a Notion database, researches it with You.com, and writes a cited answer and its sources back into the same row before flipping the status to Answered. |
-| [Playlist Janitor](pending-submission/n8n-playlist-janitor/) | Scans a YouTube playlist every week for duplicate entries and dead videos, posts a cleanup summary to Slack, and prunes the flagged items once dry run is switched off. |
-| [YouTube Banner Scheduler](pending-submission/n8n-youtube-banner-scheduler/) | Swaps the channel banner on the dates listed in a Google Sheets schedule, downloading the art from Google Drive and setting it live with the native YouTube uploadBanner operation. |
 
 ## License
 

@@ -20,7 +20,7 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
       "position": [
-        0,
+        16,
         304
       ]
     },
@@ -55,7 +55,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        192,
+        240,
         304
       ]
     },
@@ -72,7 +72,7 @@
       "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
       "position": [
-        432,
+        544,
         304
       ]
     },
@@ -92,7 +92,7 @@
       "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
       "position": [
-        608,
+        768,
         304
       ],
       "onError": "continueErrorOutput"
@@ -146,8 +146,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        880,
-        432
+        1120,
+        416
       ]
     },
     {
@@ -157,7 +157,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        1072,
+        1376,
         304
       ]
     },
@@ -210,8 +210,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        880,
-        208
+        1120,
+        224
       ]
     },
     {
@@ -223,7 +223,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1344,
+        1632,
         304
       ]
     },
@@ -256,7 +256,7 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
       "position": [
-        1504,
+        1824,
         192
       ]
     },
@@ -272,7 +272,7 @@
       "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
       "position": [
-        1952,
+        2320,
         208
       ],
       "onError": "continueRegularOutput"
@@ -286,7 +286,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1728,
+        2064,
         192
       ]
     },
@@ -299,8 +299,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1520,
-        592
+        1840,
+        624
       ]
     },
     {
@@ -321,8 +321,8 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.5,
       "position": [
-        1744,
-        592
+        2096,
+        624
       ],
       "executeOnce": true,
       "webhookId": "dc0a1f1e-9132-4492-ac82-9ad2dfcdc3c7"
@@ -330,23 +330,23 @@
     {
       "parameters": {
         "content": "## Clean duplicate and dead videos from a playlist using YouTube and Slack\n\n### How it works\n\n1. A schedule trigger runs the cleanup on a weekly cadence.\n2. The workflow lists every item in the target playlist and looks up each video.\n3. A code step flags duplicates (same video more than once, first kept) and dead entries (deleted, unavailable, or private).\n4. In dry run it only reports; with dry run off it deletes each flagged playlist item in a loop.\n5. Slack receives a summary of what was removed, or a note that the playlist is clean.\n\n### Setup steps\n\n- [ ] Connect a YouTube (Google) OAuth2 credential on the three YouTube nodes.\n- [ ] Set `playlistId` in the Set Playlist and Options node to your playlist ID.\n- [ ] Connect a Slack credential and set `slackChannelId` to your channel.\n- [ ] Keep `dryRun` set to true for the first run, then set it to false to delete for real.\n\n### Customization\n\nChange the schedule interval, or edit the flagging rules in the code node (for example, treat unlisted videos as dead too).",
-        "height": 560,
-        "width": 480
+        "height": 816,
+        "width": 592
       },
       "id": "681ba7b4-4055-412a-ad03-dd52074d2b00",
       "name": "Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -576,
-        48
+        -688,
+        -80
       ]
     },
     {
       "parameters": {
         "content": "## Safety: dry run is on by default\n\nThis workflow can permanently remove items from your playlist. It ships with `dryRun` set to true, so the first run only reports what it would remove and deletes nothing. Review the Slack summary, then set `dryRun` to false in the Set Playlist and Options node to enable real deletion.",
-        "height": 182,
-        "width": 744,
+        "height": 214,
+        "width": 584,
         "color": 3
       },
       "id": "b4486b46-625a-493e-9e94-51d089f94278",
@@ -354,15 +354,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -16,
-        544
+        -32,
+        -80
       ]
     },
     {
       "parameters": {
         "content": "## Schedule and options",
-        "height": 256,
-        "width": 396,
+        "height": 320,
+        "width": 460,
         "color": 7
       },
       "id": "a4e53941-d715-44a2-aa62-23b307f0ecd7",
@@ -370,15 +370,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -48,
-        208
+        -32,
+        192
       ]
     },
     {
       "parameters": {
         "content": "## List and check videos",
-        "height": 256,
-        "width": 378,
+        "height": 320,
+        "width": 490,
         "color": 7
       },
       "id": "8aa7a8ea-e3f4-411c-b76d-c7f515831564",
@@ -386,15 +386,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        400,
-        208
+        480,
+        192
       ]
     },
     {
       "parameters": {
         "content": "## Classify live and dead",
         "height": 488,
-        "width": 404,
+        "width": 516,
         "color": 7
       },
       "id": "378aab73-6ad9-46a5-ac0e-5289f6854234",
@@ -402,15 +402,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        832,
+        1024,
         112
       ]
     },
     {
       "parameters": {
         "content": "## Flag and prune items",
-        "height": 348,
-        "width": 824,
+        "height": 364,
+        "width": 920,
         "color": 7
       },
       "id": "5e0a057d-cbfc-4d93-be61-ef0b2583eafa",
@@ -418,15 +418,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1296,
+        1600,
         112
       ]
     },
     {
       "parameters": {
         "content": "## Report to Slack",
-        "height": 238,
-        "width": 486,
+        "height": 254,
+        "width": 614,
         "color": 7
       },
       "id": "fd513b95-d350-4817-b755-56616b3d0491",
@@ -434,11 +434,12 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1456,
-        512
+        1728,
+        544
       ]
     }
   ],
+  "pinData": {},
   "connections": {
     "Run Weekly Cleanup": {
       "main": [
@@ -589,10 +590,9 @@
   "active": false,
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true,
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "availableInMCP": true
   },
-  "pinData": {},
   "meta": {
     "aiBuilderAssisted": true,
     "builderVariant": "mcp",
