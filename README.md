@@ -4,7 +4,7 @@ A collection of n8n workflow templates I have built, organized by their status i
 
 ## Published
 
-**23 templates** are live in the n8n template library right now, grouped by area in the mindmap below. Hover a template name for a one-line summary of what it does, or hit **View** to open its listing on n8n.io.
+**24 templates** are live in the n8n template library right now, grouped by area in the mindmap below. Hover a template name for a one-line summary of what it does, or hit **View** to open its listing on n8n.io.
 
 ```mermaid
 mindmap
@@ -42,6 +42,7 @@ mindmap
     (⚙️ Operations)
       (frAIday Delivery Planner)
       (Litigation Limitation Calculator)
+      (YouTube Embargo)
 ```
 
 <table>
@@ -160,7 +161,10 @@ mindmap
 <a href="published/n8n-youtube-metadata-auditor/" title="Snapshots every video title, description, tag set, and privacy status daily, diffs the library against the previous snapshot, logs each change to Google Sheets, and alerts Slack when something changed.">YouTube Metadata Auditor</a> &middot; <a href="https://n8n.io/workflows/17072-audit-youtube-video-metadata-changes-with-google-sheets-and-slack/">View</a><br>
 <code>📡 DevOps &amp; Monitoring</code> <code>YouTube</code> <code>Google Sheets</code> <code>Slack</code>
 </td>
-<td valign="top"></td>
+<td valign="top">
+<a href="published/n8n-youtube-embargo/" title="Reads a Google Sheet of videos with unpublish dates, sets each one back to private or unlisted once its date passes, marks the row Expired, and posts a Slack recap.">YouTube Embargo</a> &middot; <a href="https://n8n.io/workflows/17091-unpublish-expired-youtube-videos-using-google-sheets-and-slack/">View</a><br>
+<code>⚙️ Operations</code> <code>YouTube</code> <code>Google Sheets</code> <code>Slack</code>
+</td>
 </tr>
 </table>
 
@@ -180,7 +184,6 @@ Built and tested but not yet submitted to the Creator hub. Templates move to `pe
 | [Asana Hygiene Auditor](pending-submission/n8n-asana-hygiene-auditor/) | Scans one Asana project each week for open tasks missing an assignee or due date, logs each flagged task to Google Sheets with reason codes, and posts a field-completeness scorecard to Slack. |
 | [Asana Status Digest](pending-submission/n8n-asana-status-digest/) | Reads one Asana project every weekday morning and posts a Slack digest of overdue, due-today, due-this-week, unassigned, and just-completed tasks, plus per-assignee open load, with no AI in the delivery path. |
 | [Open Questions Researcher](pending-submission/n8n-open-questions-researcher/) | Picks up each new question dropped into a Notion database, researches it with You.com, and writes a cited answer and its sources back into the same row before flipping the status to Answered. |
-| [YouTube Embargo](pending-submission/n8n-youtube-embargo/) | Reads a Google Sheet of videos with unpublish dates, sets each one back to private or unlisted once its date passes, marks the row Expired, and posts a Slack recap. |
 | [Playlist Janitor](pending-submission/n8n-playlist-janitor/) | Scans a YouTube playlist every week for duplicate entries and dead videos, posts a cleanup summary to Slack, and prunes the flagged items once dry run is switched off. |
 | [YouTube Banner Scheduler](pending-submission/n8n-youtube-banner-scheduler/) | Swaps the channel banner on the dates listed in a Google Sheets schedule, downloading the art from Google Drive and setting it live with the native YouTube uploadBanner operation. |
 
