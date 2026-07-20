@@ -14,7 +14,7 @@ The schedule fires weekly, the project's tasks are pulled read-only from the Asa
 
 ```
 Schedule -> Config -> Fetch Asana tasks -> split + filter open -> score -> append flagged rows to Sheets
-                                        \-> build scorecard -> post to Slack
+                                        \-> build scorecard -> post to Slack -> finish
 ```
 
 | Stage | What happens |
@@ -22,11 +22,12 @@ Schedule -> Config -> Fetch Asana tasks -> split + filter open -> score -> appen
 | Every Monday at 8am | A schedule trigger starts the run. Change the day and time on the node. |
 | Set Audit Config | One Set node holds the project GID, the Slack channel, the audit sheet link, and two optional check toggles. |
 | Fetch Asana Tasks | An HTTP request pulls the project's tasks with the fields the audit needs. This is a read. |
-| Split and filter | The task list is split into one item per task, then narrowed to open tasks so the audit covers live work. |
+| Split Task List and Filter to Open Tasks | The task list is split into one item per task, then narrowed to open tasks so the audit covers live work. |
 | Score Task Hygiene | Each open task is scored. A task that fails a check becomes one audit row with its reason codes joined by commas. |
 | Append Audit Rows in Sheets | Every flagged task is appended to the audit sheet, one row per task. |
-| Build Slack Scorecard | A Code node counts the failures and computes the percent fully fielded and the top offenders. |
+| Build Slack Scorecard | A Code node counts the failures and computes the percent fully fielded and the top five offenders. |
 | Post Scorecard to Slack | The scorecard posts to your channel with a link to the sheet. |
+| Finish Audit Run | A No Op node closes the run, so the Slack branch has a clean end point. |
 
 Every number in the scorecard is computed in plain code, not by a model. The scorecard is read from the Asana fetch directly, so it posts every week even when nothing is flagged.
 
@@ -63,7 +64,7 @@ One row is appended per flagged task. Add these headers to row 1 of your audit t
 
 ## Notes
 
-The fetch pulls up to 100 tasks in one call, which covers most single projects. For a project with more than 100 open tasks, add Asana API pagination on the fetch node. The optional Groq summary described on the canvas is off by default and never sits in the scoring path.
+The fetch pulls up to 100 tasks in one call, which covers most single projects. The limit counts every task the project returns, not just the open ones, so for a project with more than 100 tasks add Asana API pagination on the fetch node. The optional Groq summary described on the canvas is off by default and never sits in the scoring path.
 
 ## What is in this folder
 
