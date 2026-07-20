@@ -2,14 +2,6 @@
   "name": "Post a daily Asana project status digest to Slack",
   "nodes": [
     {
-      "id": "50281c82-dd37-433a-8909-3aabdf1e384e",
-      "name": "Every Weekday Morning",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        0,
-        320
-      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -22,66 +14,63 @@
                 4,
                 5
               ],
-              "triggerAtHour": 8,
-              "triggerAtMinute": 0
+              "triggerAtHour": 8
             }
           ]
         }
-      }
+      },
+      "id": "2cbebed4-9dee-4b3c-b86e-aed7789d2829",
+      "name": "Every Weekday Morning",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -64,
+        0
+      ]
     },
     {
-      "id": "7f762fba-c1c4-4ea0-a568-605620e849c7",
-      "name": "Prepare Digest Config",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        240,
-        320
-      ],
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "id": "8ebe4aa0-86c5-4675-a257-9cff22ea4ffa",
+              "id": "cfg-project",
               "name": "projectGid",
               "value": "PASTE_YOUR_ASANA_PROJECT_GID",
               "type": "string"
             },
             {
-              "id": "19885694-33ff-460f-a8b6-4b6b7025cac7",
+              "id": "cfg-channel",
               "name": "slackChannel",
               "value": "PASTE_YOUR_SLACK_CHANNEL_ID",
               "type": "string"
             },
             {
-              "id": "b3410f88-2382-436e-9873-530fed1e1d2a",
+              "id": "cfg-tz",
               "name": "timezone",
               "value": "America/New_York",
               "type": "string"
             },
             {
-              "id": "3c3bc9d4-e960-431c-9b61-845ad7c76bfa",
+              "id": "cfg-lookback",
               "name": "lookbackHours",
               "value": 24,
               "type": "number"
             }
           ]
         },
-        "includeOtherFields": false,
         "options": {}
-      }
+      },
+      "id": "bb594c95-56d7-480f-b92c-85f495192b07",
+      "name": "Prepare Digest Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        0
+      ]
     },
     {
-      "id": "0dc3aaa3-9821-4a12-a2d4-d9b1936c8a0b",
-      "name": "Fetch Asana Project Tasks",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        520,
-        320
-      ],
       "parameters": {
-        "method": "GET",
         "url": "=https://app.asana.com/api/1.0/projects/{{ $json.projectGid }}/tasks",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "asanaApi",
@@ -106,7 +95,7 @@
           "pagination": {
             "pagination": {
               "paginationMode": "responseContainsNextURL",
-              "nextURL": "={{ $response.body.next_page ? $response.body.next_page.uri : undefined }}",
+              "nextURL": "={{ $response.body.next_page ? $response.body.next_page.uri : '' }}",
               "limitPagesFetched": true,
               "maxRequests": 20,
               "requestInterval": 300
@@ -114,54 +103,52 @@
           }
         }
       },
+      "id": "05b122ce-fbb3-40a0-ae1a-cf6e972dedb7",
+      "name": "Fetch Asana Project Tasks",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        576,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "asanaApi": {
           "id": "REPLACE_WITH_YOUR_ASANA_CREDENTIAL",
           "name": "Asana account"
         }
-      },
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 5000
+      }
     },
     {
-      "id": "0b33cb4d-7848-4f72-86c2-7920206ef1ce",
+      "parameters": {
+        "jsCode": "// Deterministic bucketing. No AI. Uses the run timezone from the Config node.\nconst cfg = $('Prepare Digest Config').first().json;\nconst tz = cfg.timezone || 'UTC';\nconst lookbackH = Number(cfg.lookbackHours) || 24;\n\n// Collect tasks from every input item. Handles a single response or paginated pages.\nconst tasks = [];\nfor (const item of $input.all()) {\n  const j = item.json || {};\n  if (Array.isArray(j.data)) tasks.push(...j.data);\n  else if (j.gid || j.name) tasks.push(j);\n}\n\n// Today's date as YYYY-MM-DD in the configured timezone.\nfunction ymdInTz(date, timeZone) {\n  const parts = new Intl.DateTimeFormat('en-CA', {\n    timeZone,\n    year: 'numeric',\n    month: '2-digit',\n    day: '2-digit',\n  }).formatToParts(date);\n  const get = (t) => parts.find((p) => p.type === t).value;\n  return get('year') + '-' + get('month') + '-' + get('day');\n}\n\nconst now = new Date();\nconst todayStr = ymdInTz(now, tz);\nconst [ty, tm, td] = todayStr.split('-').map(Number);\nconst todayUTC = Date.UTC(ty, tm - 1, td);\nconst dow = new Date(todayUTC).getUTCDay(); // 0 Sunday .. 6 Saturday\nconst daysUntilSunday = (7 - dow) % 7; // through the coming Sunday\nconst weekEndStr = ymdInTz(new Date(todayUTC + daysUntilSunday * 86400000), 'UTC');\nconst completedWindowStart = now.getTime() - lookbackH * 3600 * 1000;\n\nconst overdue = [];\nconst dueToday = [];\nconst dueThisWeek = [];\nconst unassigned = [];\nconst completedRecently = [];\nconst loadByAssignee = {};\n\nfunction slim(t) {\n  return {\n    name: t.name || '(unnamed task)',\n    assignee: t.assignee && t.assignee.name ? t.assignee.name : null,\n    due_on: t.due_on || null,\n    url: t.permalink_url || null,\n  };\n}\n\nfor (const t of tasks) {\n  const done = t.completed === true;\n  if (done) {\n    if (t.completed_at && new Date(t.completed_at).getTime() >= completedWindowStart) {\n      completedRecently.push(slim(t));\n    }\n    continue; // completed tasks are not part of open load or the due buckets\n  }\n\n  // Open task: count toward per-assignee load and the due buckets.\n  const who = t.assignee && t.assignee.name ? t.assignee.name : 'Unassigned';\n  loadByAssignee[who] = (loadByAssignee[who] || 0) + 1;\n  if (!(t.assignee && t.assignee.name)) unassigned.push(slim(t));\n\n  const due = t.due_on || null;\n  if (due) {\n    if (due < todayStr) overdue.push(slim(t));\n    else if (due === todayStr) dueToday.push(slim(t));\n    else if (due <= weekEndStr) dueThisWeek.push(slim(t));\n  }\n}\n\n// Oldest due date first inside each list.\nconst byDue = (a, b) => String(a.due_on).localeCompare(String(b.due_on));\noverdue.sort(byDue);\ndueToday.sort(byDue);\ndueThisWeek.sort(byDue);\n\nconst perAssignee = Object.entries(loadByAssignee)\n  .map(([name, count]) => ({ name, count }))\n  .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));\n\nconst openTotal = tasks.filter((t) => t.completed !== true).length;\n\nreturn [\n  {\n    json: {\n      projectGid: cfg.projectGid,\n      timezone: tz,\n      todayStr,\n      weekEndStr,\n      lookbackHours: lookbackH,\n      counts: {\n        overdue: overdue.length,\n        dueToday: dueToday.length,\n        dueThisWeek: dueThisWeek.length,\n        unassigned: unassigned.length,\n        completedRecently: completedRecently.length,\n        openTotal,\n      },\n      overdue,\n      dueToday,\n      dueThisWeek,\n      unassigned,\n      completedRecently,\n      perAssignee,\n    },\n  },\n];\n"
+      },
+      "id": "9fc4a437-b386-40a2-bf17-d90e1956040f",
       "name": "Bucket Tasks by Due Status",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        800,
-        320
-      ],
-      "parameters": {
-        "jsCode": "// Deterministic bucketing. No AI. Uses the run timezone from the Config node.\nconst cfg = $('Prepare Digest Config').first().json;\nconst tz = cfg.timezone || 'UTC';\nconst lookbackH = Number(cfg.lookbackHours) || 24;\n\n// Collect tasks from every input item. Handles a single response or paginated pages.\nconst tasks = [];\nfor (const item of $input.all()) {\n  const j = item.json || {};\n  if (Array.isArray(j.data)) tasks.push(...j.data);\n  else if (j.gid || j.name) tasks.push(j);\n}\n\n// Today's date as YYYY-MM-DD in the configured timezone.\nfunction ymdInTz(date, timeZone) {\n  const parts = new Intl.DateTimeFormat('en-CA', {\n    timeZone,\n    year: 'numeric',\n    month: '2-digit',\n    day: '2-digit',\n  }).formatToParts(date);\n  const get = (t) => parts.find((p) => p.type === t).value;\n  return get('year') + '-' + get('month') + '-' + get('day');\n}\n\nconst now = new Date();\nconst todayStr = ymdInTz(now, tz);\nconst [ty, tm, td] = todayStr.split('-').map(Number);\nconst todayUTC = Date.UTC(ty, tm - 1, td);\nconst dow = new Date(todayUTC).getUTCDay(); // 0 Sunday .. 6 Saturday\nconst daysUntilSunday = (7 - dow) % 7; // through the coming Sunday\nconst weekEndStr = ymdInTz(new Date(todayUTC + daysUntilSunday * 86400000), 'UTC');\nconst completedWindowStart = now.getTime() - lookbackH * 3600 * 1000;\n\nconst overdue = [];\nconst dueToday = [];\nconst dueThisWeek = [];\nconst unassigned = [];\nconst completedRecently = [];\nconst loadByAssignee = {};\n\nfunction slim(t) {\n  return {\n    name: t.name || '(unnamed task)',\n    assignee: t.assignee && t.assignee.name ? t.assignee.name : null,\n    due_on: t.due_on || null,\n    url: t.permalink_url || null,\n  };\n}\n\nfor (const t of tasks) {\n  const done = t.completed === true;\n  if (done) {\n    if (t.completed_at && new Date(t.completed_at).getTime() >= completedWindowStart) {\n      completedRecently.push(slim(t));\n    }\n    continue; // completed tasks are not part of open load or the due buckets\n  }\n\n  // Open task: count toward per-assignee load and the due buckets.\n  const who = t.assignee && t.assignee.name ? t.assignee.name : 'Unassigned';\n  loadByAssignee[who] = (loadByAssignee[who] || 0) + 1;\n  if (!(t.assignee && t.assignee.name)) unassigned.push(slim(t));\n\n  const due = t.due_on || null;\n  if (due) {\n    if (due < todayStr) overdue.push(slim(t));\n    else if (due === todayStr) dueToday.push(slim(t));\n    else if (due <= weekEndStr) dueThisWeek.push(slim(t));\n  }\n}\n\n// Oldest due date first inside each list.\nconst byDue = (a, b) => String(a.due_on).localeCompare(String(b.due_on));\noverdue.sort(byDue);\ndueToday.sort(byDue);\ndueThisWeek.sort(byDue);\n\nconst perAssignee = Object.entries(loadByAssignee)\n  .map(([name, count]) => ({ name, count }))\n  .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));\n\nconst openTotal = tasks.filter((t) => t.completed !== true).length;\n\nreturn [\n  {\n    json: {\n      projectGid: cfg.projectGid,\n      timezone: tz,\n      todayStr,\n      weekEndStr,\n      lookbackHours: lookbackH,\n      counts: {\n        overdue: overdue.length,\n        dueToday: dueToday.length,\n        dueThisWeek: dueThisWeek.length,\n        unassigned: unassigned.length,\n        completedRecently: completedRecently.length,\n        openTotal,\n      },\n      overdue,\n      dueToday,\n      dueThisWeek,\n      unassigned,\n      completedRecently,\n      perAssignee,\n    },\n  },\n];\n"
-      }
+        1008,
+        0
+      ]
     },
     {
-      "id": "288c0c23-a876-4d86-a257-52a6fdbc4547",
+      "parameters": {
+        "jsCode": "// Format the deterministic buckets into a Slack Block Kit message. No AI here.\nconst d = $json;\nconst MAX_LINKS = 5;\n\nfunction esc(s) {\n  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n}\n\nfunction taskLine(t) {\n  const label = esc(t.name);\n  const link = t.url ? '<' + t.url + '|' + label + '>' : label;\n  const who = t.assignee ? '  ·  ' + esc(t.assignee) : '  ·  _unassigned_';\n  const due = t.due_on ? '  ·  due ' + t.due_on : '';\n  return '• ' + link + who + due;\n}\n\nfunction bucketSection(title, emoji, list) {\n  const heading = '*' + emoji + ' ' + title + ' (' + list.length + ')*';\n  if (list.length === 0) {\n    return { type: 'section', text: { type: 'mrkdwn', text: heading + '\\n_None_' } };\n  }\n  const shown = list.slice(0, MAX_LINKS).map(taskLine).join('\\n');\n  const more = list.length > MAX_LINKS ? '\\n_+' + (list.length - MAX_LINKS) + ' more_' : '';\n  return { type: 'section', text: { type: 'mrkdwn', text: heading + '\\n' + shown + more } };\n}\n\nconst c = d.counts;\nconst blocks = [];\n\nblocks.push({\n  type: 'header',\n  text: { type: 'plain_text', text: 'Asana project status: ' + d.todayStr, emoji: true },\n});\n\nblocks.push({\n  type: 'context',\n  elements: [\n    {\n      type: 'mrkdwn',\n      text:\n        c.overdue + ' overdue  ·  ' +\n        c.dueToday + ' due today  ·  ' +\n        c.dueThisWeek + ' due this week  ·  ' +\n        c.unassigned + ' unassigned  ·  ' +\n        c.completedRecently + ' completed in the last day',\n    },\n  ],\n});\n\n// Optional one-line summary. Only shows if an upstream node set a summaryLine field.\nif (d.summaryLine) {\n  blocks.push({ type: 'section', text: { type: 'mrkdwn', text: '> ' + esc(d.summaryLine) } });\n}\n\nblocks.push({ type: 'divider' });\nblocks.push(bucketSection('Overdue', '🔴', d.overdue));\nblocks.push(bucketSection('Due today', '🟠', d.dueToday));\nblocks.push(bucketSection('Due this week', '🟡', d.dueThisWeek));\nblocks.push(bucketSection('Unassigned', '⚪', d.unassigned));\n\nif (d.perAssignee && d.perAssignee.length) {\n  const lines = d.perAssignee.map((a) => '• ' + esc(a.name) + ': ' + a.count).join('\\n');\n  blocks.push({ type: 'divider' });\n  blocks.push({ type: 'section', text: { type: 'mrkdwn', text: '*Open load by assignee*\\n' + lines } });\n}\n\nblocks.push({ type: 'divider' });\nblocks.push(bucketSection('Completed recently', '✅', d.completedRecently));\n\nblocks.push({\n  type: 'context',\n  elements: [\n    { type: 'mrkdwn', text: 'Deterministic digest  ·  counts computed in n8n  ·  project ' + (d.projectGid || '') },\n  ],\n});\n\nconst fallbackText =\n  'Asana project status for ' + d.todayStr + ': ' +\n  c.overdue + ' overdue, ' +\n  c.dueToday + ' due today, ' +\n  c.dueThisWeek + ' due this week, ' +\n  c.unassigned + ' unassigned.';\n\nreturn [{ json: { blockKit: { blocks }, fallbackText } }];\n"
+      },
+      "id": "a9d14959-7334-4040-b98e-4c3727059b7a",
       "name": "Build Slack Digest Blocks",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1080,
-        320
-      ],
-      "parameters": {
-        "jsCode": "// Format the deterministic buckets into a Slack Block Kit message. No AI here.\nconst d = $json;\nconst MAX_LINKS = 5;\n\nfunction esc(s) {\n  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n}\n\nfunction taskLine(t) {\n  const label = esc(t.name);\n  const link = t.url ? '<' + t.url + '|' + label + '>' : label;\n  const who = t.assignee ? '  ·  ' + esc(t.assignee) : '  ·  _unassigned_';\n  const due = t.due_on ? '  ·  due ' + t.due_on : '';\n  return '• ' + link + who + due;\n}\n\nfunction bucketSection(title, emoji, list) {\n  const heading = '*' + emoji + ' ' + title + ' (' + list.length + ')*';\n  if (list.length === 0) {\n    return { type: 'section', text: { type: 'mrkdwn', text: heading + '\\n_None_' } };\n  }\n  const shown = list.slice(0, MAX_LINKS).map(taskLine).join('\\n');\n  const more = list.length > MAX_LINKS ? '\\n_+' + (list.length - MAX_LINKS) + ' more_' : '';\n  return { type: 'section', text: { type: 'mrkdwn', text: heading + '\\n' + shown + more } };\n}\n\nconst c = d.counts;\nconst blocks = [];\n\nblocks.push({\n  type: 'header',\n  text: { type: 'plain_text', text: 'Asana project status: ' + d.todayStr, emoji: true },\n});\n\nblocks.push({\n  type: 'context',\n  elements: [\n    {\n      type: 'mrkdwn',\n      text:\n        c.overdue + ' overdue  ·  ' +\n        c.dueToday + ' due today  ·  ' +\n        c.dueThisWeek + ' due this week  ·  ' +\n        c.unassigned + ' unassigned  ·  ' +\n        c.completedRecently + ' completed in the last day',\n    },\n  ],\n});\n\n// Optional one-line summary. Only shows if an upstream node set a summaryLine field.\nif (d.summaryLine) {\n  blocks.push({ type: 'section', text: { type: 'mrkdwn', text: '> ' + esc(d.summaryLine) } });\n}\n\nblocks.push({ type: 'divider' });\nblocks.push(bucketSection('Overdue', '🔴', d.overdue));\nblocks.push(bucketSection('Due today', '🟠', d.dueToday));\nblocks.push(bucketSection('Due this week', '🟡', d.dueThisWeek));\nblocks.push(bucketSection('Unassigned', '⚪', d.unassigned));\n\nif (d.perAssignee && d.perAssignee.length) {\n  const lines = d.perAssignee.map((a) => '• ' + esc(a.name) + ': ' + a.count).join('\\n');\n  blocks.push({ type: 'divider' });\n  blocks.push({ type: 'section', text: { type: 'mrkdwn', text: '*Open load by assignee*\\n' + lines } });\n}\n\nblocks.push({ type: 'divider' });\nblocks.push(bucketSection('Completed recently', '✅', d.completedRecently));\n\nblocks.push({\n  type: 'context',\n  elements: [\n    { type: 'mrkdwn', text: 'Deterministic digest  ·  counts computed in n8n  ·  project ' + (d.projectGid || '') },\n  ],\n});\n\nconst fallbackText =\n  'Asana project status for ' + d.todayStr + ': ' +\n  c.overdue + ' overdue, ' +\n  c.dueToday + ' due today, ' +\n  c.dueThisWeek + ' due this week, ' +\n  c.unassigned + ' unassigned.';\n\nreturn [{ json: { blockKit: { blocks }, fallbackText } }];\n"
-      }
+        1376,
+        0
+      ]
     },
     {
-      "id": "1c58f294-d29f-4846-bc43-dbb19c597c4e",
-      "name": "Post Digest to Slack",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.5,
-      "position": [
-        1360,
-        320
-      ],
       "parameters": {
-        "resource": "message",
-        "operation": "post",
         "select": "channel",
         "channelId": {
           "__rl": true,
@@ -170,129 +157,137 @@
         },
         "messageType": "block",
         "blocksUi": "={{ $json.blockKit }}",
-        "text": "={{ $json.fallbackText }}",
         "otherOptions": {
           "includeLinkToWorkflow": false
         }
       },
+      "id": "8e090938-80a1-42e2-8d6d-f0dae9c2e25f",
+      "name": "Post Digest to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        1616,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "executeOnce": true,
       "credentials": {
         "slackApi": {
           "id": "REPLACE_WITH_YOUR_SLACK_CREDENTIAL",
           "name": "Slack account"
         }
-      },
-      "executeOnce": true,
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 5000
+      }
     },
     {
-      "id": "7720e31c-3cb8-47a5-acdb-876b88c38163",
+      "parameters": {},
+      "id": "a75a87d0-f7ff-4563-89fd-d80c9386f74c",
       "name": "Inspect Final Digest",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1600,
-        320
-      ],
-      "parameters": {}
+        1840,
+        0
+      ]
     },
     {
-      "id": "ecd7eeb1-8976-4b4b-b658-5e73456d6df1",
+      "parameters": {
+        "content": "## Post a daily Asana project status digest to Slack\n\n### How it works\n\n1. A weekday-morning schedule starts the run in your timezone.\n2. It reads one Asana project over the REST API, asking for due dates, assignees, and completion so every bucket has what it needs.\n3. A Code node sorts open tasks into overdue, due today, due this week, and unassigned, collects tasks completed in the last day, and tallies open load per assignee.\n4. A second Code node builds a Block Kit message and posts it to your Slack channel.\n\n### Setup steps\n\n- [ ] Add an Asana credential (Personal Access Token) and assign it to `Fetch Asana Project Tasks`.\n- [ ] Add a Slack credential and assign it to `Post Digest to Slack`.\n- [ ] In `Prepare Digest Config`, set `projectGid`, `slackChannel`, and `timezone`.\n- [ ] Set the days and hour in `Every Weekday Morning`, run once to check, then activate.\n\n### Customization\n\nChange the schedule, the `lookbackHours` window for completed tasks, or how many task links each section shows. Every count is computed in n8n, so an optional model call can add a one-line summary without changing any number.",
+        "height": 764,
+        "width": 576
+      },
+      "id": "1d3741fa-36af-4147-bfc9-4f3969ab4bfc",
       "name": "Sticky Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -560,
-        40
-      ],
-      "parameters": {
-        "content": "## Post a daily Asana project status digest to Slack\n\n### How it works\n\n1. A weekday-morning schedule starts the run in your timezone.\n2. It reads one Asana project over the REST API, asking for due dates, assignees, and completion so every bucket has what it needs.\n3. A Code node sorts open tasks into overdue, due today, due this week, and unassigned, collects tasks completed in the last day, and tallies open load per assignee.\n4. A second Code node builds a Block Kit message and posts it to your Slack channel.\n\n### Setup steps\n\n- [ ] Add an Asana credential (Personal Access Token) and assign it to `Fetch Asana Project Tasks`.\n- [ ] Add a Slack credential and assign it to `Post Digest to Slack`.\n- [ ] In `Prepare Digest Config`, set `projectGid`, `slackChannel`, and `timezone`.\n- [ ] Set the days and hour in `Every Weekday Morning`, run once to check, then activate.\n\n### Customization\n\nChange the schedule, the `lookbackHours` window for completed tasks, or how many task links each section shows. Every count is computed in n8n, so an optional model call can add a one-line summary without changing any number.",
-        "height": 620,
-        "width": 480
-      }
+        -768,
+        -224
+      ]
     },
     {
-      "id": "dbc983df-5591-4395-8df7-04e31fc966fa",
+      "parameters": {
+        "content": "## Schedule and configure\n\nSet `projectGid`, `slackChannel`, and `timezone` here, then choose which days and what hour the digest runs.",
+        "height": 360,
+        "width": 480,
+        "color": 7
+      },
+      "id": "5ef20519-f412-4c1d-b7b8-24b4c4047a17",
       "name": "Sticky Schedule And Configure",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        180
-      ],
-      "parameters": {
-        "content": "## Schedule and configure\n\nSet `projectGid`, `slackChannel`, and `timezone` here, then choose which days and what hour the digest runs.",
-        "height": 320,
-        "width": 520,
-        "color": 7
-      }
+        -128,
+        -176
+      ]
     },
     {
-      "id": "6524f389-c306-47aa-854e-9df36991a752",
+      "parameters": {
+        "content": "## Read the Asana project\n\nThe `opt_fields` list guarantees due dates, assignees, and completion come back for every task. `completed_since` keeps completed tasks scoped to the recent window.",
+        "height": 408,
+        "width": 392,
+        "color": 7
+      },
+      "id": "1efefcdc-2143-4b74-a5e4-93dd916df166",
       "name": "Sticky Read Asana",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        480,
-        180
-      ],
-      "parameters": {
-        "content": "## Read the Asana project\n\nThe `opt_fields` list guarantees due dates, assignees, and completion come back for every task. `completed_since` keeps completed tasks scoped to the recent window.",
-        "height": 320,
-        "width": 260,
-        "color": 7
-      }
+        416,
+        -224
+      ]
     },
     {
-      "id": "6700f0da-3275-4c94-a2e5-77771f7fa66f",
+      "parameters": {
+        "content": "## Bucket and count, no AI\n\nDeterministic classification into overdue, due today, due this week, and unassigned, plus completed-in-the-last-day and per-assignee open load.",
+        "height": 408,
+        "width": 344,
+        "color": 7
+      },
+      "id": "0b837baf-2430-4b21-9d1d-72cdc1301e52",
       "name": "Sticky Bucket And Count",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        760,
-        180
-      ],
-      "parameters": {
-        "content": "## Bucket and count, no AI\n\nDeterministic classification into overdue, due today, due this week, and unassigned, plus completed-in-the-last-day and per-assignee open load.",
-        "height": 320,
-        "width": 260,
-        "color": 7
-      }
+        880,
+        -224
+      ]
     },
     {
-      "id": "9c9b416d-3ac6-4608-a032-ccd38f0c477d",
+      "parameters": {
+        "content": "## Format and post the digest\n\nBuild the Block Kit message and post one digest to Slack. The final node keeps the built payload so each run is inspectable.",
+        "height": 408,
+        "width": 770,
+        "color": 7
+      },
+      "id": "6040bd00-3416-478a-b324-51c61d7a0574",
       "name": "Sticky Format And Post",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1040,
-        180
-      ],
-      "parameters": {
-        "content": "## Format and post the digest\n\nBuild the Block Kit message and post one digest to Slack. The final node keeps the built payload so each run is inspectable.",
-        "height": 320,
-        "width": 780,
-        "color": 7
-      }
+        1296,
+        -224
+      ]
     },
     {
-      "id": "bb75e2d1-4ec0-4740-88da-678009210974",
+      "parameters": {
+        "content": "## Optional one-line summary\n\nThe counts come from the Code node, not a model. For a plain-English headline like '3 overdue, Priya carrying the most', add a Groq call that writes a `summaryLine` field and the digest shows it above the buckets. Off by default, and it never changes the numbers.",
+        "height": 202,
+        "width": 576,
+        "color": 4
+      },
+      "id": "6bc2ca2b-cd21-4ca3-859c-1756f8334c07",
       "name": "Sticky Optional Summary",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1040,
-        540
-      ],
-      "parameters": {
-        "content": "## Optional one-line summary\n\nThe counts come from the Code node, not a model. For a plain-English headline like '3 overdue, Priya carrying the most', add a Groq call that writes a `summaryLine` field and the digest shows it above the buckets. Off by default, and it never changes the numbers.",
-        "height": 200,
-        "width": 520,
-        "color": 7
-      }
+        160,
+        256
+      ]
     }
   ],
+  "pinData": {},
   "connections": {
     "Every Weekday Morning": {
       "main": [
@@ -365,7 +360,6 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "pinData": {},
   "meta": {},
   "tags": []
 }
