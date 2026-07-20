@@ -170,6 +170,9 @@ Submitted to the n8n Creator hub and awaiting approval. Templates move up to `pu
 | Template | What it does |
 |---|---|
 | [Asana Hygiene Auditor](pending-review/n8n-asana-hygiene-auditor/) | Scans one Asana project each week for open tasks missing an assignee or due date, logs each flagged task to Google Sheets with reason codes, and posts a field-completeness scorecard to Slack. |
+| [Asana Status Digest](pending-review/n8n-asana-status-digest/) | Reads one Asana project every weekday morning and posts a Slack digest of overdue, due-today, due-this-week, unassigned, and just-completed tasks, plus per-assignee open load, with no AI in the delivery path. |
+| [Open Questions Researcher](pending-review/n8n-open-questions-researcher/) | Picks up each new question dropped into a Notion database, researches it with You.com, and writes a cited answer and its sources back into the same row before flipping the status to Answered. |
+| [Asana Calendar Sync](pending-review/n8n-asana-calendar-sync/) | Mirrors the due dates of one Asana project into a Google Calendar on a timer, creating, moving, and deleting events as tasks change, with the task GID kept in each event description so re-runs never duplicate. |
 
 ## Pending submission
 
@@ -178,9 +181,6 @@ Built and tested but not yet submitted to the Creator hub. Templates move to `pe
 | Template | What it does |
 |---|---|
 | [Grounded Support Drafter](pending-submission/n8n-grounded-support-drafter/) | Answers a support question about a public source, a third-party API, a public standard, or a help or regulatory page, by researching the live web with You.com, then saves the cited reply as a Gmail draft for a support agent to review and send. |
-| [Asana Status Digest](pending-submission/n8n-asana-status-digest/) | Reads one Asana project every weekday morning and posts a Slack digest of overdue, due-today, due-this-week, unassigned, and just-completed tasks, plus per-assignee open load, with no AI in the delivery path. |
-| [Open Questions Researcher](pending-submission/n8n-open-questions-researcher/) | Picks up each new question dropped into a Notion database, researches it with You.com, and writes a cited answer and its sources back into the same row before flipping the status to Answered. |
-| [Asana Calendar Sync](pending-submission/n8n-asana-calendar-sync/) | Mirrors the due dates of one Asana project into a Google Calendar on a timer, creating, moving, and deleting events as tasks change, with the task GID kept in each event description so re-runs never duplicate. |
 | [Asana Sheet Mirror](pending-submission/n8n-asana-sheet-mirror/) | Reads every task in one Asana project on a schedule and upserts it into a Google Sheet keyed by task GID, flagging rows whose task is gone as no longer present instead of deleting them. |
 
 ## License
