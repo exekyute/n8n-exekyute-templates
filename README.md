@@ -4,7 +4,7 @@ A collection of n8n workflow templates I have built, organized by their status i
 
 ## Published
 
-**24 templates** are live in the n8n template library right now, grouped by area in the mindmap below. Hover a template name for a one-line summary of what it does, or hit **View** to open its listing on n8n.io.
+**28 templates** are live in the n8n template library right now, grouped by area in the mindmap below. Hover a template name for a one-line summary of what it does, or hit **View** to open its listing on n8n.io.
 
 ```mermaid
 mindmap
@@ -20,6 +20,8 @@ mindmap
       (Lead Enricher)
       (Gladia Subtitle Generator)
       (Project Health Roll-up)
+      (Gladia Speaker Transcript)
+      (Gladia Audio Translator)
     (🗃️ Data & Records)
       (Notion Deduplicator)
       (Notion Overdue Roller)
@@ -27,6 +29,7 @@ mindmap
       (Gladia Notion Meetings)
       (CSV Folder Reconciler)
       (YouTube Tag Normalizer)
+      (Playlist Janitor)
     (📁 Files & Documents)
       (CSV Folder Reconciler)
       (Drive Auto-Filer)
@@ -43,6 +46,7 @@ mindmap
       (frAIday Delivery Planner)
       (Litigation Limitation Calculator)
       (YouTube Embargo)
+      (YouTube Banner Scheduler)
 ```
 
 <table>
@@ -166,6 +170,26 @@ mindmap
 <code>⚙️ Operations</code> <code>YouTube</code> <code>Google Sheets</code> <code>Slack</code>
 </td>
 </tr>
+<tr>
+<td valign="top">
+<a href="published/n8n-youtube-banner-scheduler/" title="Rotates your YouTube channel banner on a schedule from a Google Sheets plan: downloads each dated banner from Drive, sets it live with the native uploadBanner operation, catches up on any missed day, and preserves the rest of your channel branding.">YouTube Banner Scheduler</a> &middot; <a href="https://n8n.io/workflows/17137-rotate-youtube-channel-banners-on-a-schedule-with-google-sheets-and-drive/">View</a><br>
+<code>⚙️ Operations</code> <code>YouTube</code> <code>Google Sheets</code> <code>Google Drive</code>
+</td>
+<td valign="top">
+<a href="published/n8n-playlist-janitor/" title="Scans a YouTube playlist every week for duplicate entries and dead videos, posts a cleanup summary to Slack, and prunes the flagged items once dry run is switched off.">Playlist Janitor</a> &middot; <a href="https://n8n.io/workflows/17092-clean-duplicate-and-dead-youtube-playlist-videos-with-slack-reports/">View</a><br>
+<code>🗃️ Data &amp; Records</code> <code>YouTube</code> <code>Slack</code>
+</td>
+</tr>
+<tr>
+<td valign="top">
+<a href="published/n8n-gladia-speaker-transcript/" title="Transcribes a public call or interview recording into a clean speaker-labeled transcript with Gladia diarization, saves it to Google Drive as Markdown, and posts the link to Slack.">Gladia Speaker Transcript</a> &middot; <a href="https://n8n.io/workflows/17138-transcribe-speaker-labeled-recordings-with-gladia-google-drive-and-slack/">View</a><br>
+<code>🤖 AI</code> <code>Gladia</code> <code>Google Drive</code> <code>Slack</code>
+</td>
+<td valign="top">
+<a href="published/n8n-gladia-audio-translator/" title="Translates a foreign-language audio or video recording into a target language with Gladia in a single call, saving both the original transcript and the translation to Google Drive as a Markdown file and logging every run to a Google Sheet.">Gladia Audio Translator</a> &middot; <a href="https://n8n.io/workflows/17139-translate-audio-transcripts-with-gladia-google-drive-and-google-sheets/">View</a><br>
+<code>🤖 AI</code> <code>Gladia</code> <code>Google Drive</code> <code>Google Sheets</code>
+</td>
+</tr>
 </table>
 
 ## Pending review
@@ -174,10 +198,7 @@ Submitted to the n8n Creator hub and awaiting approval. Templates move up to `pu
 
 | Template | What it does |
 |---|---|
-| [YouTube Banner Scheduler](pending-review/n8n-youtube-banner-scheduler/) | Rotates your YouTube channel banner on a schedule from a Google Sheets plan: downloads each dated banner from Drive, sets it live with the native uploadBanner operation, catches up on any missed day, and preserves the rest of your channel branding. |
-| [Playlist Janitor](pending-review/n8n-playlist-janitor/) | Scans a YouTube playlist every week for duplicate entries and dead videos, posts a cleanup summary to Slack, and prunes the flagged items once dry run is switched off. |
-| [Gladia Speaker Transcript](pending-review/n8n-gladia-speaker-transcript/) | Transcribes a public call or interview recording into a clean speaker-labeled transcript with Gladia diarization, saves it to Google Drive as Markdown, and posts the link to Slack. |
-| [Gladia Audio Translator](pending-review/n8n-gladia-audio-translator/) | Translates a foreign-language audio or video recording into a target language with Gladia in a single call, saving both the original transcript and the translation to Google Drive as a Markdown file and logging every run to a Google Sheet. |
+| [Asana Hygiene Auditor](pending-review/n8n-asana-hygiene-auditor/) | Scans one Asana project each week for open tasks missing an assignee or due date, logs each flagged task to Google Sheets with reason codes, and posts a field-completeness scorecard to Slack. |
 
 ## Pending submission
 
@@ -186,7 +207,6 @@ Built and tested but not yet submitted to the Creator hub. Templates move to `pe
 | Template | What it does |
 |---|---|
 | [Grounded Support Drafter](pending-submission/n8n-grounded-support-drafter/) | Answers a support question about a public source, a third-party API, a public standard, or a help or regulatory page, by researching the live web with You.com, then saves the cited reply as a Gmail draft for a support agent to review and send. |
-| [Asana Hygiene Auditor](pending-submission/n8n-asana-hygiene-auditor/) | Scans one Asana project each week for open tasks missing an assignee or due date, logs each flagged task to Google Sheets with reason codes, and posts a field-completeness scorecard to Slack. |
 | [Asana Status Digest](pending-submission/n8n-asana-status-digest/) | Reads one Asana project every weekday morning and posts a Slack digest of overdue, due-today, due-this-week, unassigned, and just-completed tasks, plus per-assignee open load, with no AI in the delivery path. |
 | [Open Questions Researcher](pending-submission/n8n-open-questions-researcher/) | Picks up each new question dropped into a Notion database, researches it with You.com, and writes a cited answer and its sources back into the same row before flipping the status to Answered. |
 

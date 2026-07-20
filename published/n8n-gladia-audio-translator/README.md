@@ -1,5 +1,7 @@
 # Translate an audio recording into a target-language transcript using Gladia and Google Drive
 
+[Published n8n template](https://n8n.io/workflows/17139-translate-audio-transcripts-with-gladia-google-drive-and-google-sheets/)
+
 Paste a link to a recording, pick a language, and get back both the original transcript and its translation. I built this so turning a foreign-language clip into something I can read is one form submission, not a chain of tools.
 
 Built with n8n, plus Gladia, Google Drive, and Google Sheets.
