@@ -8,7 +8,7 @@ A schedule fires weekly and reads one Asana project's tasks over the REST API, s
 
 ## How to set up
 
-Import the workflow. Add an Asana Personal Access Token credential and select it on the fetch node. Open the config node and set the project GID, the Slack channel, and the audit sheet link. Turn on the section and description checks if you want a stricter audit. Connect a Google Sheets credential and pick the spreadsheet and tab. Connect a Slack credential and pick the channel. Add the header row to the audit sheet, run once, and activate.
+Import the workflow. Add an Asana Personal Access Token credential and select it on the fetch node. Open the config node and set the project GID, the Slack channel, and the audit sheet link. Turn on the section and description checks if you want a stricter audit. Connect a Google Sheets credential and pick the spreadsheet and tab. Connect a Slack credential; the channel itself comes from the config node, not from the Slack node. Add the header row to the audit sheet, run once, and activate.
 
 ## Requirements
 
@@ -20,4 +20,4 @@ The fetch pulls up to 100 tasks in one call, which covers most single projects. 
 
 ## How to customize the workflow
 
-Change the Monday 8am schedule to any cadence. Turn the section and description checks on or off in the config node. Add columns to the audit row in the score node. For a plain-English one-liner on top of the numbers, add a Groq node after the scorecard is built and prepend its sentence to the Slack text, keeping the model out of the scoring path.
+Change the Monday 8am schedule to any cadence. Turn the section and description checks on or off in the config node. Add columns to the audit row in the score node, then map them on the Sheets node and add them to the sheet header. For a plain-English one-liner on top of the numbers, add a Groq node after the scorecard is built and prepend its sentence to the Slack text, keeping the model out of the scoring path.
