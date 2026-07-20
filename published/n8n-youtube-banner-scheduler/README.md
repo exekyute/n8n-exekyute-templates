@@ -1,5 +1,7 @@
 # Rotate YouTube channel banners on a schedule using Google Sheets and Drive
 
+[Published n8n template](https://n8n.io/workflows/17137-rotate-youtube-channel-banners-on-a-schedule-with-google-sheets-and-drive/)
+
 Built with n8n, the native YouTube node, Google Sheets, and Google Drive. A date-driven workflow that rotates your YouTube channel banner from a spreadsheet schedule, catching up on any day it missed and leaving the rest of your channel branding untouched.
 
 ![Workflow canvas](images/workflow.png)

@@ -1,5 +1,7 @@
 # Clean duplicate and dead videos from a playlist using YouTube and Slack
 
+[Published n8n template](https://n8n.io/workflows/17092-clean-duplicate-and-dead-youtube-playlist-videos-with-slack-reports/)
+
 Built with the n8n YouTube node, a Schedule Trigger, Code, and Slack. A weekly janitor that finds duplicate and dead videos in a YouTube playlist, reports them to Slack, and prunes the flagged items. It runs report-only by default so nothing is deleted until you say so.
 
 ![Workflow canvas](images/workflow.png)

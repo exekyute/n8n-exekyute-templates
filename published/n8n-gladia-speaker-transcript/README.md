@@ -1,5 +1,7 @@
 # Transcribe recordings into speaker-labeled notes using Gladia and Google Drive
 
+[Published n8n template](https://n8n.io/workflows/17138-transcribe-speaker-labeled-recordings-with-gladia-google-drive-and-slack/)
+
 Paste a public link to a call, interview, or meeting recording and get back a clean transcript that marks who spoke and when. I built this because the useful part of a recording is usually "who said what", and most tools either bury that or make you copy it out by hand.
 
 Built with n8n, plus Gladia, Google Drive, and Slack.
