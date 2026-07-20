@@ -7,7 +7,7 @@ A collection of n8n workflow templates I have built, organized by their status i
 **28 templates** are live in the n8n template library right now, grouped by area. Hover a template name for a one-line summary of what it does, or hit **View** to open its listing on n8n.io. A template that spans two areas is listed once, under the first one, and carries both tags.
 
 <table>
-<tr><th colspan="2" align="left">🤖 AI &middot; 11</th></tr>
+<tr><th colspan="2" align="left"><h3>🤖 AI &middot; 11</h3></th></tr>
 <tr>
 <td valign="top">
 <a href="published/n8n-kb-inquiry-assistant/" title="A retrieval-augmented generation (RAG) assistant that drafts grounded replies to inbound support email from a Notion knowledge base, using Cohere embeddings and reranking plus Groq, and saves each as a Gmail draft for a human to review.">KB Inquiry Assistant (RAG)</a> &middot; <a href="https://n8n.io/workflows/16813-draft-grounded-gmail-support-replies-from-a-notion-kb-with-groq-and-cohere/">View</a><br>
@@ -65,7 +65,10 @@ A collection of n8n workflow templates I have built, organized by their status i
 </td>
 <td valign="top"></td>
 </tr>
-<tr><th colspan="2" align="left">🗃️ Data &amp; Records &middot; 5</th></tr>
+</table>
+
+<table>
+<tr><th colspan="2" align="left"><h3>🗃️ Data &amp; Records &middot; 5</h3></th></tr>
 <tr>
 <td valign="top">
 <a href="published/n8n-notion-deduplicator/" title="Removes duplicate rows from a Notion database on a schedule, keeping the newest or most complete record in each group, archiving the rest to the Notion trash, and logging a recap of every run.">Notion Deduplicator</a> &middot; <a href="https://n8n.io/workflows/16801-deduplicate-and-archive-notion-database-rows-daily-with-an-audit-log/">View</a><br>
@@ -93,7 +96,10 @@ A collection of n8n workflow templates I have built, organized by their status i
 </td>
 <td valign="top"></td>
 </tr>
-<tr><th colspan="2" align="left">📁 Files &amp; Documents &middot; 2</th></tr>
+</table>
+
+<table>
+<tr><th colspan="2" align="left"><h3>📁 Files &amp; Documents &middot; 2</h3></th></tr>
 <tr>
 <td valign="top">
 <a href="published/n8n-csv-folder-reconciler/" title="Merges the daily CSV exports in a Google Drive folder into one deduped master, quarantines every bad row to a dated reject file with a reason, and posts a rows in, merged, quarantined, duplicates recap to Slack.">CSV Folder Reconciler</a> &middot; <a href="https://n8n.io/workflows/16700-reconcile-daily-google-drive-csv-exports-into-a-master-file-and-send-a-slack-recap/">View</a><br>
@@ -104,7 +110,10 @@ A collection of n8n workflow templates I have built, organized by their status i
 <code>📁 Files &amp; Documents</code> <code>Google Drive</code> <code>Google Sheets</code>
 </td>
 </tr>
-<tr><th colspan="2" align="left">📡 DevOps &amp; Monitoring &middot; 3</th></tr>
+</table>
+
+<table>
+<tr><th colspan="2" align="left"><h3>📡 DevOps &amp; Monitoring &middot; 3</h3></th></tr>
 <tr>
 <td valign="top">
 <a href="published/n8n-api-contract-drift-watcher/" title="Polls a JSON or OpenAPI endpoint on a schedule, snapshots its response schema in a Data Table, and posts a severity-tagged Slack alert only when the contract breaks, ignoring ordinary value churn.">API Contract Drift Watcher</a> &middot; <a href="https://n8n.io/workflows/16699-alert-on-api-contract-drift-using-data-tables-and-slack/">View</a><br>
@@ -122,7 +131,10 @@ A collection of n8n workflow templates I have built, organized by their status i
 </td>
 <td valign="top"></td>
 </tr>
-<tr><th colspan="2" align="left">📣 Sales &amp; Marketing &middot; 3</th></tr>
+</table>
+
+<table>
+<tr><th colspan="2" align="left"><h3>📣 Sales &amp; Marketing &middot; 3</h3></th></tr>
 <tr>
 <td valign="top">
 <a href="published/n8n-lead-enricher/" title="Researches an inbound company with You.com, writes a profile and fit score with Groq, alerts Slack for hot leads, and logs every lead to Notion.">Lead Enricher</a> &middot; <a href="https://n8n.io/workflows/16504-enrich-and-route-inbound-leads-using-youcom-groq-notion-and-slack/">View</a><br>
@@ -140,7 +152,10 @@ A collection of n8n workflow templates I have built, organized by their status i
 </td>
 <td valign="top"></td>
 </tr>
-<tr><th colspan="2" align="left">⚙️ Operations &middot; 4</th></tr>
+</table>
+
+<table>
+<tr><th colspan="2" align="left"><h3>⚙️ Operations &middot; 4</h3></th></tr>
 <tr>
 <td valign="top">
 <a href="published/n8n-frAIday-delivery-planner/" title="Batches food delivery orders into Saturday and Sunday route plans, geocoded via OpenStreetMap, emailed every Friday.">frAIday Delivery Planner</a> &middot; <a href="https://n8n.io/workflows/16154-plan-delivery-routes-from-notion-orders-with-nominatim-and-email/">View</a><br>
