@@ -10,22 +10,26 @@
             }
           ]
         },
-        "event": "pageAddedToDatabase",
         "databaseId": {
           "__rl": true,
           "mode": "id",
           "value": "REPLACE_WITH_QUESTIONS_DATABASE_ID"
-        },
-        "simple": true
+        }
       },
-      "id": "a1f0c2e4-1111-4a10-9b01-0f0a0b0c0d01",
+      "id": "14bffe39-57ae-4716-9089-31042921d546",
       "name": "When a Question Is Added",
       "type": "n8n-nodes-base.notionTrigger",
       "typeVersion": 1,
       "position": [
-        80,
-        760
-      ]
+        48,
+        736
+      ],
+      "credentials": {
+        "notionApi": {
+          "id": "REPLACE_WITH_YOUR_NOTION_CREDENTIAL",
+          "name": "Notion account"
+        }
+      }
     },
     {
       "parameters": {
@@ -39,7 +43,7 @@
           "combinator": "and",
           "conditions": [
             {
-              "id": "c1000000-0000-4000-8000-000000000001",
+              "id": "cond-question",
               "leftValue": "={{ $json['Question'] }}",
               "operator": {
                 "type": "string",
@@ -48,7 +52,7 @@
               "rightValue": ""
             },
             {
-              "id": "c1000000-0000-4000-8000-000000000002",
+              "id": "cond-status",
               "leftValue": "={{ $json['Status'] }}",
               "operator": {
                 "type": "string",
@@ -60,29 +64,34 @@
         },
         "options": {}
       },
-      "id": "a1f0c2e4-2222-4a10-9b01-0f0a0b0c0d02",
+      "id": "d634b4ac-7c6e-4bb1-9817-ef27e8355438",
       "name": "If Row Needs Research",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
-        380,
-        760
+        288,
+        736
       ]
     },
     {
       "parameters": {
         "operation": "research",
-        "input": "={{ $('When a Question Is Added').item.json['Question'] }}",
-        "researchEffort": "standard"
+        "input": "={{ $('When a Question Is Added').item.json['Question'] }}"
       },
-      "id": "a1f0c2e4-3333-4a10-9b01-0f0a0b0c0d03",
+      "id": "03b9b4aa-a1c6-40a3-a334-45c8f1e59233",
       "name": "Research the Question",
       "type": "@youdotcom-oss/n8n-nodes-youdotcom.youDotCom",
       "typeVersion": 1,
       "position": [
-        720,
-        760
+        768,
+        720
       ],
+      "credentials": {
+        "youDotComApi": {
+          "id": "REPLACE_WITH_YOUR_YOUCOM_CREDENTIAL",
+          "name": "You.com account"
+        }
+      },
       "onError": "continueErrorOutput"
     },
     {
@@ -112,14 +121,20 @@
         },
         "options": {}
       },
-      "id": "a1f0c2e4-4444-4a10-9b01-0f0a0b0c0d04",
+      "id": "09ce5e4c-dcad-4675-8a36-1b8cf0baec63",
       "name": "Write Answer and Mark Answered",
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
       "position": [
-        1080,
-        640
-      ]
+        1296,
+        704
+      ],
+      "credentials": {
+        "notionApi": {
+          "id": "REPLACE_WITH_YOUR_NOTION_CREDENTIAL",
+          "name": "Notion account"
+        }
+      }
     },
     {
       "parameters": {
@@ -134,98 +149,104 @@
           "propertyValues": [
             {
               "key": "Answer|rich_text",
-              "textContent": "={{ 'Research did not complete: ' + ($json.error ?? 'unknown error') + '. The row was left as To Research so you can retry it.' }}"
+              "textContent": "={{ 'Research did not complete: ' + ($json.error?.message ?? $json.error ?? 'unknown error') + '. The row was left as To Research so you can retry it.' }}"
             }
           ]
         },
         "options": {}
       },
-      "id": "a1f0c2e4-5555-4a10-9b01-0f0a0b0c0d05",
+      "id": "442678e8-f0a8-4461-af61-be8a093e65ea",
       "name": "Log the Research Failure",
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
       "position": [
-        1080,
-        920
-      ]
+        1296,
+        912
+      ],
+      "credentials": {
+        "notionApi": {
+          "id": "REPLACE_WITH_YOUR_NOTION_CREDENTIAL",
+          "name": "Notion account"
+        }
+      }
     },
     {
       "parameters": {
         "content": "## Answer a Notion questions queue in place using You.com research\n\n### How it works\n\n1. A Notion trigger picks up each new row added to your questions database.\n2. A guard skips any row with an empty question or a status that is not `To Research`.\n3. The You.com research operation answers the question and returns a cited Markdown write-up with a source list.\n4. A Notion update writes the answer and sources back into the same row and flips its status to `Answered`.\n\n### Setup steps\n\n- [ ] Install the You.com community node `@youdotcom-oss/n8n-nodes-youdotcom` (self-hosted n8n only).\n- [ ] Add You.com and Notion credentials and select them on their nodes.\n- [ ] Point `When a Question Is Added` at a Notion database with `Question` (title), `Status` (select), `Answer` (text), and `Sources` (text).\n- [ ] Add `To Research` and `Answered` as options on the `Status` select.\n\n### Customization\nRaise the depth on `Research the Question` from `standard` to `deep` or `exhaustive`, or swap the Notion trigger for a Schedule trigger that queries `Status = To Research` to run on n8n Cloud.",
-        "height": 540,
-        "width": 760
+        "height": 668,
+        "width": 728
       },
-      "id": "a1f0c2e4-6666-4a10-9b01-0f0a0b0c0d06",
+      "id": "64b945c9-0ad2-488a-a6c6-97086d321f00",
       "name": "Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        0,
-        0
+        -896,
+        416
       ]
     },
     {
       "parameters": {
         "content": "## Intake and guard\n\nA Notion trigger fires on each new question row, and the guard drops empty or not-ready rows before spending a research call.",
-        "height": 320,
-        "width": 600,
+        "height": 384,
+        "width": 568,
         "color": 7
       },
-      "id": "a1f0c2e4-7777-4a10-9b01-0f0a0b0c0d07",
+      "id": "cf56d67a-c1ef-457c-b887-3dd1e3822f22",
       "name": "Section Intake",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        40,
-        660
+        -32,
+        560
       ]
     },
     {
       "parameters": {
         "content": "## Research the question\n\nYou.com researches the question and returns a cited Markdown answer plus a source list in a single call.",
-        "height": 320,
-        "width": 300,
+        "height": 368,
+        "width": 428,
         "color": 7
       },
-      "id": "a1f0c2e4-8888-4a10-9b01-0f0a0b0c0d08",
+      "id": "5e622028-06c2-43cd-80eb-aa609375fabd",
       "name": "Section Research",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        680,
-        660
+        608,
+        544
       ]
     },
     {
       "parameters": {
         "content": "## Answer in place\n\nThe same row gets the answer and sources written back and its status flips to `Answered`. A failed lookup logs a note and leaves the row as `To Research` so you can retry it.",
-        "height": 540,
-        "width": 400,
+        "height": 620,
+        "width": 480,
         "color": 7
       },
-      "id": "a1f0c2e4-9999-4a10-9b01-0f0a0b0c0d09",
+      "id": "10a15ddb-6578-46ab-807e-411b50b3a232",
       "name": "Section Answer",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1020,
-        560
+        1104,
+        480
       ]
     },
     {
       "parameters": {
         "content": "## Self-hosted only\n\nThe You.com node is a community node, so this runs on self-hosted n8n. On n8n Cloud, use the HTTP Request plus Schedule trigger variant described in the README.",
         "height": 150,
-        "width": 300,
+        "width": 716,
         "color": 3
       },
-      "id": "a1f0c2e4-aaaa-4a10-9b01-0f0a0b0c0d10",
+      "id": "6a6497f0-21c5-42ec-b6ac-68e9646732ec",
       "name": "Warning self-hosted",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        680,
-        1000
+        -32,
+        992
       ]
     }
   ],
@@ -250,8 +271,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Research the Question": {
@@ -277,6 +297,6 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "nodeGroups": [],
+  "meta": {},
   "tags": []
 }
