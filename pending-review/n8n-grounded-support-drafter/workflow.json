@@ -27,7 +27,6 @@
             }
           ]
         },
-        "responseMode": "onReceived",
         "options": {
           "appendAttribution": false,
           "respondWithOptions": {
@@ -36,15 +35,16 @@
               "formSubmittedText": "Thanks. You.com is researching public sources for this question now. A cited draft reply will be waiting in Gmail for a support agent to review and send. Nothing is emailed automatically. You can close this page."
             }
           }
-        }
+        },
+        "responseMode": "onReceived"
       },
       "id": "a1f0c2d4-1111-4a10-9c01-000000000001",
       "name": "When a Support Question Is Submitted",
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.6,
       "position": [
-        -40,
-        600
+        -64,
+        672
       ],
       "webhookId": "b2e1d3f5-2222-4b20-8c02-000000000002"
     },
@@ -97,8 +97,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        220,
-        600
+        176,
+        672
       ]
     },
     {
@@ -112,8 +112,8 @@
       "type": "@youdotcom-oss/n8n-nodes-youdotcom.youDotCom",
       "typeVersion": 1,
       "position": [
-        520,
-        600
+        560,
+        672
       ],
       "onError": "continueErrorOutput",
       "credentials": {
@@ -133,8 +133,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        760,
-        600
+        816,
+        656
       ]
     },
     {
@@ -153,8 +153,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1040,
-        600
+        1200,
+        656
       ],
       "credentials": {
         "gmailOAuth2": {
@@ -182,8 +182,8 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.5,
       "position": [
-        1320,
-        600
+        1440,
+        656
       ],
       "webhookId": "c8f7a9b1-8888-4b80-8c08-000000000008",
       "onError": "continueRegularOutput",
@@ -219,8 +219,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1040,
-        940
+        640,
+        1104
       ]
     },
     {
@@ -242,8 +242,8 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.5,
       "position": [
-        1320,
-        940
+        880,
+        1104
       ],
       "webhookId": "d0b9c2e4-bbbb-4ebb-8f0b-00000000000b",
       "credentials": {
@@ -256,96 +256,96 @@
     {
       "parameters": {
         "content": "## Draft cited support replies from live public docs using You.com and Gmail\n\n### How it works\n\n1. A support agent or customer submits a question about a public, documented topic through the form.\n2. You.com researches live public sources in one call and returns an answer with inline citations and a source list.\n3. A Code node formats the answer and its sources into an HTML email body.\n4. Gmail saves the reply as a draft. It is never sent automatically.\n5. Slack pings a support agent that a cited draft is ready to review and send.\n\n### Setup steps\n\n- [ ] Self-hosted n8n only: install the You.com community node `@youdotcom-oss/n8n-nodes-youdotcom` under Settings, Community Nodes.\n- [ ] Add You.com and Gmail credentials, and a Slack credential if you want the ping.\n- [ ] Open `Prepare Research Request` to set the research effort and the Slack member ID to mention.\n- [ ] In `Notify Agent Draft Ready` pick the Slack channel for your support team.\n\n### Customization\n\nScope the research prompt in `Prepare Research Request` to your own public docs, tune the research effort from lite to exhaustive, or swap the form trigger for a Gmail trigger on a support alias.",
-        "height": 460,
-        "width": 900
+        "height": 592,
+        "width": 992
       },
       "id": "d1c0e3f5-cccc-4fcc-9a0c-00000000000c",
       "name": "Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -80,
-        0
+        -160,
+        -192
       ]
     },
     {
       "parameters": {
         "content": "## Take in the support question\nA form collects the question, optional context, and an optional customer email, then one Set node holds all the config and builds the research prompt.",
-        "height": 320,
+        "height": 384,
         "width": 560,
-        "color": 2
+        "color": 7
       },
       "id": "e2d1f4a6-dddd-4add-9b0d-00000000000d",
       "name": "Section Intake",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -120,
+        -160,
         480
       ]
     },
     {
       "parameters": {
         "content": "## Research live public sources\nYou.com research runs one call over live public docs and standards and returns a cited answer. No private knowledge base, no RAG. A Code node turns the answer and its sources into an HTML email.",
-        "height": 320,
+        "height": 384,
         "width": 560,
-        "color": 5
+        "color": 7
       },
       "id": "f3e2a5b7-eeee-4bee-9c0e-00000000000e",
       "name": "Section Research",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        460,
-        480
+        464,
+        464
       ]
     },
     {
       "parameters": {
         "content": "## Draft the reply, a human sends\nGmail saves the cited reply as a draft and never sends it. Slack tells a support agent it is ready to review and send.",
-        "height": 320,
+        "height": 384,
         "width": 560,
-        "color": 6
+        "color": 7
       },
       "id": "a4f3b6c8-ffff-4cff-9d0f-00000000000f",
       "name": "Section Draft",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1000,
-        480
+        1088,
+        464
       ]
     },
     {
       "parameters": {
         "content": "## Handle a failed lookup\nIf the You.com call fails, the run builds a short failure notice and alerts the support team instead of failing silently.",
-        "height": 260,
-        "width": 560,
-        "color": 3
+        "height": 384,
+        "width": 592,
+        "color": 7
       },
       "id": "b5a4c7d9-0a0a-4d0a-9e10-000000000010",
       "name": "Section Error",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1000,
-        840
+        528,
+        912
       ]
     },
     {
       "parameters": {
         "content": "## Self-hosted and human-in-the-loop\nThe You.com node is a community node and needs self-hosted n8n. The Gmail step only creates a draft. No path in this workflow sends an email on its own.",
-        "height": 150,
-        "width": 560,
-        "color": 4
+        "height": 176,
+        "width": 448,
+        "color": 3
       },
       "id": "c6b5d8ea-1b1b-4e1b-9f11-000000000011",
       "name": "Warning Self-Hosted And HITL",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        460,
-        820
+        1200,
+        912
       ]
     }
   ],
@@ -391,6 +391,17 @@
         ]
       ]
     },
+    "Build Failure Notice": {
+      "main": [
+        [
+          {
+            "node": "Alert Support Team of Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Build Cited Email Reply": {
       "main": [
         [
@@ -407,17 +418,6 @@
         [
           {
             "node": "Notify Agent Draft Ready",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Build Failure Notice": {
-      "main": [
-        [
-          {
-            "node": "Alert Support Team of Failure",
             "type": "main",
             "index": 0
           }

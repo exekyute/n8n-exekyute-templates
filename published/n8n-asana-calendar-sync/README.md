@@ -1,5 +1,7 @@
 # Sync Asana task due dates to Google Calendar
 
+[Published n8n template](https://n8n.io/workflows/17269-sync-asana-task-due-dates-with-google-calendar-events/)
+
 I wanted my Asana due dates to show up in the calendar I actually look at, without keeping two lists by hand. This workflow reads one Asana project on a timer and mirrors every dated task into a Google Calendar: new tasks become events, changed dates move the event, and a task that is completed or loses its date has its event removed. It is one-way, so the calendar follows Asana and never writes back.
 
 Built with n8n, plus Asana and Google Calendar.

@@ -1,5 +1,7 @@
 # Audit Asana task hygiene and log a weekly scorecard to Google Sheets and Slack
 
+[Published n8n template](https://n8n.io/workflows/17268-audit-asana-task-hygiene-with-google-sheets-and-slack-scorecards/)
+
 Once a week this scans one Asana project for open tasks that are missing an assignee or a due date, logs each one to a Google Sheet with the reasons it was flagged, and posts a completeness scorecard to Slack. I built it because a project board drifts quietly: tasks pile up with no owner and no date, and nobody notices until a standup. This gives me one number each Monday and the exact list behind it.
 
 It reads from Asana and writes nothing back. The audit never touches your tasks.
