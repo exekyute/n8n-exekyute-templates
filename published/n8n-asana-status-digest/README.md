@@ -1,5 +1,7 @@
 # Post a daily Asana project status digest to Slack
 
+[Published n8n template](https://n8n.io/workflows/17271-post-a-daily-asana-project-status-digest-to-slack/)
+
 I wanted one Slack message each morning that tells me where a project stands, without opening Asana. This workflow reads one Asana project on a weekday schedule and posts a digest: overdue, due today, due this week, unassigned, and completed since yesterday, plus how much open work each person is carrying. Nothing in the delivery path uses AI, so the counts are exact and the same every run.
 
 Built with n8n, plus Asana and Slack.

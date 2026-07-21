@@ -1,5 +1,7 @@
 # Answer a Notion questions queue in place using You.com research
 
+[Published n8n template](https://n8n.io/workflows/17270-answer-notion-knowledge-base-questions-with-youcom-research/)
+
 Keep a Notion database of things you mean to look up, and let it drain itself. Every row you drop in gets researched and answered in place, so the list you already keep becomes the interface. No report doc, no chat window, no second tool to check.
 
 Built with n8n, plus You.com and Notion.

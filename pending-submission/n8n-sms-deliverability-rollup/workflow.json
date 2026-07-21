@@ -1,0 +1,407 @@
+{
+  "name": "Summarize yesterday's Twilio message delivery rates to Google Sheets and Slack",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7,
+              "triggerAtMinute": 15
+            }
+          ]
+        }
+      },
+      "id": "92508a89-ff98-45eb-b52e-9f3388334fd5",
+      "name": "Run Every Morning",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -80,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);\nconst yyyy = yesterday.getFullYear();\nconst mm = String(yesterday.getMonth() + 1).padStart(2, '0');\nconst dd = String(yesterday.getDate()).padStart(2, '0');\nconst reportDate = yyyy + '-' + mm + '-' + dd;\n\nreturn [{\n  json: {\n    report_date: reportDate,\n    date_sent_after: reportDate + 'T00:00:00Z',\n    date_sent_before: reportDate + 'T23:59:59Z'\n  }\n}];"
+      },
+      "id": "84bb0a97-a5dc-49b7-804b-6c07d737299a",
+      "name": "Build Yesterday Date Window",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.twilio.com/2010-04-01/Accounts/REPLACE_WITH_YOUR_ACCOUNT_SID/Messages.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "twilioApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "DateSent>",
+              "value": "={{ $json.date_sent_after }}"
+            },
+            {
+              "name": "DateSent<",
+              "value": "={{ $json.date_sent_before }}"
+            },
+            {
+              "name": "PageSize",
+              "value": "1000"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "29a8e204-3b32-45ee-a7d7-477e78991186",
+      "name": "Fetch Twilio Messages",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        688,
+        688
+      ],
+      "credentials": {
+        "twilioApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "REPLACE_WITH_YOUR_TWILIO_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $input.first().json;\nconst messages = payload.messages || [];\nconst buckets = { queued: 0, sent: 0, delivered: 0, failed: 0, undelivered: 0, other: 0 };\n\nfor (const message of messages) {\n  const status = String(message.status || '').toLowerCase();\n  if (Object.prototype.hasOwnProperty.call(buckets, status)) {\n    buckets[status] += 1;\n  } else {\n    buckets.other += 1;\n  }\n}\n\nreturn [{\n  json: {\n    report_date: $('Build Yesterday Date Window').first().json.report_date,\n    total: messages.length,\n    queued: buckets.queued,\n    sent: buckets.sent,\n    delivered: buckets.delivered,\n    failed: buckets.failed,\n    undelivered: buckets.undelivered,\n    other: buckets.other\n  }\n}];"
+      },
+      "id": "613b4967-889a-446d-93ba-0755b862ae2b",
+      "name": "Tally Messages By Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1168,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "delivery-rate-pct",
+              "name": "delivery_rate_pct",
+              "type": "number",
+              "value": "={{ ($json.delivered + $json.failed + $json.undelivered) > 0 ? Math.round(($json.delivered / ($json.delivered + $json.failed + $json.undelivered)) * 1000) / 10 : 0 }}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "bfbd28db-f1bd-476f-a214-b9bc941ebf23",
+      "name": "Calculate Delivery Rate",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1440,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "",
+          "cachedResultName": "REPLACE_WITH_YOUR_SPREADSHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "REPLACE_WITH_YOUR_SHEET_TAB"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "date": "={{ $json.report_date }}",
+            "total": "={{ $json.total }}",
+            "delivered": "={{ $json.delivered }}",
+            "failed": "={{ $json.failed }}",
+            "undelivered": "={{ $json.undelivered }}",
+            "delivery_rate_pct": "={{ $json.delivery_rate_pct }}"
+          },
+          "schema": [
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total",
+              "displayName": "total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delivered",
+              "displayName": "delivered",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "failed",
+              "displayName": "failed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "undelivered",
+              "displayName": "undelivered",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delivery_rate_pct",
+              "displayName": "delivery_rate_pct",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fa5bf41a-e153-4ceb-947b-91f1695dc5b7",
+      "name": "Append Daily Summary Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1808,
+        688
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "REPLACE_WITH_YOUR_GOOGLE_SHEETS_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "REPLACE_WITH_YOUR_SLACK_CHANNEL"
+        },
+        "text": "=*SMS delivery rollup for {{ $(\"Calculate Delivery Rate\").item.json.report_date }}*\nTotal sent: {{ $(\"Calculate Delivery Rate\").item.json.total }}\nDelivered: {{ $(\"Calculate Delivery Rate\").item.json.delivered }}\nFailed: {{ $(\"Calculate Delivery Rate\").item.json.failed }}\nUndelivered: {{ $(\"Calculate Delivery Rate\").item.json.undelivered }}\nDelivery rate: {{ $(\"Calculate Delivery Rate\").item.json.delivery_rate_pct }}%",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "46c3f838-4570-43dd-b9b1-9267ad179dc7",
+      "name": "Post Delivery Digest",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        2080,
+        688
+      ],
+      "credentials": {
+        "slackApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "REPLACE_WITH_YOUR_SLACK_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Summarize yesterday's Twilio message delivery rates to Google Sheets and Slack\n\n### How it works\n\n1. `Run Every Morning` fires once a day at 07:15.\n2. `Build Yesterday Date Window` returns yesterday's date plus start and end ISO timestamps.\n3. `Fetch Twilio Messages` GETs the Twilio Messages list filtered to that window.\n4. `Tally Messages By Status` counts each message into a status bucket.\n5. `Calculate Delivery Rate` divides delivered by the messages that reached a final state.\n6. `Append Daily Summary Row` writes one row per day to Google Sheets.\n7. `Post Delivery Digest` posts the same figures to Slack.\n\n### Setup steps\n\n- [ ] Create an HTTP Basic Auth credential with your Twilio Account SID as the user and your Auth Token as the password.\n- [ ] Paste the same Account SID into the URL in `Fetch Twilio Messages`.\n- [ ] Pick your spreadsheet and tab in `Append Daily Summary Row`. The header row must be date, total, delivered, failed, undelivered, delivery_rate_pct.\n- [ ] Set the channel in `Post Delivery Digest` and adjust the hour in `Run Every Morning`.\n\n### Customization\n\nChange the bucket list in `Tally Messages By Status` if you care about queued and sent too, swap the rate formula for a failure rate, or drop the Slack step and read the trend straight off the Sheet.",
+        "height": 672,
+        "width": 992
+      },
+      "id": "59d686f3-c9f5-4328-af8a-80418253db53",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Required credential, read only\n\nBasic auth from your Account SID and Auth Token, and the same SID goes in the request URL. The rollup only reads, so it never sends a message.",
+        "height": 176,
+        "width": 448,
+        "color": 3
+      },
+      "id": "184059f0-07a1-4ed5-8723-b8f4ed326101",
+      "name": "Warning Credential And Cost",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        896,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Pick yesterday and build the window\n\nA daily Schedule Trigger starts the run, and a Code node turns today's date into yesterday's calendar day as two ISO timestamps.",
+        "height": 384,
+        "width": 560,
+        "color": 7
+      },
+      "id": "91c40a5e-5b5f-4cbf-bfa3-313d0741e405",
+      "name": "Section Date Window",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Pull yesterday's messages\n\nOne GET on the Twilio Messages list endpoint, filtered by DateSent greater than and less than, with a page size of 1000.",
+        "height": 384,
+        "width": 560,
+        "color": 7
+      },
+      "id": "612a1d2f-2b54-4134-b910-7b81cdff92f4",
+      "name": "Section Fetch Messages",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        464,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Tally the statuses and the rate\n\nA Code node counts each message into a status bucket, then a Set node divides delivered by the messages that reached a final state.",
+        "height": 384,
+        "width": 560,
+        "color": 7
+      },
+      "id": "657735ae-c909-4936-a632-3ebf2529c179",
+      "name": "Section Tally And Rate",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## One row per day, plus a digest\n\nGoogle Sheets gets a single summary row so the tab stays a chartable trend line, and Slack gets the same numbers as a short digest.",
+        "height": 384,
+        "width": 560,
+        "color": 7
+      },
+      "id": "c20cae35-df54-464f-aff6-8c1c3ad55d7a",
+      "name": "Section Sheet And Slack",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        512
+      ]
+    }
+  ],
+  "connections": {
+    "Run Every Morning": {
+      "main": [
+        [
+          {
+            "node": "Build Yesterday Date Window",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Yesterday Date Window": {
+      "main": [
+        [
+          {
+            "node": "Fetch Twilio Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Twilio Messages": {
+      "main": [
+        [
+          {
+            "node": "Tally Messages By Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tally Messages By Status": {
+      "main": [
+        [
+          {
+            "node": "Calculate Delivery Rate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Delivery Rate": {
+      "main": [
+        [
+          {
+            "node": "Append Daily Summary Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Daily Summary Row": {
+      "main": [
+        [
+          {
+            "node": "Post Delivery Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
