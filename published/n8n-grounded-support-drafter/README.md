@@ -1,5 +1,7 @@
 # Draft cited support replies from live public docs using You.com and Gmail
 
+[Published n8n template](https://n8n.io/workflows/17335-draft-cited-support-replies-from-public-docs-with-youcom-gmail-and-slack/)
+
 A support question comes in about a third-party API, a public standard, or a documented tool. You.com researches the live public web, writes an answer with real citations, and saves it as a Gmail draft. A human reads the sources and hits send. I built this for the support questions whose answer lives in someone else's public docs, not in your own knowledge base.
 
 Built with n8n, plus You.com and Gmail, with an optional Slack ping.

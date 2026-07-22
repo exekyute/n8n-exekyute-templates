@@ -1,5 +1,7 @@
 # Log Twilio delivery statuses to Google Sheets and alert Slack on failures
 
+[Published n8n template](https://n8n.io/workflows/17342-log-twilio-sms-delivery-statuses-to-google-sheets-and-alert-slack-on-failures/)
+
 I kept finding out about failed text messages the slow way, by someone telling me they never got one. Twilio already knows, it just posts the answer to a callback URL and moves on. So I pointed that callback at n8n, wrote every event to a sheet, and made the failures shout in Slack with a reason a person can read instead of a five-digit code.
 
 Built with n8n, plus Twilio status callbacks, Google Sheets, and Slack.

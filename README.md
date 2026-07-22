@@ -4,7 +4,7 @@ A collection of n8n workflow templates I have built, organized by their status i
 
 ## Published
 
-**32 templates** are live in the n8n template library right now, grouped by area. Hover a template name for a one-line summary of what it does, or hit **View** to open its listing on n8n.io. A template that spans two areas is listed once, under the first one, and carries both tags.
+**36 templates** are live in the n8n template library right now, grouped by area. Hover a template name for a one-line summary of what it does, or hit **View** to open its listing on n8n.io. A template that spans two areas is listed once, under the first one, and carries both tags.
 
 <!--
   Each area below is its own table so the headings do not blend into the cards.
@@ -15,7 +15,7 @@ A collection of n8n workflow templates I have built, organized by their status i
   table to the full README width. It never renders at 2000px and adds no scrollbar.
 -->
 <table width="100%">
-<tr><th colspan="2" align="left" width="2000"><h3>🤖 AI &middot; 12</h3></th></tr>
+<tr><th colspan="2" align="left" width="2000"><h3>🤖 AI &middot; 13</h3></th></tr>
 <tr>
 <td valign="top" width="50%">
 <a href="published/n8n-kb-inquiry-assistant/" title="A retrieval-augmented generation (RAG) assistant that drafts grounded replies to inbound support email from a Notion knowledge base, using Cohere embeddings and reranking plus Groq, and saves each as a Gmail draft for a human to review.">KB Inquiry Assistant (RAG)</a> &middot; <a href="https://n8n.io/workflows/16813-draft-grounded-gmail-support-replies-from-a-notion-kb-with-groq-and-cohere/">View</a><br>
@@ -76,10 +76,17 @@ A collection of n8n workflow templates I have built, organized by their status i
 <code>🤖 AI</code> <code>🗃️ Data &amp; Records</code> <code>Notion</code> <code>You.com</code>
 </td>
 </tr>
+<tr>
+<td valign="top" width="50%">
+<a href="published/n8n-grounded-support-drafter/" title="Answers a support question about a public source, a third-party API, a public standard, or a help or regulatory page, by researching the live web with You.com, then saves the cited reply as a Gmail draft for a support agent to review and send.">Grounded Support Drafter</a> &middot; <a href="https://n8n.io/workflows/17335-draft-cited-support-replies-from-public-docs-with-youcom-gmail-and-slack/">View</a><br>
+<code>🤖 AI</code> <code>You.com</code> <code>Gmail</code> <code>Slack</code>
+</td>
+<td valign="top" width="50%"></td>
+</tr>
 </table>
 
 <table width="100%">
-<tr><th colspan="2" align="left" width="2000"><h3>🗃️ Data &amp; Records &middot; 5</h3></th></tr>
+<tr><th colspan="2" align="left" width="2000"><h3>🗃️ Data &amp; Records &middot; 6</h3></th></tr>
 <tr>
 <td valign="top" width="50%">
 <a href="published/n8n-notion-deduplicator/" title="Removes duplicate rows from a Notion database on a schedule, keeping the newest or most complete record in each group, archiving the rest to the Notion trash, and logging a recap of every run.">Notion Deduplicator</a> &middot; <a href="https://n8n.io/workflows/16801-deduplicate-and-archive-notion-database-rows-daily-with-an-audit-log/">View</a><br>
@@ -105,7 +112,10 @@ A collection of n8n workflow templates I have built, organized by their status i
 <a href="published/n8n-playlist-janitor/" title="Scans a YouTube playlist every week for duplicate entries and dead videos, posts a cleanup summary to Slack, and prunes the flagged items once dry run is switched off.">Playlist Janitor</a> &middot; <a href="https://n8n.io/workflows/17092-clean-duplicate-and-dead-youtube-playlist-videos-with-slack-reports/">View</a><br>
 <code>🗃️ Data &amp; Records</code> <code>YouTube</code> <code>Slack</code>
 </td>
-<td valign="top" width="50%"></td>
+<td valign="top" width="50%">
+<a href="published/n8n-asana-sheet-mirror/" title="Reads every task in one Asana project on a schedule and upserts it into a Google Sheet keyed by task GID, flagging rows whose task is gone as no longer present instead of deleting them.">Asana Sheet Mirror</a> &middot; <a href="https://n8n.io/workflows/17306-sync-asana-project-tasks-with-a-mirrored-google-sheets-tab/">View</a><br>
+<code>🗃️ Data &amp; Records</code> <code>Asana</code> <code>Google Sheets</code>
+</td>
 </tr>
 </table>
 
@@ -124,7 +134,7 @@ A collection of n8n workflow templates I have built, organized by their status i
 </table>
 
 <table width="100%">
-<tr><th colspan="2" align="left" width="2000"><h3>📡 DevOps &amp; Monitoring &middot; 5</h3></th></tr>
+<tr><th colspan="2" align="left" width="2000"><h3>📡 DevOps &amp; Monitoring &middot; 6</h3></th></tr>
 <tr>
 <td valign="top" width="50%">
 <a href="published/n8n-api-contract-drift-watcher/" title="Polls a JSON or OpenAPI endpoint on a schedule, snapshots its response schema in a Data Table, and posts a severity-tagged Slack alert only when the contract breaks, ignoring ordinary value churn.">API Contract Drift Watcher</a> &middot; <a href="https://n8n.io/workflows/16699-alert-on-api-contract-drift-using-data-tables-and-slack/">View</a><br>
@@ -150,7 +160,10 @@ A collection of n8n workflow templates I have built, organized by their status i
 <a href="published/n8n-asana-status-digest/" title="Reads one Asana project every weekday morning and posts a Slack digest of overdue, due-today, due-this-week, unassigned, and just-completed tasks, plus per-assignee open load, with no AI in the delivery path.">Asana Status Digest</a> &middot; <a href="https://n8n.io/workflows/17271-post-a-daily-asana-project-status-digest-to-slack/">View</a><br>
 <code>📡 DevOps &amp; Monitoring</code> <code>Asana</code> <code>Slack</code>
 </td>
-<td valign="top" width="50%"></td>
+<td valign="top" width="50%">
+<a href="published/n8n-sms-status-logger/" title="Receives Twilio message status callbacks, appends every delivery event to a Google Sheet, and posts a Slack alert with a plain-English reason whenever a message fails.">SMS Status Logger</a> &middot; <a href="https://n8n.io/workflows/17342-log-twilio-sms-delivery-statuses-to-google-sheets-and-alert-slack-on-failures/">View</a><br>
+<code>📡 DevOps &amp; Monitoring</code> <code>Twilio</code> <code>Google Sheets</code> <code>Slack</code>
+</td>
 </tr>
 </table>
 
@@ -176,7 +189,7 @@ A collection of n8n workflow templates I have built, organized by their status i
 </table>
 
 <table width="100%">
-<tr><th colspan="2" align="left" width="2000"><h3>⚙️ Operations &middot; 5</h3></th></tr>
+<tr><th colspan="2" align="left" width="2000"><h3>⚙️ Operations &middot; 6</h3></th></tr>
 <tr>
 <td valign="top" width="50%">
 <a href="published/n8n-frAIday-delivery-planner/" title="Batches food delivery orders into Saturday and Sunday route plans, geocoded via OpenStreetMap, emailed every Friday.">frAIday Delivery Planner</a> &middot; <a href="https://n8n.io/workflows/16154-plan-delivery-routes-from-notion-orders-with-nominatim-and-email/">View</a><br>
@@ -202,7 +215,10 @@ A collection of n8n workflow templates I have built, organized by their status i
 <a href="published/n8n-asana-calendar-sync/" title="Mirrors the due dates of one Asana project into a Google Calendar on a timer, creating, moving, and deleting events as tasks change, with the task GID kept in each event description so re-runs never duplicate.">Asana Calendar Sync</a> &middot; <a href="https://n8n.io/workflows/17269-sync-asana-task-due-dates-with-google-calendar-events/">View</a><br>
 <code>⚙️ Operations</code> <code>Asana</code> <code>Google Calendar</code>
 </td>
-<td valign="top" width="50%"></td>
+<td valign="top" width="50%">
+<a href="published/n8n-whatsapp-faq-responder/" title="Replies to an inbound WhatsApp keyword with the matching canned answer from a Google Sheet, inside the Twilio sandbox 24 hour window, with no AI in the path.">WhatsApp FAQ Responder</a> &middot; <a href="https://n8n.io/workflows/17341-answer-whatsapp-keyword-faqs-with-twilio-and-google-sheets/">View</a><br>
+<code>⚙️ Operations</code> <code>Twilio</code> <code>Google Sheets</code>
+</td>
 </tr>
 </table>
 
@@ -212,21 +228,14 @@ Submitted to the n8n Creator hub and awaiting approval. Templates move up to `pu
 
 | Template | What it does |
 |---|---|
-| [Grounded Support Drafter](pending-review/n8n-grounded-support-drafter/) | Answers a support question about a public source, a third-party API, a public standard, or a help or regulatory page, by researching the live web with You.com, then saves the cited reply as a Gmail draft for a support agent to review and send. |
-| [Asana Sheet Mirror](pending-review/n8n-asana-sheet-mirror/) | Reads every task in one Asana project on a schedule and upserts it into a Google Sheet keyed by task GID, flagging rows whose task is gone as no longer present instead of deleting them. |
-| [WhatsApp FAQ Responder](pending-review/n8n-whatsapp-faq-responder/) | Replies to an inbound WhatsApp keyword with the matching canned answer from a Google Sheet, inside the Twilio sandbox 24 hour window, with no AI in the path. |
-| [SMS Status Logger](pending-review/n8n-sms-status-logger/) | Receives Twilio message status callbacks, appends every delivery event to a Google Sheet, and posts a Slack alert with a plain-English reason whenever a message fails. |
+| [Twilio Alert Monitor](pending-review/n8n-twilio-alert-monitor/) | Polls the Twilio Monitor Alerts API on a schedule, groups debugger errors and warnings by code and severity, logs each one to a Google Sheet, and posts a single grouped Slack digest. |
+| [SMS Deliverability Rollup](pending-review/n8n-sms-deliverability-rollup/) | Tallies the previous day of Twilio messages by status each morning, works out a delivery rate, writes one summary row to a Google Sheet, and posts the same numbers to Slack. |
+| [SMS Task Capture](pending-review/n8n-sms-task-capture/) | Turns an inbound SMS into a Notion task, reading the due date out of the message with a fixed rule table in a Code node instead of a model. |
+| [SMS Pumping Screener](pending-review/n8n-sms-pumping-screener/) | Screens every destination number in a campaign list through Twilio Lookup for line type and country, then splits the list into a safe-to-send tab and a quarantine tab. |
 
 ## Pending submission
 
 Built and tested but not yet submitted to the Creator hub. Templates move to `pending-review/` once submitted.
-
-| Template | What it does |
-|---|---|
-| [Twilio Alert Monitor](pending-submission/n8n-twilio-alert-monitor/) | Polls the Twilio Monitor Alerts API on a schedule, groups debugger errors and warnings by code and severity, logs each one to a Google Sheet, and posts a single grouped Slack digest. |
-| [SMS Deliverability Rollup](pending-submission/n8n-sms-deliverability-rollup/) | Tallies the previous day of Twilio messages by status each morning, works out a delivery rate, writes one summary row to a Google Sheet, and posts the same numbers to Slack. |
-| [SMS Task Capture](pending-submission/n8n-sms-task-capture/) | Turns an inbound SMS into a Notion task, reading the due date out of the message with a fixed rule table in a Code node instead of a model. |
-| [SMS Pumping Screener](pending-submission/n8n-sms-pumping-screener/) | Screens every destination number in a campaign list through Twilio Lookup for line type and country, then splits the list into a safe-to-send tab and a quarantine tab. |
 
 ## License
 

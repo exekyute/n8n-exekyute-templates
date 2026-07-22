@@ -1,5 +1,7 @@
 # Answer WhatsApp keyword questions from a Google Sheet FAQ
 
+[Published n8n template](https://n8n.io/workflows/17341-answer-whatsapp-keyword-faqs-with-twilio-and-google-sheets/)
+
 Most of the "chatbot" questions a small business gets are the same three questions. I did not want a model guessing at them, so this replies with the exact sentence someone typed into a spreadsheet. A customer sends HOURS to the WhatsApp number, the workflow finds that row in a Google Sheet, and it sends the answer back. Staff can change an answer by editing a cell, without opening n8n.
 
 Built with n8n, plus Twilio and Google Sheets.
