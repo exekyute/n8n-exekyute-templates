@@ -1,5 +1,7 @@
 # Sync Asana project tasks to a Google Sheet mirror
 
+[Published n8n template](https://n8n.io/workflows/17306-sync-asana-project-tasks-with-a-mirrored-google-sheets-tab/)
+
 I wanted a Google Sheet that always reflects one Asana project without babysitting it. On a schedule this workflow reads every task in the project and upserts it into the sheet keyed by task GID, so status, assignee, due date, and section stay current. When a task disappears from Asana the row is not deleted, it is flagged `present` = `No`, so the sheet stays a self-healing backup you can pivot and filter.
 
 Built with n8n, plus Asana and Google Sheets.
