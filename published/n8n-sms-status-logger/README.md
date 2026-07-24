@@ -2,15 +2,20 @@
 
 [Published n8n template](https://n8n.io/workflows/17342-log-twilio-sms-delivery-statuses-to-google-sheets-and-alert-slack-on-failures/)
 
-I kept finding out about failed text messages the slow way, by someone telling me they never got one. Twilio already knows, it just posts the answer to a callback URL and moves on. So I pointed that callback at n8n, wrote every event to a sheet, and made the failures shout in Slack with a reason a person can read instead of a five-digit code.
+Log every Twilio message status change to a Google Sheet and alert Slack the moment a delivery fails, with the error decoded into a sentence a person can read instead of a five-digit code. Twilio already posts every state change to a callback URL; this workflow points that callback at n8n, appends each event to a ledger, and lets only `failed` and `undelivered` through to Slack.
 
 Built with n8n, plus Twilio status callbacks, Google Sheets, and Slack.
 
-![The workflow on the n8n canvas: a webhook feeding two Set nodes, a Google Sheets append, an IF that splits failed deliveries to Slack, and a shared Respond to Webhook node](images/workflow.png)
+![The workflow on the n8n canvas: a webhook feeding two Set nodes, a Google Sheets append, an IF that splits failed deliveries to Slack, and a shared Respond to Webhook node.](images/workflow.png)
+
+## Use it when
+
+- A customer tells you they never got the text, and that conversation is your first sign anything failed.
+- You need per-message delivery history, not just failure pings. The sheet keeps one row per state change, successes included, so you can see which codes pile up over a week.
 
 ## How it works
 
-Twilio POSTs a form-encoded payload to the webhook every time a message changes state, so one message can produce several calls as it moves from queued to sent to delivered. The first Set node holds a static map of Twilio error codes to plain sentences. The second Set node pulls MessageSid, To, MessageStatus, and ErrorCode off the callback, normalizes the status to lowercase, and looks the code up in that map. Google Sheets then appends the whole event as a ledger row, successes included. Only after the row is written does the IF check the status, and only failed and undelivered continue to Slack. Both branches finish at the same Respond to Webhook node, which returns 200 so Twilio stops retrying.
+Twilio POSTs a form-encoded payload to the webhook every time a message changes state, so one message can produce several calls as it moves from queued to sent to delivered. The first Set node holds a static map of Twilio error codes to plain sentences; the second pulls MessageSid, To, MessageStatus, and ErrorCode off the callback, normalizes the status to lowercase, and resolves the code against that map. Google Sheets appends the whole event as a ledger row, successes included, and only after the row is written does the IF check the status and let `failed` and `undelivered` continue to Slack. Both branches finish at the same Respond to Webhook node, which returns 200 so Twilio stops retrying.
 
 | Stage | What happens |
 |---|---|
@@ -22,16 +27,22 @@ Twilio POSTs a form-encoded payload to the webhook every time a message changes 
 | Post Failure Alert To Slack | Posts the recipient, status, code, decoded reason, and message SID |
 | Return 200 To Twilio | Answers the callback on both branches so Twilio does not retry |
 
-Keeping the error map in a Set node means the alert explains the failure without a second API call, and adding a new code is one line of editing rather than another integration.
+I keep the error map in a Set node so the alert explains the failure without a second API call, and adding a new code is one line of editing rather than another integration.
+
+## Requirements
+
+- A Twilio account. A trial is enough, because the testing section below runs on mock callbacks rather than real sends.
+- A Google account with a spreadsheet the workflow can append to, and a Slack workspace with a channel for the failure alerts.
+- n8n (cloud or self-hosted) with Google Sheets and Slack credentials. No Twilio credential is needed, since Twilio calls in rather than the other way around, but the instance has to be reachable from the public internet for the callback to land.
 
 ## Setup
 
-1. Import `workflow.json` into n8n. It imports inactive, so configure it before activating.
-2. Add a Google Sheets credential on **Append Delivery Ledger Row** and a Slack credential on **Post Failure Alert To Slack**. No Twilio credential is needed, since Twilio calls in rather than the other way around.
-3. Create a sheet with the header row `received_at`, `message_sid`, `to_number`, `message_status`, `error_code`, `failure_reason`, then pick it in the Sheets node and set the tab name. Set the Slack channel you want the alerts in.
+1. Import `workflow.json` into n8n. It imports inactive; configure before activating.
+2. Add a Google Sheets credential on "Append Delivery Ledger Row" and a Slack credential on "Post Failure Alert To Slack". No Twilio credential is needed.
+3. Create a sheet with the header row `received_at`, `message_sid`, `to_number`, `message_status`, `error_code`, `failure_reason`, pick it in the Sheets node, set the tab name, and set the Slack channel you want the alerts in.
 4. Activate the workflow, copy the production webhook URL, and set it as the `StatusCallback` on your outbound messages or as the Status Callback URL on your Messaging Service. Send one message and confirm a row lands.
 
-## Testing this on a Twilio trial
+## Testing on a Twilio trial
 
 You can exercise the whole thing without sending a message or spending trial credit. Turn the workflow on, then POST form-encoded mock callbacks at the webhook URL and watch what happens.
 
@@ -44,7 +55,7 @@ You can exercise the whole thing without sending a message or spending trial cre
 
 If you want one live event, send a single SMS from the Twilio console to your own verified number with the callback URL attached. A trial account only sends to numbers you have verified, and custom message bodies are not allowed on trial, so use one of Twilio's pre-defined templates. The delivered callback that comes back is real and costs one of your free units.
 
-These are the codes the map decodes out of the box.
+These are the codes the map decodes out of the box; anything unmapped falls through as "Unmapped Twilio error code".
 
 | Code | Reason |
 |---|---|
@@ -54,6 +65,13 @@ These are the codes the map decodes out of the box.
 | 30007 | Carrier filtered the message as spam |
 | 30008 | Carrier rejected it without giving a reason |
 | 21610 | Recipient replied STOP and is unsubscribed |
+
+## Customize
+
+- Add a code by editing the single object field in "Load Twilio Error Code Map". One line per code.
+- Swap Slack for email or PagerDuty. The alert branch starts after "Check For Failed Delivery", and nothing upstream cares what listens there.
+- Widen the IF to pass other statuses to the alert branch while the sheet keeps logging everything, or add sheet columns for callback fields this build ignores.
+- Lock down the webhook before trusting the payload. It is open by default; Twilio signs every callback with an `X-Twilio-Signature` header, so validate it or restrict the path by IP.
 
 ## What is in this folder
 
