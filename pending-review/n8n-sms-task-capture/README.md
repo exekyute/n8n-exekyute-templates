@@ -1,14 +1,20 @@
 # Turn inbound SMS into Notion tasks with deterministic due-date parsing
 
-I kept thinking of things to do while nowhere near a laptop, so I wanted a task inbox I could hit from a text message. This workflow takes an inbound SMS to a Twilio number, reads a due date out of the text using a fixed rule table in a Code node, and creates a Notion page with that date. No model is involved, so the same wording always produces the same date and I can read the rules instead of guessing at them.
+Text a task to a Twilio number and it becomes a Notion page with a due date parsed straight out of the message. The parsing is a fixed rule table in a Code node, not a model, so the same wording always produces the same date and the rules are there to read instead of guess at. A message with no date phrase still becomes a page, with Needs Review ticked and the raw text stored, so nothing is dropped.
 
 Built with n8n, plus Twilio and Notion.
 
-![The inbound SMS to Notion task workflow on the n8n canvas](images/workflow.png)
+![The inbound SMS to Notion task workflow on the n8n canvas, running from a Twilio trigger through a normalize Set node and a rule-table Code node into two Notion branches.](images/workflow.png)
+
+## Use it when
+
+- A task occurs to you nowhere near a laptop, and by the time you are back at one it is gone.
+- You keep tasks in a Notion database and want a capture path that works from any phone that can send a text.
+- You need `file taxes by friday` to resolve to the same date every time, with a rule you can point at when it surprises you.
 
 ## How it works
 
-A Twilio Trigger fires when the number receives a message. A Set node pulls the body and the sender into predictable fields and makes a lowercased copy for matching. A Code node runs a short list of regular expressions against that copy, resolves the first match to a real date with Luxon in one declared timezone, and strips the matched phrase out of the title. An IF node checks whether a date came back. If it did, a Notion node creates the page with the Due date filled in. If it did not, a second Notion node creates the same page with a Needs Review checkbox ticked and the raw message stored, so nothing is dropped.
+A Twilio Trigger fires when the number receives a message. A Set node pulls the body and the sender into predictable fields and makes a lowercased copy for matching. A Code node runs a short list of regular expressions against that copy, resolves the first match to a real date with Luxon in one declared timezone, and strips the matched phrase out of the title. An IF node splits on whether a date came back: one Notion node creates the page with Due filled in, the other creates it with Needs Review ticked and the raw message stored.
 
 | Stage | What happens |
 |---|---|
@@ -19,18 +25,24 @@ A Twilio Trigger fires when the number receives a message. A Set node pulls the 
 | Create Notion Task With Due Date | Creates the page with the cleaned title and the parsed Due date |
 | Create Notion Task Flagged For Review | Creates the page with the original text, ticks Needs Review, and leaves Due blank |
 
-Because the parser is a fixed table rather than a model, the mapping from text to date is something you can read, test, and change in one place.
+I keep the parser in a plain rule table because the mapping from text to date should be something you can read, test, and change in one place.
+
+## Requirements
+
+- A Twilio account with an SMS-capable number. A free trial is enough; see the trial section below.
+- A Notion task database with a title property, a date property named `Due`, a checkbox named `Needs Review`, and a text property named `Source`.
+- n8n (cloud or self-hosted) that Twilio can reach from the internet, with Twilio and Notion credentials.
 
 ## Setup
 
-1. Import `workflow.json` into n8n. It imports inactive, so configure it before activating.
+1. Import `workflow.json` into n8n. It imports inactive; configure before activating.
 2. Add a Twilio credential (Account SID and Auth Token) and assign it to "Inbound SMS Received". Add a Notion credential and assign it to both Notion nodes.
 3. In the Twilio console, open your phone number and point the "A message comes in" webhook at the trigger's production URL, method POST.
-4. Open both Notion nodes and pick your task database. The database needs a title property, a date property named `Due`, a checkbox named `Needs Review`, and a text property named `Source`.
+4. Open both Notion nodes and pick your task database. It needs the four properties listed under Requirements.
 5. Open "Parse Due Date From Rule Table" and set `TIMEZONE` on the first line to the zone your due dates should be read in. It ships as `America/Halifax`.
 6. Run it once with a test text, check the Notion page, then activate.
 
-## The rule table and testing on a Twilio trial
+## The rule table
 
 The parser tries these in order and stops at the first hit. Matching is case-insensitive because the Set node lowercases the text first.
 
@@ -45,7 +57,16 @@ The parser tries these in order and stops at the first hit. Matching is case-ins
 
 Weekdays accept short forms (`mon`, `tues`, `thurs`), and months accept short forms (`jan`, `sept`). The matched phrase is cut out of the title, so `call vendor tomorrow` becomes a task called `call vendor` due tomorrow. If nothing matches, `dueIso` comes back empty and the false branch handles it.
 
-You can exercise all of this on a Twilio trial without spending a single free message or burning a verified-number slot. The trial's restrictions are on what you send out, and this workflow sends nothing: inbound receiving is unrestricted. Point the number's inbound webhook at the trigger, then text it from your own phone with a bare task, `call vendor tomorrow`, `file taxes by friday`, and `ship it in 3 days`. Confirm each one lands in Notion with the date you expect, and that the bare task arrives with Needs Review ticked rather than failing the run.
+## Testing on a Twilio trial
+
+You can exercise all of this on a trial without spending a single free message or burning a verified-number slot. The trial's restrictions are on what you send out, and this workflow sends nothing: inbound receiving is unrestricted. Point the number's inbound webhook at the trigger, then text it from your own phone with a bare task, `call vendor tomorrow`, `file taxes by friday`, and `ship it in 3 days`. Confirm each one lands in Notion with the date you expect, and that the bare task arrives with Needs Review ticked rather than failing the run.
+
+## Customize
+
+- Add rules to the `RULES` array in the Code node. They are tried top down, and each entry is a pattern plus a resolver returning a Luxon DateTime.
+- Change `TIMEZONE` at the top of the same node to move every resolved date into another zone.
+- Add a priority or project field by adding a `propertyValues` entry on the Notion nodes.
+- Route unmatched messages elsewhere by pointing the false branch at Slack or email instead of the review page.
 
 ## What is in this folder
 
