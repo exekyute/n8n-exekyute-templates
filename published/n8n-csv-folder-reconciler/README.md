@@ -2,37 +2,46 @@
 
 [Published n8n template](https://n8n.io/workflows/16700-reconcile-daily-google-drive-csv-exports-into-a-master-file-and-send-a-slack-recap/)
 
-Multi-branch teams export a CSV a day, and someone ends up stitching them into one clean file by hand. This workflow merges every CSV in a Google Drive folder into a single deduplicated master, quarantines every bad row to a dated reject file with the reason it failed, and posts a rows in, merged, quarantined, duplicates recap to Slack. No AI, fully rule based, so the same input always produces the same result.
+Merge every CSV in a Google Drive folder into one deduplicated master file, quarantine every bad row to a dated reject file with the reason it failed, and post a rows in, merged, quarantined, duplicates recap to Slack. The reconciliation is rule based end to end, driven by an editable block of required columns, a dedup key, and format checks at the top of a single Code node, so the same input always produces the same result.
 
 Built with n8n, plus Google Drive and Slack.
 
-![The CSV Folder Reconciler workflow on the n8n canvas](images/workflow.png)
+![The CSV Folder Reconciler workflow on the n8n canvas, running from a schedule trigger through Drive download and parsing into a reconcile Code node that fans out to a master lane, a reject lane, and a Slack recap.](images/workflow.png)
+
+## Use it when
+
+- Every branch or system drops its own daily CSV export into a shared Drive folder, and someone stitches them into one clean file by hand each morning.
+- Two exports overlap and the same order lands twice. The dedup key keeps the first occurrence and quarantines the copy, so the totals stop drifting.
+- Someone asks why a row disappeared during the merge, and the honest answer today is a shrug. Here the reject file answers with the exact reason.
 
 ## How it works
 
-On a schedule, the workflow lists every CSV in the folder, downloads and parses each one, and merges all the rows. A Code node validates each row, deduplicates on a key, and splits the clean rows from the bad ones. The good rows are written to a dated master CSV and the rejected rows to a dated reject file, both uploaded back to Drive, and a recap is posted to Slack.
+On a schedule, the workflow lists every CSV in the folder, downloads and parses each one, and merges all the rows. A Code node validates each row, deduplicates on the key, and splits the clean rows from the bad ones. Good rows become a dated master CSV and bad rows a dated reject file, both uploaded back to Drive, and a recap posts to Slack. The Drive steps retry a few times on a transient error.
 
 | Stage | What happens |
 |---|---|
-| Run on schedule | A Schedule Trigger fires once a day |
-| List and download | Google Drive lists every CSV in the folder and downloads each one |
-| Parse | Extract from File turns each CSV into rows |
-| Reconcile | A Code node merges all rows, validates each, deduplicates on the key, and splits good from bad |
-| Write master | Convert to File builds a clean master CSV of the deduped good rows, uploaded to Drive |
-| Quarantine | Every bad row is written to a dated reject file with a reason, uploaded to Drive |
-| Recap | Slack receives the rows in, merged, quarantined, and duplicates counts |
+| Run on Schedule | Fires once a day |
+| List CSV Files in Folder, Download Each CSV, Parse CSV Rows | Lists every CSV in the folder, skips the `reconciled-` output prefix, downloads each file, and turns it into rows |
+| Reconcile CSVs | Merges all rows, validates each, deduplicates on the key, and splits good from bad |
+| Master Rows, Build Master CSV, Upload Master CSV | The deduped good rows become a dated master CSV on Drive |
+| Reject Rows, Build Reject CSV, Upload Reject CSV | Every bad row lands in a dated reject file with a reason, back on Drive |
+| Post Recap to Slack | Posts the rows in, merged, quarantined, and duplicates counts |
 
-The reject file and the recap are the point: every row that does not reach the master is accounted for, so a run is auditable instead of a silent merge.
+I made the reject lane and the recap the point: every row that does not reach the master is accounted for, so a run is auditable instead of a silent merge.
+
+## Requirements
+
+- A Google Drive account with access to the folder the exports land in (OAuth2 credential).
+- A Slack workspace with a channel for the recap (bot token or OAuth2 credential).
+- n8n (cloud or self-hosted) with Google Drive and Slack credentials.
 
 ## Setup
 
-1. Import `workflow.json` into n8n. It imports inactive, so configure it before activating.
-2. Assign a Google Drive credential to the four Google Drive nodes, and a Slack credential to the recap node.
-3. In "List CSV Files in Folder", pick the folder your exports land in.
+1. Import `workflow.json` into n8n. It imports inactive; configure before activating.
+2. Assign a Google Drive credential to the four Google Drive nodes, and a Slack credential to "Post Recap to Slack".
+3. In "List CSV Files in Folder", pick the folder your exports land in; in "Upload Master CSV" and "Upload Reject CSV", pick the folder for the output files; in "Post Recap to Slack", pick the channel.
 4. In "Reconcile CSVs", set the required columns, the dedup key, and the format checks in the block at the top of the node.
-5. In "Upload Master CSV" and "Upload Reject CSV", pick the folder to write the output files to.
-6. In "Post Recap to Slack", pick the channel.
-7. Run it once on a few test files, then activate.
+5. Run it once on a few test files, then activate.
 
 ## The reconciliation rules
 
@@ -47,7 +56,7 @@ const OUTPUT_PREFIX = 'reconciled';
 
 A row must have every required column present and non-empty, a non-empty key, and pass the format checks (integer, number, or date as YYYY-MM-DD). A row that fails is quarantined with the reason. Surviving rows are deduplicated on the key column, keeping the first occurrence and quarantining later duplicates.
 
-## What gets quarantined
+## The reject lane and the recap
 
 Every row that does not reach the master goes to `reconciled-rejects-YYYY-MM-DD.csv` with three audit columns added:
 
@@ -57,43 +66,16 @@ Every row that does not reach the master goes to `reconciled-rejects-YYYY-MM-DD.
 | reject_type | `invalid`, `duplicate`, or `unreadable_file` |
 | reject_reason | The specific reason, for example `column "qty" is not a valid integer (got "abc")` |
 
-The master file, `reconciled-master-YYYY-MM-DD.csv`, holds only the clean deduped rows, with no audit columns.
+A file that cannot be parsed is logged as an `unreadable_file` and the run carries on, so one bad file never halts the reconciliation. The master file, `reconciled-master-YYYY-MM-DD.csv`, holds only the clean deduped rows, with no audit columns. When nothing is quarantined no reject file is written, and when no valid rows survive no master is written.
 
-## The recap
-
-The Slack message reconciles the whole run:
-
-```
-CSV Folder Reconciler run (2026-06-28)
-Files read: 4
-Rows in: 14
-Merged to master: 8
-Quarantined (invalid): 4
-Duplicates dropped: 2
-Unreadable files: 1
-Master file: reconciled-master-2026-06-28.csv
-Reject file: reconciled-rejects-2026-06-28.csv (7 rows)
-```
-
-Rows in always equals merged plus quarantined plus duplicates, so the numbers balance.
-
-## Error handling
-
-The Drive steps retry a few times on a transient error. A file that cannot be parsed is logged to the reject file as an `unreadable_file` and the run carries on, so one bad file never halts the reconciliation. When nothing is quarantined, no reject file is written; when there are no valid rows, no master is written. The recap always posts.
+The Slack recap reconciles the whole run: files read, rows in, merged to master, quarantined, duplicates dropped, unreadable files, and both output filenames with the reject row count. Rows in always equals merged plus quarantined plus duplicates, so the numbers balance. The recap posts either way.
 
 ## Customize
 
-- Edit the rules block to change the required columns, the dedup key, or the format checks.
-- Change the schedule, or the `reconciled` output prefix.
+- Edit the rules block to change the required columns, the dedup key, the format checks, or the `reconciled` output prefix.
+- Change the schedule in "Run on Schedule", or drop the Slack node to run with Google Drive only.
 - Point the two upload nodes at a separate output folder. The List node already skips the `reconciled-` prefix, so writing the outputs back to the same folder is safe too.
-- Drop the Slack node to run with Google Drive only.
-- Optional paid upgrade: feed only the count summary (never the file contents) to a cheap LLM (Groq free, or gpt-4o-mini / Claude Haiku) for a smoother narrative recap line. The base workflow does not use it and ships fully free.
-
-## Requirements
-
-- n8n.
-- A Google Drive credential (OAuth2) with access to the folder.
-- A Slack credential (bot token or OAuth2).
+- Optional paid upgrade: feed only the count summary (never the file contents) to a cheap LLM (Groq free, or gpt-4o-mini / Claude Haiku) for a smoother narrative recap line. The base workflow ships fully free without it.
 
 ## What is in this folder
 
