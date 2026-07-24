@@ -1,103 +1,62 @@
-# Litigation limitation and deadline calculator (n8n template)
+# Calculate litigation limitation deadlines and reminders in Google Calendar
 
-Calculate the applicable limitation period and downstream procedural deadlines for a
-litigation matter from a single intake form, then write them to a calendar, log them, and
-post staggered reminders. The dates are computed from an editable, jurisdiction-aware rules
-table with Luxon, and every deadline records the exact rule that produced it.
+[Published n8n template](https://n8n.io/workflows/16993-calculate-litigation-deadlines-from-intake-forms-with-google-calendar-sheets-slack-and-gmail/)
 
-> **Not legal advice.** This template is a scheduling aid. Limitation and procedural rules
-> change and have many exceptions (discoverability, notice periods, suspensions, parties under
-> disability, and more). Verify every date against the current statute and rules of court
-> before relying on it.
+> **Not legal advice.** This template is a scheduling aid. Limitation and procedural rules change and have many exceptions (discoverability, notice periods, suspensions, parties under disability, and more). Verify every date against the current statute and rules of court before relying on it.
 
-## What it does
+Calculate the applicable limitation period and downstream procedural deadlines for a litigation matter from a single intake form, then write them to a calendar, log them, and post staggered reminders. The dates are computed from an editable, jurisdiction-aware rules table with Luxon, and every deadline records the exact rule that produced it.
 
-- Takes a trigger event (date of loss, discovery, service, or filing) and a jurisdiction.
-- Computes the basic limitation period from a discovery or loss/act anchor, the ultimate
-  limitation period where one applies, and service-driven procedural deadlines. A service or
-  filing date falls after discovery, so rather than understating the exposure the engine emits
-  a "review needed" note pointing to the correct anchor, while still computing any procedural
-  deadline from the service date.
-- Applies a transparent business-day roll: filing deadlines move forward off weekends and
-  listed holidays; reminders move back to the prior working day so an alert never lands after
-  the date it warns about. Both the raw statutory date and the adjusted date are kept.
-- Creates an all-day calendar event for each deadline and one for each staggered reminder
-  (90, 30, and 7 days out by default).
-- Appends one row per deadline to a Google Sheets register.
-- Posts a single plain-language summary to Slack and emails it through Gmail, each citing the
-  rule applied.
+Built with n8n, plus Google Calendar, Google Sheets, Slack, and Gmail.
+
+![The litigation deadline calculator on the n8n canvas, running from an intake form through a rules node and a calculation Code node into Google Calendar, Google Sheets, Slack, and Gmail.](images/workflow.png)
+
+## Use it when
+
+- A new matter lands and its key dates need to exist somewhere real before anyone forgets. One form submission produces the calendar events, the register rows, and a summary in Slack and the inbox.
+- A date gets questioned months later. Every deadline carries its rule citation plus both the raw statutory date and the adjusted one, so the register shows how each date was computed, not just what it is.
+- Reminders set by hand land on weekends, or after the date they warn about. These roll back to the prior working day, and filing deadlines roll forward.
 
 ## How it works
 
-```
-Receive Matter Intake Form
-  -> Set the Rules Table                       single config node
-  -> Calculate Matter Deadlines                matches the rule, computes dates, cites it
-     -> Append Deadline to Matter Log          Google Sheets register (dated rows and notes)
-     -> Only Dated Deadlines -> Create Deadline Event in Calendar
-     -> Split Reminders Into Rows -> Create Reminder Event in Calendar
-     -> Build Deadline Summary -> Post to Slack + Email to lawyer
-```
+The engine emits one record per deadline: the matter details, the deadline type, the computed date, the raw statutory date, whether it was rolled, the days remaining, the rule citation, and the reminder dates. Where no date can be produced (a service or filing anchor for the limitation, or a served date with no procedural rule for the jurisdiction), a dateless "review needed" note is logged and summarized but kept out of the calendar. A deadline landing past the last year the holiday list covers still rolls off weekends and carries a warning naming the year to extend the list to.
 
-The engine emits one record per deadline. Each record carries the matter details, the
-deadline type, the computed date, the raw statutory date, whether it was rolled, the days
-remaining, the rule citation, and the reminder dates. Where a date cannot be produced (a
-service or filing anchor for the limitation, or a served date with no procedural rule for the
-jurisdiction), it emits a dateless "review needed" note instead, which is logged and included
-in the summary but filtered out of the calendar. A deadline landing in a year the holiday list
-does not cover still rolls off weekends and carries a warning naming the year to extend to.
+| Stage | What happens |
+|---|---|
+| Receive Matter Intake Form | Collects the matter, the trigger event (date of loss or act, discovery, service, or filing), the jurisdiction, and the claim type |
+| Set the Rules Table | One config node holding the limitation rules, procedural rules, holidays, reminder offsets, and output targets |
+| Calculate Matter Deadlines | Matches the rule and computes the basic limitation from a discovery or loss/act anchor, the ultimate limitation where the rule defines one and the trigger is the act or omission date, and service-driven procedural deadlines; rolls filing deadlines forward off weekends and listed holidays, drops reminders already in the past, and cites the rule on every record |
+| Append Deadline to Matter Log | Appends one row per deadline to the Google Sheets register, dated rows and review notes alike |
+| Only Dated Deadlines, Create Deadline Event in Calendar | Filters out the dateless review notes, then creates one all-day event per deadline |
+| Split Reminders Into Rows, Create Reminder Event in Calendar | Creates one all-day event per surviving reminder, 90, 30, and 7 days out by default |
+| Build Deadline Summary, Post Deadline Summary to Channel, Email Deadline Summary to Lawyer | Assembles one plain-language summary citing each rule applied, posts it to Slack, and emails it through Gmail |
 
-## Jurisdictions in the default rules table
-
-Illustrative defaults are included for Ontario, British Columbia, Alberta, Saskatchewan,
-Manitoba, Nova Scotia, New Brunswick, the federal Crown, and Quebec, across common claim
-types (general civil, personal injury and motor vehicle, contract, property damage,
-defamation, municipal slip and fall, professional negligence). Ontario ships with a worked
-procedural example (statement of defence due 20 days after service). These are starting
-points to confirm and extend, not a substitute for checking the source.
-
-## Date logic and verification
-
-- **Anniversary convention** for year-based periods: the deadline is the same calendar date N
-  years later, which caps February 29 to February 28 in non-leap years.
-- **Day counting** for procedural deadlines counts the day after the anchor date as day one.
-- **Business-day roll** uses an editable holiday list.
-
-The `verification/` folder contains a harness that runs the engine's exact date logic against
-hand-computed expected dates (anniversary roll, leap year, procedural counting, reminder
-roll-back, past-reminder drop, and validation errors).
-
-```bash
-npm install
-npm run verify
-```
-
-See [verification/RESULTS.md](verification/RESULTS.md) for the cases and the latest output.
+I made the engine refuse to anchor a limitation on a service or filing date, because a date that overstates the time remaining is worse than none: the review note names the correct anchor, and the procedural deadlines still compute from the service date.
 
 ## Requirements
 
-- An n8n instance (cloud or self-hosted).
-- Credentials for Google Calendar, Google Sheets, Gmail, and Slack.
-- A Google Sheet for the deadline log, with a header row matching the columns the log node
-  writes (Matter, Client, Jurisdiction, Claim type, Deadline type, Deadline, Due date,
-  Statutory date, Rolled, Days until, Rule cited, Basis, Calculated from).
+- n8n (cloud or self-hosted) with Google Calendar, Google Sheets, Gmail, and Slack credentials. No AI keys and no paid APIs.
+- A Google Sheet for the deadline log, with a header row matching the columns the log node writes: Matter, Client, Jurisdiction, Claim type, Deadline type, Deadline, Due date, Statutory date, Rolled, Days until, Rule cited, Basis, Calculated from.
 
 ## Setup
 
-1. Import `workflow.json` into n8n.
-2. Open each Google, Slack, and Gmail node and select your credentials.
-3. Open **Set the Rules Table** and replace the placeholders:
-   `calendarId`, `logSpreadsheetId`, `logSheetName`, `slackChannel`, `fallbackNotifyEmail`.
-4. Review `limitationRules`, `proceduralRules`, and `holidays`, and adjust them for the
-   jurisdictions you practise in.
-5. Open the form trigger to get its URL, submit a test matter, and confirm the calendar,
-   sheet, Slack, and email outputs.
-6. Recommended: set a workflow-level error workflow in n8n so any failure is surfaced rather
-   than missed.
+1. Import `workflow.json` into n8n. It imports inactive; configure before activating.
+2. Open each Google Calendar, Google Sheets, Gmail, and Slack node and select your credentials.
+3. Open "Set the Rules Table" and replace the placeholders: `calendarId`, `logSpreadsheetId`, `logSheetName`, `slackChannel`, `fallbackNotifyEmail`.
+4. Review `limitationRules`, `proceduralRules`, and `holidays`, and adjust them for the jurisdictions you practise in.
+5. Open the form trigger to get its URL, submit a test matter, and confirm the calendar, sheet, Slack, and email outputs, then activate.
+6. Recommended: set a workflow-level error workflow in n8n so a failure is surfaced rather than missed.
 
-## Customizing
+## The default rules table
 
-Everything a user changes lives in the **Set the Rules Table** node:
+Illustrative defaults ship for Ontario, British Columbia, Alberta, Saskatchewan, Manitoba, Nova Scotia, New Brunswick, the federal Crown, and Quebec, across general civil, personal injury and motor vehicle, contract, property damage, defamation, municipal slip and fall, and professional negligence claims. Ontario includes a worked procedural example (statement of defence due 20 days after service). These are starting points to confirm and extend, not a substitute for checking the source.
+
+## Date logic and verification
+
+Year-based periods use the anniversary convention, the same calendar date N years later, which caps February 29 to February 28 in non-leap years. Procedural deadlines count the day after the anchor date as day one, and the business-day roll uses the editable holiday list. The `verification/` folder holds a harness that runs the engine's exact date logic against hand-computed expected dates, covering anniversary roll, leap year, procedural counting, reminder roll-back, past-reminder drop, and validation errors. Run `npm install` then `npm run verify`; [verification/RESULTS.md](verification/RESULTS.md) holds the cases and the latest output.
+
+## Customize
+
+Everything a user changes lives in the "Set the Rules Table" node, so a new jurisdiction or claim type is a table row, not a code change.
 
 - `limitationRules`: jurisdiction to claim type to `{ years, ultimateYears, basis, citation, note }`.
 - `proceduralRules`: jurisdiction to a list of `{ name, fromEvent, days, citation }`.
@@ -106,6 +65,19 @@ Everything a user changes lives in the **Set the Rules Table** node:
 - `rollDeadlinesToBusinessDay`, `rollRemindersBackToBusinessDay`: toggle the roll behaviour.
 - `timezone`: the zone used for all date math (default `America/Toronto`).
 
-## License
+## What is in this folder
 
-MIT. See [LICENSE](LICENSE). Copyright (c) 2026 Kevin Yu (https://github.com/exekyute).
+| File | What it is |
+|---|---|
+| `README.md` | This overview |
+| `TEMPLATE-DESCRIPTION.md` | The n8n Creator hub listing text |
+| `workflow.json` | The importable n8n workflow |
+| `package.json` | Runs the verification harness (`npm run verify`); Luxon is the only dependency |
+| `verification/` | The date-math harness: `engine-core.mjs`, `date-math-check.mjs`, and `RESULTS.md` |
+| `images/workflow.png` | The workflow on the n8n canvas |
+
+---
+
+All sample data is fictional. No real credentials, IDs, or endpoints are included.
+
+Part of the [n8n-exekyute-templates](../../README.md) collection. MIT licensed.
