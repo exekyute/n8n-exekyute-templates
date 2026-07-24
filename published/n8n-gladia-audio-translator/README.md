@@ -2,34 +2,50 @@
 
 [Published n8n template](https://n8n.io/workflows/17139-translate-audio-transcripts-with-gladia-google-drive-and-google-sheets/)
 
-Paste a link to a recording, pick a language, and get back both the original transcript and its translation. I built this so turning a foreign-language clip into something I can read is one form submission, not a chain of tools.
+Submit a form with a link to a recording and a target language code, and get back a Markdown file holding both the original transcript and its translation, saved to Google Drive and logged in a Google Sheet. Gladia transcribes and translates in a single pre-recorded call, with the source language auto-detected, so there is no separate translation step to configure.
 
 Built with n8n, plus Gladia, Google Drive, and Google Sheets.
 
-![The Gladia audio translator workflow](images/workflow.png)
+![The Gladia audio translator workflow on the n8n canvas, running from a form trigger through the Gladia translation call and a polling loop into Google Drive and Google Sheets.](images/workflow.png)
+
+## Use it when
+
+- A recording lands on your desk in a language you do not read, and making it readable normally means chaining a transcription tool and a translation tool. Here it is one form submission.
+- You collect multilingual voicemails, interviews, or field audio and want each one archived as a bilingual file with a log row you can search later.
+- You are publishing a clip in a second language and need the original transcript next to the translation so someone can check it.
 
 ## How it works
 
-You submit a form with a public media URL and a target language code. Gladia transcribes the audio and translates it in a single call, then the result is saved to Drive and logged to a sheet.
+The form takes a publicly reachable audio or video URL and a target language code such as `en` or `fr`. The URL must be public because Gladia fetches it directly. The workflow starts the Gladia job, polls it on a timer until it finishes or times out, then writes the result to Drive and the log sheet.
 
 | Stage | What happens |
 |---|---|
-| Form trigger | You submit a publicly reachable audio or video URL and a target language code such as `en` or `fr`. |
-| Prepare config | A Set node holds the poll interval and attempt limit and normalizes the target language. |
-| Start translation | The URL is sent to Gladia with transcription and translation turned on. Source language is auto-detected. |
-| Poll | The workflow waits, fetches the job, and routes on status. It loops until Gladia returns done, or stops after a set number of attempts. |
-| Save and log | A Code node builds a Markdown file with the original transcript and the translation, saves it to Drive, and appends a row to the log sheet. |
-| Failures | Any API error or a timeout writes a Failed row with a reason, so nothing is lost silently. |
+| When Translation Requested | Collects the media URL and the target language code from the form |
+| Prepare Config Values | Holds the poll interval and attempt limit, and normalizes the form inputs |
+| Start Gladia Translation | Sends the URL to Gladia with transcription and translation enabled; source language is auto-detected |
+| Wait for Processing | Pauses `wait_seconds` between polls |
+| Get Translation Result | Fetches the job from Gladia |
+| Route by Status | Loops back while the job runs, and stops after `max_attempts` polls |
+| Build Translation File | A Code node builds a Markdown file with the original transcript and the translation |
+| Save Translation to Drive | Saves the file to your Drive folder |
+| Log Translation in Sheets | Appends a Translated row with a link to the file |
+| Log Failure in Sheets | Any API error or timeout writes a Failed row with a reason, so nothing is lost silently |
 
-The single call is the point. Gladia detects the source language, transcribes, and translates in one pre-recorded job, so the file you get back holds both languages side by side without a separate translation step.
+I run transcription and translation as one Gladia call because the file that comes back holds both languages side by side, with no second API and no second bill to wire up.
+
+## Requirements
+
+- A Gladia account and API key. Gladia bills by audio duration beyond its free allowance, so check your plan before large batches.
+- A Google account with a Drive folder for the translation files and a spreadsheet for the log.
+- n8n (cloud or self-hosted) with Header Auth, Google Drive, and Google Sheets credentials.
 
 ## Setup
 
-1. Import `workflow.json` into n8n. It imports inactive, so configure it before turning it on.
-2. Create a Header Auth credential named `Gladia` with header name `x-gladia-key` and your Gladia API key. It is used by both Gladia HTTP nodes.
+1. Import `workflow.json` into n8n. It imports inactive; configure before activating.
+2. Create a Header Auth credential named `Gladia` with header name `x-gladia-key` and your Gladia API key. It is used by both Gladia HTTP nodes, "Start Gladia Translation" and "Get Translation Result".
 3. Connect a Google Drive credential and set the destination folder on "Save Translation to Drive".
-4. Connect a Google Sheets credential and pick the spreadsheet and tab for the log on both "Log Translation in Sheets" and "Log Failure in Sheets".
-5. Open the form URL on "When Translation Requested" and submit a public media URL to test.
+4. Connect a Google Sheets credential and pick the spreadsheet and tab on both "Log Translation in Sheets" and "Log Failure in Sheets".
+5. Open the form URL on "When Translation Requested", submit a public media URL, and check the Drive file and the log row.
 
 ## The config node
 
@@ -37,14 +53,22 @@ Everything you tune lives in one Set node, "Prepare Config Values":
 
 | Field | What it controls |
 |---|---|
-| `wait_seconds` | How long to wait between each poll of the Gladia job. |
-| `max_attempts` | How many polls before the run gives up and logs a timeout. The default 10 seconds times 60 attempts is a 10 minute ceiling. |
+| `wait_seconds` | Seconds between each poll of the Gladia job. Default 10. |
+| `max_attempts` | Polls before the run gives up and logs a timeout. Default 60, which with the 10 second wait makes a 10 minute ceiling per file. |
 
 The media URL and the target language come from the form and are normalized here, so the rest of the workflow reads clean values.
 
 ## The log sheet
 
 Both the success and failure paths append to the same sheet, so it doubles as an audit trail. The columns are Timestamp, Media URL, Detected Language, Target Language, Status, Translation Link, and Detail. A successful run writes Translated with a link to the file, and a failed run writes Failed with the reason.
+
+## Customize
+
+- **Long recordings.** Raise `max_attempts` in "Prepare Config Values"; the default gives up after about 10 minutes.
+- **Trigger.** Swap the form for a webhook, or a schedule that reads URLs from a sheet.
+- **More languages.** Request several target languages at once in the translation config on "Start Gladia Translation", then extend "Build Translation File", which currently reads only the first translation result.
+- **File layout.** The Markdown structure is assembled in "Build Translation File"; reword it there.
+- **Notifications.** Add a Slack or Gmail node after "Log Translation in Sheets" to hear when a translation is ready.
 
 ## What is in this folder
 
@@ -53,10 +77,10 @@ Both the success and failure paths append to the same sheet, so it doubles as an
 | `README.md` | This overview |
 | `TEMPLATE-DESCRIPTION.md` | The n8n Creator hub listing text |
 | `workflow.json` | The importable n8n workflow |
-| `images/` | The workflow overview image |
+| `images/workflow.png` | The workflow on the n8n canvas |
 
 ---
 
 All sample data is fictional. No real credentials, IDs, or endpoints are included.
 
-Part of the [n8n-exekyute-templates](../../) collection. MIT licensed.
+Part of the [n8n-exekyute-templates](../../README.md) collection. MIT licensed.
