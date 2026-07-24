@@ -1,46 +1,68 @@
 # Generate a sound effect variation pack from one brief using ElevenLabs and Google Drive
 
-Describe one sound once and get several ElevenLabs takes of it to choose from, each saved into a dated Google Drive folder as take-1.mp3, take-2.mp3, and so on. The sound-generation API has no seed, so re-running the same brief is exactly how you get real variety, and this workflow does that fan-out for you from a simple form.
+[Published n8n template](https://n8n.io/workflows/16954-generate-sound-effect-variation-packs-with-elevenlabs-and-google-drive/)
+
+Submit one sound brief through a form and get several ElevenLabs takes of it back, each saved into a dated Google Drive folder as take-1.mp3 through take-N.mp3. The sound-generation API has no seed, so re-running the same brief is exactly how you get real variety, and this workflow does that fan-out for you.
 
 Built with n8n, plus ElevenLabs and Google Drive.
 
-![The Sound Effect Variation Pack workflow on the n8n canvas](images/workflow.png)
+![The Sound Effect Variation Pack workflow on the n8n canvas, running from a form trigger through planning and Drive folder creation into per-take ElevenLabs generation, uploads, and a results summary.](images/workflow.png)
+
+## Use it when
+
+- You need options for one cue, not a single one-shot result you either keep or regenerate by hand. One form submission returns a small pack to audition.
+- You keep re-running the same prompt manually and losing track of which download was which. Every take here lands in one dated folder with a numbered filename.
+- You are placing a sound in a video, game, or app and want three or four candidates side by side before committing.
 
 ## How it works
 
-You submit one brief through a form and the workflow returns a small pack of takes to audition.
+A form takes the brief, a Code node clamps the inputs and plans the run, and a dated subfolder is created in Drive. The brief then fans out into one ElevenLabs call per take, each MP3 is uploaded, and the form's final page shows the folder link with a per-take result list.
 
 | Stage | What happens |
 |---|---|
-| Form trigger | Takes the sound description, how many takes you want (1 to 5), and optional duration and prompt influence. |
-| Plan and fan out | Clamps the inputs, creates a dated Drive subfolder for this run, and builds one request per take from the single brief. |
-| Generate each take | Calls the ElevenLabs sound-generation endpoint once per take. Because the API has no seed, each call returns a different result. |
-| Store each take | Uploads every returned MP3 into the subfolder as take-1.mp3 through take-N.mp3. |
-| Return the pack | Shows a link to the folder plus a per-take list, marking any take that failed rather than hiding it. |
+| When a Brief Is Submitted | Takes the sound description, a take count from 1 to 5, and optional duration and prompt influence |
+| Plan Takes and Folder | Clamps the inputs, names a run folder from the brief plus a timestamp, and plans one take per request |
+| Create Take Folder in Drive | Creates that subfolder under your configured parent folder |
+| Build Take Requests | Turns the plan into one ElevenLabs request body per take |
+| Generate Sound Effect | POSTs each request to the sound-generation endpoint; with no seed, each call comes back different |
+| Upload Take to Drive | Saves each returned MP3 into the subfolder as take-1.mp3 through take-N.mp3 |
+| Record Successful Take / Record Failed Take | Marks each take's outcome so a failed generation or upload is listed, not hidden |
+| Build Results Summary / Show the Variation Pack | Returns the folder link plus the per-take list on the form's completion page |
+| Explain Folder Problem | Returns a plain setup message when the folder ID or Drive credential is missing, instead of a generic error |
 
-The one design choice that matters: variety comes from re-generating the same prompt, not from a seed, so prompt influence is spread slightly across the takes as a second variety lever while the brief stays identical.
+I nudge prompt influence up slightly on each take as a second variety lever, because the brief itself stays identical on every call.
+
+## Requirements
+
+- An ElevenLabs account and API key. Each take is one sound-generation call, so a pack of N takes costs N generations against your plan.
+- A Google account with a Drive folder to hold the packs.
+- n8n (cloud or self-hosted) with an ElevenLabs Header Auth credential and a Google Drive OAuth2 credential that can write to that folder.
 
 ## Setup
 
-1. Import `workflow.json` into n8n. It imports inactive, so configure it before activating.
-2. Create an ElevenLabs credential as Header Auth: header name `xi-api-key`, value your ElevenLabs API key. Name it `ElevenLabs` and assign it to the "Generate Sound Effect" node.
+1. Import `workflow.json` into n8n. It imports inactive; configure before activating.
+2. Create an ElevenLabs credential as Header Auth: header name `xi-api-key`, value your ElevenLabs API key. Name it `ElevenLabs` and assign it to "Generate Sound Effect".
 3. Create a Google Drive OAuth2 credential and assign it to both Drive nodes.
 4. Open "Plan Takes and Folder" and set `PARENT_FOLDER_ID` to the Drive folder that should hold the generated packs.
 5. Run it once from the form on a short brief, then activate.
 
-## Choosing takes and variety
+## Takes and variety
 
-- Number of takes is clamped to 1 through 5. The default is 3.
-- Duration is optional and clamped to 0.5 to 30 seconds. Leave it blank to let ElevenLabs choose a natural length.
-- Prompt influence is optional (0 to 1, default 0.3). Each take nudges it up a little for extra variety, which you can change in the Code node.
-- A take that fails to generate or upload is recorded as failed and still listed, so a partial pack never looks like a total success.
-- If the output folder ID is not set or the Google Drive credential is not connected, the form returns a clear setup message instead of a generic error.
+| Input | Range | Default |
+|---|---|---|
+| Number of takes | 1 to 5 | 3 |
+| Duration | 0.5 to 30 seconds | Blank, which lets ElevenLabs choose a natural length |
+| Prompt influence | 0 to 1 | 0.3, nudged up by 0.1 per take |
 
-## Requirements
+A take that fails to generate or upload is recorded as failed and still listed, so a partial pack never looks like a total success. The Drive and ElevenLabs calls each retry up to 3 times before a take counts as failed. Takes are saved as MP3 at 44.1 kHz, 128 kbps.
 
-- n8n.
-- An ElevenLabs account and API key, used through a Header Auth credential (`xi-api-key`).
-- A Google Drive OAuth2 credential with access to the output folder.
+## Customize
+
+- Change the per-take prompt-influence step (`INFLUENCE_STEP`, 0.1) or any of the clamps in the "Plan Takes and Folder" Code node.
+- Rename the run folders in the same node: the pattern is the brief slugged to 40 characters plus a timestamp.
+- Change the audio format through the `output_format` query parameter on "Generate Sound Effect", which ships as `mp3_44100_128`.
+- Rename the files on "Upload Take to Drive", where the take-N.mp3 pattern lives.
+- Add fields to the form, then carry them into the request body in "Build Take Requests".
 
 ## What is in this folder
 
@@ -49,10 +71,10 @@ The one design choice that matters: variety comes from re-generating the same pr
 | `README.md` | This overview |
 | `TEMPLATE-DESCRIPTION.md` | The n8n Creator hub listing text |
 | `workflow.json` | The importable n8n workflow |
-| `images/` | The canvas screenshot |
+| `images/workflow.png` | The workflow on the n8n canvas |
 
 ---
 
 All sample data is fictional. No real credentials, IDs, or endpoints are included.
 
-Part of the [n8n-exekyute-templates](../../) collection. MIT licensed.
+Part of the [n8n-exekyute-templates](../../README.md) collection. MIT licensed.
