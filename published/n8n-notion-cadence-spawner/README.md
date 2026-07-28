@@ -1,5 +1,7 @@
 # Spawn recurring Notion tasks from a rules database on a schedule
 
+[Published n8n template](https://n8n.io/workflows/17549-spawn-recurring-notion-tasks-from-rules-with-data-tables-and-slack/)
+
 Read a Notion database where every row describes one recurring to-do, work out which rules are due today, and create a Notion task page for each. A Data Table ledger records what was already created, so running the workflow twice on the same day makes nothing the second time. Four recurrence patterns are supported, including the nth weekday of the month and the last one.
 
 Built with n8n, plus Notion, Slack, and n8n Data Tables.
