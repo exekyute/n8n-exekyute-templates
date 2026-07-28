@@ -4,7 +4,7 @@ A collection of n8n workflow templates I have built, organized by their status i
 
 ## Published
 
-**36 templates** are live in the n8n template library right now, grouped by area. Hit **View** on any row to open its listing on n8n.io. A template that spans two areas is listed once, under the first one.
+**40 templates** are live in the n8n template library right now, grouped by area. Hit **View** on any row to open its listing on n8n.io. A template that spans two areas is listed once, under the first one.
 
 ### 🤖 AI · 13
 
@@ -42,7 +42,9 @@ A collection of n8n workflow templates I have built, organized by their status i
 | [CSV Folder Reconciler](published/n8n-csv-folder-reconciler/) · [View](https://n8n.io/workflows/16700-reconcile-daily-google-drive-csv-exports-into-a-master-file-and-send-a-slack-recap/) | Merges every CSV in a Drive folder into one deduplicated master file, quarantines bad rows with a reason, and recaps to Slack. | Google Drive, Slack |
 | [Drive Auto-Filer](published/n8n-drive-auto-filer/) · [View](https://n8n.io/workflows/16812-file-google-drive-inbox-documents-into-dated-folders-with-a-google-sheets-audit-log/) | Files everything dropped in a Drive inbox into a dated Year, Month, Type folder tree, with an audit row written for every move. | Google Drive, Google Sheets |
 
-### 📡 DevOps & Monitoring · 6
+### 📡 DevOps & Monitoring · 8
+| [Twilio Alert Monitor](published/n8n-twilio-alert-monitor/) · [View](https://n8n.io/workflows/17399-monitor-twilio-debugger-alerts-and-send-grouped-digests-to-slack-and-google-sheets/) | Polls the Twilio Monitor Alerts API on a schedule, groups debugger errors by code and severity, logs each one, and posts one Slack digest. | Twilio, Google Sheets, Slack |
+| [SMS Deliverability Rollup](published/n8n-sms-deliverability-rollup/) · [View](https://n8n.io/workflows/17401-summarize-daily-twilio-sms-delivery-rates-to-google-sheets-and-slack/) | Counts yesterday's Twilio messages by status each morning, works out a delivery rate, and posts the same figures to a Sheet and Slack. | Twilio, Google Sheets, Slack |
 
 | Template | What it does | Stack |
 |---|---|---|
@@ -53,7 +55,8 @@ A collection of n8n workflow templates I have built, organized by their status i
 | [Asana Status Digest](published/n8n-asana-status-digest/) · [View](https://n8n.io/workflows/17271-post-a-daily-asana-project-status-digest-to-slack/) | Posts a weekday Slack digest of overdue, due-today, due-this-week, unassigned, and completed tasks, plus each person's open workload. | Asana, Slack |
 | [SMS Status Logger](published/n8n-sms-status-logger/) · [View](https://n8n.io/workflows/17342-log-twilio-sms-delivery-statuses-to-google-sheets-and-alert-slack-on-failures/) | Logs every Twilio message status change to a Sheet and alerts Slack on failure, with the error code decoded into plain words. | Twilio, Google Sheets, Slack |
 
-### 📣 Sales & Marketing · 3
+### 📣 Sales & Marketing · 4
+| [SMS Pumping Screener](published/n8n-sms-pumping-screener/) · [View](https://n8n.io/workflows/17400-screen-sms-campaign-numbers-for-high-risk-lines-with-twilio-sheets-and-slack/) | Runs every campaign number through Twilio Lookup before sending, splitting the list into a safe-to-send tab and a quarantine tab with reasons. | Twilio Lookup, Google Sheets, Slack |
 
 | Template | What it does | Stack |
 |---|---|---|
@@ -61,7 +64,8 @@ A collection of n8n workflow templates I have built, organized by their status i
 | [Media Monitor](published/n8n-media-monitor/) · [View](https://n8n.io/workflows/16296-send-scored-media-monitoring-digests-from-rss-feeds-via-smtp-email/) | Scores every matching article from RSS and Atom feeds for relevance, sentiment, and entities, then emails a digest grouped by topic. | RSS, Email |
 | [Local Business Proximity](published/n8n-local-business-proximity/) · [View](https://n8n.io/workflows/16997-log-nearby-businesses-from-openstreetmap-to-google-sheets-by-proximity/) | Pulls every business of a chosen category within a radius from OpenStreetMap into a Google Sheet, flagged by whether each lists a website. | OpenStreetMap, Google Sheets |
 
-### ⚙️ Operations · 6
+### ⚙️ Operations · 7
+| [SMS Task Capture](published/n8n-sms-task-capture/) · [View](https://n8n.io/workflows/17402-create-notion-tasks-from-inbound-sms-with-twilio-and-rule-based-date-parsing/) | Turns an inbound SMS into a Notion task, reading the due date from the message with a fixed rule table instead of a model. | Twilio, Notion |
 
 | Template | What it does | Stack |
 |---|---|---|
@@ -75,13 +79,6 @@ A collection of n8n workflow templates I have built, organized by their status i
 ## Pending review
 
 Submitted to the n8n Creator hub and awaiting approval. Templates move up to `published/` once they are live in the library.
-
-| Template | What it does | Stack |
-|---|---|---|
-| [Twilio Alert Monitor](pending-review/n8n-twilio-alert-monitor/) | Polls the Twilio Monitor Alerts API on a schedule, groups debugger errors by code and severity, logs each one, and posts one Slack digest. | Twilio, Google Sheets, Slack |
-| [SMS Deliverability Rollup](pending-review/n8n-sms-deliverability-rollup/) | Counts yesterday's Twilio messages by status each morning, works out a delivery rate, and posts the same figures to a Sheet and Slack. | Twilio, Google Sheets, Slack |
-| [SMS Task Capture](pending-review/n8n-sms-task-capture/) | Turns an inbound SMS into a Notion task, reading the due date from the message with a fixed rule table instead of a model. | Twilio, Notion |
-| [SMS Pumping Screener](pending-review/n8n-sms-pumping-screener/) | Runs every campaign number through Twilio Lookup before sending, splitting the list into a safe-to-send tab and a quarantine tab with reasons. | Twilio Lookup, Google Sheets, Slack |
 
 ## Pending submission
 

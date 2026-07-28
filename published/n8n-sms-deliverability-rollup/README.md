@@ -1,5 +1,7 @@
 # Summarize yesterday's Twilio message delivery rates to Google Sheets and Slack
 
+[Published n8n template](https://n8n.io/workflows/17401-summarize-daily-twilio-sms-delivery-rates-to-google-sheets-and-slack/)
+
 Count yesterday's Twilio messages by status every morning, work out a delivery rate, append one summary row to a Google Sheet, and post the same figures to Slack. The window covers the full previous calendar day, because Twilio statuses are not final the instant a message is accepted; a shorter lookback would count traffic still in flight. It only reads and never sends, so it cannot cost anything.
 
 Built with n8n, plus Twilio, Google Sheets, and Slack.

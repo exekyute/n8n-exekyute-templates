@@ -1,5 +1,7 @@
 # Screen a campaign number list for high-risk lines with Twilio Lookup
 
+[Published n8n template](https://n8n.io/workflows/17400-screen-sms-campaign-numbers-for-high-risk-lines-with-twilio-sheets-and-slack/)
+
 Run every number on a campaign list through Twilio Lookup before anything is sent, routing mobiles in allowed countries to a safe-to-send tab and everything else to a quarantine tab with a written reason. Bad numbers cost money twice: landlines and VoIP lines inflate the failure rate and the bill, and premium-rate VoIP lines are the raw material of SMS pumping fraud. Slack gets one summary per run with a breakdown of what was blocked.
 
 Built with n8n, plus Twilio Lookup, Google Sheets, and Slack.
