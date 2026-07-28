@@ -1,5 +1,7 @@
 # Publish a Google Sheet as a live calendar feed for Google Calendar, Apple Calendar and Outlook
 
+[Published n8n template](https://n8n.io/workflows/17548-publish-a-live-calendar-feed-from-google-sheets-to-google-apple-and-outlook/)
+
 Serve a tab of events as an RFC 5545 iCalendar feed at a stable URL, so anyone can subscribe once and see edits arrive on their own calendar. The sheet stays the source of truth: change a row and the event changes for every subscriber, delete the row and it disappears. Nothing is written back to the sheet, and a malformed cell is rejected with its row number rather than guessed at.
 
 Built with n8n, plus Google Sheets.

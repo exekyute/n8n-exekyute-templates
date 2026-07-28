@@ -1,5 +1,7 @@
 # Issue gapless sequential invoice and ticket numbers from a Data Table
 
+[Published n8n template](https://n8n.io/workflows/17547-issue-sequential-invoice-and-ticket-numbers-via-webhook-and-data-table/)
+
 POST to a webhook and get back the next number in a named sequence, formatted with your prefix and zero padding. The counter lives in an n8n Data Table, so several workflows can draw from the same sequence without each keeping its own count. Ask for `invoice` and you get `INV-000042`; ask again and you get `INV-000043`.
 
 Built with n8n, plus n8n Data Tables.

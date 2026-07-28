@@ -4,7 +4,7 @@ A collection of n8n workflow templates I have built, organized by their status i
 
 ## Published
 
-**40 templates** are live in the n8n template library right now, grouped by area. Hit **View** on any row to open its listing on n8n.io. A template that spans two areas is listed once, under the first one.
+**44 templates** are live in the n8n template library right now, grouped by area. Hit **View** on any row to open its listing on n8n.io. A template that spans two areas is listed once, under the first one.
 
 ### 🤖 AI · 13
 
@@ -24,7 +24,7 @@ A collection of n8n workflow templates I have built, organized by their status i
 | [Open Questions Researcher](published/n8n-open-questions-researcher/) · [View](https://n8n.io/workflows/17270-answer-notion-knowledge-base-questions-with-youcom-research/) | Drains a Notion queue of open questions, researching each with You.com and writing the cited answer back into its row. | Notion, You.com |
 | [Grounded Support Drafter](published/n8n-grounded-support-drafter/) · [View](https://n8n.io/workflows/17335-draft-cited-support-replies-from-public-docs-with-youcom-gmail-and-slack/) | Researches a support question across the live public web with You.com and saves a cited reply as a Gmail draft. | You.com, Gmail, Slack |
 
-### 🗃️ Data & Records · 6
+### 🗃️ Data & Records · 7
 
 | Template | What it does | Stack |
 |---|---|---|
@@ -34,6 +34,7 @@ A collection of n8n workflow templates I have built, organized by their status i
 | [YouTube Tag Normalizer](published/n8n-youtube-tag-normalizer/) · [View](https://n8n.io/workflows/17071-normalize-youtube-video-tags-using-google-sheets-vocabulary-rules/) | Normalizes a channel's video tags against a controlled vocabulary in Google Sheets, writing back only the videos that changed. | YouTube, Google Sheets |
 | [Playlist Janitor](published/n8n-playlist-janitor/) · [View](https://n8n.io/workflows/17092-clean-duplicate-and-dead-youtube-playlist-videos-with-slack-reports/) | Flags duplicate entries and dead videos in a YouTube playlist each week, reports them to Slack, and prunes the flagged items. | YouTube, Slack |
 | [Asana Sheet Mirror](published/n8n-asana-sheet-mirror/) · [View](https://n8n.io/workflows/17306-sync-asana-project-tasks-with-a-mirrored-google-sheets-tab/) | Upserts every task in one Asana project into a Google Sheet keyed by task GID, keeping status, assignee, and dates current. | Asana, Google Sheets |
+| [Notion Cadence Spawner](published/n8n-notion-cadence-spawner/) · [View](https://n8n.io/workflows/17549-spawn-recurring-notion-tasks-from-rules-with-data-tables-and-slack/) | Reads a Notion database of recurrence rules, works out which are due today, and creates one task page each without repeating on a second run. | Notion, Slack, Data Tables |
 
 ### 📁 Files & Documents · 2
 
@@ -42,7 +43,7 @@ A collection of n8n workflow templates I have built, organized by their status i
 | [CSV Folder Reconciler](published/n8n-csv-folder-reconciler/) · [View](https://n8n.io/workflows/16700-reconcile-daily-google-drive-csv-exports-into-a-master-file-and-send-a-slack-recap/) | Merges every CSV in a Drive folder into one deduplicated master file, quarantines bad rows with a reason, and recaps to Slack. | Google Drive, Slack |
 | [Drive Auto-Filer](published/n8n-drive-auto-filer/) · [View](https://n8n.io/workflows/16812-file-google-drive-inbox-documents-into-dated-folders-with-a-google-sheets-audit-log/) | Files everything dropped in a Drive inbox into a dated Year, Month, Type folder tree, with an audit row written for every move. | Google Drive, Google Sheets |
 
-### 📡 DevOps & Monitoring · 8
+### 📡 DevOps & Monitoring · 9
 
 | Template | What it does | Stack |
 |---|---|---|
@@ -54,6 +55,7 @@ A collection of n8n workflow templates I have built, organized by their status i
 | [SMS Status Logger](published/n8n-sms-status-logger/) · [View](https://n8n.io/workflows/17342-log-twilio-sms-delivery-statuses-to-google-sheets-and-alert-slack-on-failures/) | Logs every Twilio message status change to a Sheet and alerts Slack on failure, with the error code decoded into plain words. | Twilio, Google Sheets, Slack |
 | [Twilio Alert Monitor](published/n8n-twilio-alert-monitor/) · [View](https://n8n.io/workflows/17399-monitor-twilio-debugger-alerts-and-send-grouped-digests-to-slack-and-google-sheets/) | Polls the Twilio Monitor Alerts API on a schedule, groups debugger errors by code and severity, logs each one, and posts one Slack digest. | Twilio, Google Sheets, Slack |
 | [SMS Deliverability Rollup](published/n8n-sms-deliverability-rollup/) · [View](https://n8n.io/workflows/17401-summarize-daily-twilio-sms-delivery-rates-to-google-sheets-and-slack/) | Counts yesterday's Twilio messages by status each morning, works out a delivery rate, and posts the same figures to a Sheet and Slack. | Twilio, Google Sheets, Slack |
+| [Sheet Metrics Exporter](published/n8n-sheet-metrics-exporter/) · [View](https://n8n.io/workflows/17546-expose-google-sheet-kpis-as-prometheus-metrics-for-grafana/) | Serves a tab of business numbers as a Prometheus exposition endpoint, so SLO targets and licence counts sit on a Grafana dashboard next to real telemetry. | Google Sheets, Prometheus, Grafana |
 
 ### 📣 Sales & Marketing · 4
 
@@ -64,7 +66,7 @@ A collection of n8n workflow templates I have built, organized by their status i
 | [Local Business Proximity](published/n8n-local-business-proximity/) · [View](https://n8n.io/workflows/16997-log-nearby-businesses-from-openstreetmap-to-google-sheets-by-proximity/) | Pulls every business of a chosen category within a radius from OpenStreetMap into a Google Sheet, flagged by whether each lists a website. | OpenStreetMap, Google Sheets |
 | [SMS Pumping Screener](published/n8n-sms-pumping-screener/) · [View](https://n8n.io/workflows/17400-screen-sms-campaign-numbers-for-high-risk-lines-with-twilio-sheets-and-slack/) | Runs every campaign number through Twilio Lookup before sending, splitting the list into a safe-to-send tab and a quarantine tab with reasons. | Twilio Lookup, Google Sheets, Slack |
 
-### ⚙️ Operations · 7
+### ⚙️ Operations · 9
 
 | Template | What it does | Stack |
 |---|---|---|
@@ -75,17 +77,13 @@ A collection of n8n workflow templates I have built, organized by their status i
 | [Asana Calendar Sync](published/n8n-asana-calendar-sync/) · [View](https://n8n.io/workflows/17269-sync-asana-task-due-dates-with-google-calendar-events/) | Mirrors dated Asana tasks into Google Calendar, moving events when dates change and removing them when a task completes or loses its date. | Asana, Google Calendar |
 | [WhatsApp FAQ Responder](published/n8n-whatsapp-faq-responder/) · [View](https://n8n.io/workflows/17341-answer-whatsapp-keyword-faqs-with-twilio-and-google-sheets/) | Answers keyword questions on a WhatsApp number with canned replies pulled from a Google Sheet FAQ tab. | Twilio, Google Sheets |
 | [SMS Task Capture](published/n8n-sms-task-capture/) · [View](https://n8n.io/workflows/17402-create-notion-tasks-from-inbound-sms-with-twilio-and-rule-based-date-parsing/) | Turns an inbound SMS into a Notion task, reading the due date from the message with a fixed rule table instead of a model. | Twilio, Notion |
+| [Sheet Calendar Feed](published/n8n-sheet-calendar-feed/) · [View](https://n8n.io/workflows/17548-publish-a-live-calendar-feed-from-google-sheets-to-google-apple-and-outlook/) | Serves a tab of events as an iCalendar feed at a stable URL, so anyone can subscribe once and see later edits arrive on their own calendar. | Google Sheets, iCalendar |
+| [Gapless Number Issuer](published/n8n-gapless-number-issuer/) · [View](https://n8n.io/workflows/17547-issue-sequential-invoice-and-ticket-numbers-via-webhook-and-data-table/) | Returns the next number in a named sequence over a webhook, formatted with a prefix and zero padding, with the counter shared in a Data Table. | Data Tables |
 
 ## Pending review
 
 Submitted to the n8n Creator hub and awaiting approval. Templates move up to `published/` once they are live in the library.
 
-| Template | What it does | Stack |
-|---|---|---|
-| [Sheet Calendar Feed](pending-review/n8n-sheet-calendar-feed/) | Serves a tab of events as an iCalendar feed at a stable URL, so anyone can subscribe once and see later edits arrive on their own calendar. | Google Sheets, iCalendar |
-| [Sheet Metrics Exporter](pending-review/n8n-sheet-metrics-exporter/) | Serves a tab of business numbers as a Prometheus exposition endpoint, so SLO targets and licence counts sit on a Grafana dashboard next to real telemetry. | Google Sheets, Prometheus, Grafana |
-| [Notion Cadence Spawner](pending-review/n8n-notion-cadence-spawner/) | Reads a Notion database of recurrence rules, works out which are due today, and creates one task page each without repeating on a second run. | Notion, Slack, Data Tables |
-| [Gapless Number Issuer](pending-review/n8n-gapless-number-issuer/) | Returns the next number in a named sequence over a webhook, formatted with a prefix and zero padding, with the counter shared in a Data Table. | Data Tables |
 
 ## Pending submission
 

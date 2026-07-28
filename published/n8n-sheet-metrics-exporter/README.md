@@ -1,5 +1,7 @@
 # Expose Google Sheet KPIs as a Prometheus metrics endpoint for Grafana
 
+[Published n8n template](https://n8n.io/workflows/17546-expose-google-sheet-kpis-as-prometheus-metrics-for-grafana/)
+
 Serve a tab of business numbers as a Prometheus 0.0.4 text exposition endpoint, so SLO targets, licence counts and hand-counted backlogs land on a Grafana dashboard next to real telemetry. Prometheus scrapes the webhook on its own interval and the workflow answers from a short TTL cache, so a 60 second scrape does not become a Google Sheets read every 60 seconds. A blank cell is rejected and counted, never turned into a real zero.
 
 Built with n8n, plus Google Sheets.
