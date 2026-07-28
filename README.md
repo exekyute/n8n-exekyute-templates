@@ -87,6 +87,13 @@ Submitted to the n8n Creator hub and awaiting approval. Templates move up to `pu
 
 Built and tested but not yet submitted to the Creator hub. Templates move to `pending-review/` once submitted.
 
+| Template | What it does | Stack |
+|---|---|---|
+| [Sheet Calendar Feed](pending-submission/n8n-sheet-calendar-feed/) | Serves a tab of events as an iCalendar feed at a stable URL, so anyone can subscribe once and see later edits arrive on their own calendar. | Google Sheets, iCalendar |
+| [Sheet Metrics Exporter](pending-submission/n8n-sheet-metrics-exporter/) | Serves a tab of business numbers as a Prometheus exposition endpoint, so SLO targets and licence counts sit on a Grafana dashboard next to real telemetry. | Google Sheets, Prometheus, Grafana |
+| [Notion Cadence Spawner](pending-submission/n8n-notion-cadence-spawner/) | Reads a Notion database of recurrence rules, works out which are due today, and creates one task page each without repeating on a second run. | Notion, Slack, Data Tables |
+| [Gapless Number Issuer](pending-submission/n8n-gapless-number-issuer/) | Returns the next number in a named sequence over a webhook, formatted with a prefix and zero padding, with the counter shared in a Data Table. | Data Tables |
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
