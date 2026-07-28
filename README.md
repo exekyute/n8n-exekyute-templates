@@ -84,11 +84,16 @@ A collection of n8n workflow templates I have built, organized by their status i
 
 Submitted to the n8n Creator hub and awaiting approval. Templates move up to `published/` once they are live in the library.
 
+| Template | What it does | Stack |
+|---|---|---|
+| [Drive Approval Gate](pending-review/n8n-drive-approval-gate/) | Holds every new file in a Drive inbox until somebody taps Approve or Send back on a Discord message, then moves it and logs the decision. | Discord, Google Drive, Google Sheets |
+| [Discord Attachment Archiver](pending-review/n8n-discord-attachment-archiver/) | Sweeps named Discord channels daily and pulls every new attachment into a dated Google Drive folder before its signed URL expires. | Discord, Google Drive, Google Sheets |
+| [Unanswered Question Digest](pending-review/n8n-unanswered-question-digest/) | Finds the questions in a Discord help channel that nobody answered and posts them with jump links to a moderator channel each morning. | Discord, Google Sheets |
+| [Roster Drift Reconciler](pending-review/n8n-roster-drift-reconciler/) | Compares a Google Sheets roster against Discord roles each week and reports both directions of drift without ever changing a role. | Discord, Google Sheets |
 
 ## Pending submission
 
 Built and tested but not yet submitted to the Creator hub. Templates move to `pending-review/` once submitted.
-
 
 ## License
 

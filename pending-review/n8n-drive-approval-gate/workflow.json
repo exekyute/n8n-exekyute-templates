@@ -1,0 +1,762 @@
+{
+  "name": "Approve a new Google Drive file from inside Discord before it moves",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 5,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "mode": "list",
+          "value": "<__PLACEHOLDER_VALUE__Drive folder ID of the review inbox, e.g. 1QwErTyUiOpAsDfGhJkL__>"
+        },
+        "event": "fileCreated",
+        "options": {
+          "fileType": "all"
+        }
+      },
+      "id": "cc138ad7-da23-4888-9df9-8e0550627132",
+      "name": "Watch Inbox Folder",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        304
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_DRIVE_CREDENTIAL",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "guild-id",
+              "name": "discordGuildId",
+              "value": "<__PLACEHOLDER_VALUE__Discord server (guild) ID, e.g. 1123581321345589144__>",
+              "type": "string"
+            },
+            {
+              "id": "review-channel-id",
+              "name": "reviewChannelId",
+              "value": "<__PLACEHOLDER_VALUE__Discord channel ID the review card is posted to, e.g. 1123581321345589200__>",
+              "type": "string"
+            },
+            {
+              "id": "drive-id",
+              "name": "driveId",
+              "value": "My Drive",
+              "type": "string"
+            },
+            {
+              "id": "approved-folder-id",
+              "name": "approvedFolderId",
+              "value": "<__PLACEHOLDER_VALUE__Drive folder ID for approved files, e.g. 1AbCdEfGhIjKlMnOpQrStU__>",
+              "type": "string"
+            },
+            {
+              "id": "rejected-folder-id",
+              "name": "rejectedFolderId",
+              "value": "<__PLACEHOLDER_VALUE__Drive folder ID for files sent back, e.g. 1VwXyZ0123456789AbCdEf__>",
+              "type": "string"
+            },
+            {
+              "id": "log-sheet-url",
+              "name": "decisionLogUrl",
+              "value": "<__PLACEHOLDER_VALUE__Google Sheet URL for the decision log, e.g. https://docs.google.com/spreadsheets/d/1AbC.../edit__>",
+              "type": "string"
+            },
+            {
+              "id": "log-sheet-tab",
+              "name": "logSheetTab",
+              "value": "Decision Log",
+              "type": "string"
+            },
+            {
+              "id": "review-queue-name",
+              "name": "reviewQueueName",
+              "value": "Client deliverables",
+              "type": "string"
+            },
+            {
+              "id": "decision-window",
+              "name": "decisionWindowHours",
+              "value": 12,
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "1baf43df-ce80-43b2-ab3f-1402e2a59bde",
+      "name": "Set Review Settings",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        64,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const f = $json;\nconst bytes = Number(f.size || 0);\nconst units = ['B', 'KB', 'MB', 'GB', 'TB'];\nlet scaled = bytes;\nlet unitIndex = 0;\nwhile (scaled >= 1024 && unitIndex < units.length - 1) { scaled = scaled / 1024; unitIndex = unitIndex + 1; }\nconst sizeHuman = bytes > 0 ? (unitIndex === 0 ? bytes + ' B' : scaled.toFixed(1) + ' ' + units[unitIndex]) : 'not reported by Drive';\nconst previewLink = f.webViewLink || ('https://drive.google.com/file/d/' + f.id + '/view');\nconst fileKind = (f.mimeType || 'unknown').replace('application/vnd.google-apps.', 'Google ');\nconst reviewCard = [\n  '**Review needed: ' + (f.name || 'Untitled file') + '**',\n  'Queue: ' + (f.reviewQueueName || 'Client deliverables'),\n  'Type: ' + fileKind,\n  'Size: ' + sizeHuman,\n  'Landed in the inbox: ' + (f.createdTime || 'unknown'),\n  'Preview: ' + previewLink,\n  '',\n  'Approve moves it to the shared folder. Send back moves it to the rework folder.'\n].join('\\n');\nreturn { json: { fileId: f.id, fileName: f.name || 'Untitled file', mimeType: f.mimeType || '', fileKind, sizeBytes: bytes, sizeHuman, previewLink, createdTime: f.createdTime || '', reviewCard } };"
+      },
+      "id": "3ffc1f85-4d94-476b-9f0c-f300b8427936",
+      "name": "Build Review Card",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendAndWait",
+        "guildId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Set Review Settings').first().json.discordGuildId }}"
+        },
+        "channelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Set Review Settings').first().json.reviewChannelId }}"
+        },
+        "message": "={{ $json.reviewCard }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Approve",
+            "disapproveLabel": "Send back"
+          }
+        },
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": "={{ $('Set Review Settings').first().json.decisionWindowHours }}"
+            }
+          },
+          "appendAttribution": false
+        }
+      },
+      "id": "a55e3479-aafa-40a8-bcc1-ac3663630c08",
+      "name": "Request Approval In Discord",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        848,
+        320
+      ],
+      "credentials": {
+        "discordBotApi": {
+          "id": "REPLACE_WITH_YOUR_DISCORD_CREDENTIAL",
+          "name": "Discord Bot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Loop Over Files').first().json.fileId }}"
+        },
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "={{ $('Set Review Settings').first().json.driveId }}",
+          "cachedResultName": "From Set Review Settings"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Set Review Settings').first().json.approvedFolderId }}"
+        }
+      },
+      "id": "538e0c06-9a87-42fe-a2ec-b1a9cc5dd6ca",
+      "name": "Move To Approved Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1344,
+        240
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_DRIVE_CREDENTIAL",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "={{ $('Set Review Settings').first().json.decisionLogUrl }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Set Review Settings').first().json.logSheetTab }}"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Decided At": "={{ $now.toISO() }}",
+            "File Name": "={{ $json.fileName }}",
+            "File ID": "={{ $json.fileId }}",
+            "Size": "={{ $json.sizeHuman }}",
+            "Type": "={{ $json.mimeType }}",
+            "Preview Link": "={{ $json.previewLink }}",
+            "Decision": "={{ $json.decision }}",
+            "Destination Folder ID": "={{ $json.destinationFolderId }}",
+            "Reviewed In Channel": "={{ $('Set Review Settings').first().json.reviewChannelId }}",
+            "Execution ID": "={{ $execution.id }}"
+          },
+          "schema": [
+            {
+              "id": "Decided At",
+              "displayName": "Decided At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "File Name",
+              "displayName": "File Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "File ID",
+              "displayName": "File ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Size",
+              "displayName": "Size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Type",
+              "displayName": "Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Preview Link",
+              "displayName": "Preview Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Decision",
+              "displayName": "Decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Destination Folder ID",
+              "displayName": "Destination Folder ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reviewed In Channel",
+              "displayName": "Reviewed In Channel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Execution ID",
+              "displayName": "Execution ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED"
+        }
+      },
+      "id": "b33c4912-7961-44d8-90ee-ef8bc045272d",
+      "name": "Log Decision To Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1824,
+        352
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_SHEETS_CREDENTIAL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Loop Over Files').first().json.fileId }}"
+        },
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "={{ $('Set Review Settings').first().json.driveId }}",
+          "cachedResultName": "From Set Review Settings"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Set Review Settings').first().json.rejectedFolderId }}"
+        }
+      },
+      "id": "e481a839-31a7-4ac5-8dad-94a3a3afd2ee",
+      "name": "Move To Rejected Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1344,
+        480
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_DRIVE_CREDENTIAL",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "e7518449-8706-47d6-86ff-8d31c0fa7650",
+      "name": "Loop Over Files",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        512,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Set Review Settings').first().json.discordGuildId }}"
+        },
+        "channelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Set Review Settings').first().json.reviewChannelId }}"
+        },
+        "content": "=**{{ $('Resolve Decision Outcome').first().json.fileName }}**: {{ $('Resolve Decision Outcome').first().json.decision }}. {{ $('Resolve Decision Outcome').first().json.outcome }} Execution {{ $execution.id }}.",
+        "options": {
+          "flags": [
+            "SUPPRESS_EMBEDS"
+          ]
+        }
+      },
+      "id": "28b6472d-ad70-4c56-b367-5a592946d281",
+      "name": "Post Decision Receipt",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        2048,
+        352
+      ],
+      "credentials": {
+        "discordBotApi": {
+          "id": "REPLACE_WITH_YOUR_DISCORD_CREDENTIAL",
+          "name": "Discord Bot account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## Approve a new Google Drive file from inside Discord before it moves\n\nA client deliverable lands in an inbox folder and nothing moves until a person taps a button. The Discord node posts the file card with real Approve and Send back buttons and pauses the execution until someone answers, so a freelancer clearing an agency deliverable, or a moderator clearing user-submitted media, decides from their phone without opening a second tool.\n\n### How it works\n1. A Google Drive trigger polls the inbox folder and fires on each new file, and `Set Review Settings` supplies every ID and constant from one node.\n2. `Build Review Card` turns raw Drive metadata into a readable card: name, human-readable size, type and a preview link.\n3. `Loop Over Files` hands the reviewer one file at a time, so cards never pile up.\n4. `Request Approval In Discord` posts the card with Approve and Send back buttons and pauses this execution until someone taps one.\n5. `Route Reviewer Decision` sends approved files to the shared folder, sent-back files to the rework folder, and an expired decision window to neither.\n6. `Resolve Decision Outcome` names what actually happened, the row is appended to the decision sheet, and a receipt goes back to the channel.\n\n### Setup steps\n- [ ] Create a Discord application, add a bot, and invite it to your server with Send Messages on the review channel.\n- [ ] Connect the Discord Bot credential. No privileged intents needed: this template never reads message content or the member list.\n- [ ] Connect your Google Drive and Google Sheets credentials.\n- [ ] Point the trigger at your inbox folder ID.\n- [ ] Fill `Set Review Settings`: guild ID, review channel ID, approved and rejected folder IDs, log sheet URL, tab name and the decision window in hours.\n- [ ] Give the log sheet these headers: Decided At, File Name, File ID, Size, Type, Preview Link, Decision, Destination Folder ID, Reviewed In Channel, Execution ID.\n- [ ] Drop one test file in the inbox and complete the round trip before you trust the queue.\n\n### Customization\n`decisionWindowHours` sets how long a card waits before the run is recorded as `No response` and the file is left in the inbox. Shorten the trigger poll interval for a busier queue and accept the extra API calls. Set `driveId` to a Shared Drive ID if your deliverables do not live in My Drive.",
+        "height": 956,
+        "width": 660
+      },
+      "id": "fb2fc6a5-bfd2-4fde-8173-b9536c7e0a8b",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1008,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Watch the inbox and build the card\n\nThe Drive trigger polls rather than pushes, so a file can wait up to the poll interval before its card appears in Discord. Every ID and constant lives in `Set Review Settings`, so this template is configured in one node.",
+        "height": 380,
+        "width": 948,
+        "color": 7
+      },
+      "id": "ed44d200-6a35-4100-9a2a-d804bdb30d2d",
+      "name": "Section Watch And Build",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Ask Discord and wait for a tap\n\n`sendAndWait` renders real buttons and pauses this execution until someone taps one. Files are handled one at a time.",
+        "height": 478,
+        "width": 412,
+        "color": 7
+      },
+      "id": "430d8aee-a99e-494e-81fa-35f802c15f53",
+      "name": "Section Ask And Wait",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        800,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Route, move, log and confirm\n\nThree outcomes are logged distinctly: approved, sent back, and nobody answered. A failed Drive move is caught per file, so one bad file cannot kill the rest of the batch.",
+        "height": 606,
+        "width": 944,
+        "color": 7
+      },
+      "id": "bf1e9473-b5a6-45b4-8c95-429822ed2af8",
+      "name": "Section Move Log Confirm",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Read before you activate\n\nYour n8n instance must be reachable at its webhook URL. The Discord buttons point at that URL, so a self-hosted instance behind a firewall, or one without `WEBHOOK_URL` set correctly, renders buttons nobody can complete.\n\n**Nothing moves unless a human decides.** If the decision window expires the file is left in the inbox and the run is logged as `No response`. An expired window is never recorded as a rejection.\n\nBoth Approve and Send back MOVE the file out of the inbox, and each is one way. Point both folder IDs at real folders before the first run. For a Shared Drive, set `driveId` in `Set Review Settings` to the drive ID instead of `My Drive`.",
+        "height": 308,
+        "width": 932,
+        "color": 3
+      },
+      "id": "45506c2f-fc73-40d7-948c-a724f17d8c5e",
+      "name": "Warning Before You Activate",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "is-approved",
+                    "leftValue": "={{ $json.data && $json.data.approved === true }}",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "rightValue": ""
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "is-rejected",
+                    "leftValue": "={{ $json.data && $json.data.approved === false }}",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "rightValue": ""
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "No Response"
+        }
+      },
+      "id": "cf79e07e-36e8-4d36-a8c1-d5730f390286",
+      "name": "Route Reviewer Decision",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1072,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Single place where the three real outcomes are named: answered and moved,\n// answered but Drive refused the move, and nobody answered at all.\n// Without this, an expired window is logged as a rejection no human made.\n\nvar settings = $('Set Review Settings').first().json;\nvar file = $('Loop Over Files').first().json;\nvar wait = $('Request Approval In Discord').first().json || {};\nvar incoming = $input.first().json || {};\n\nvar answered = Boolean(wait.data) && typeof wait.data.approved === 'boolean';\nvar approved = answered ? wait.data.approved === true : false;\nvar moveFailed = Boolean(incoming.error);\n\nvar decision, destination, outcome;\nif (!answered) {\n  decision = 'No response';\n  destination = '';\n  outcome = 'Nobody answered inside the ' + String(settings.decisionWindowHours) +\n            'h window. Nothing was moved and the file is still in the inbox.';\n} else if (moveFailed) {\n  decision = approved ? 'Approved, move failed' : 'Sent back, move failed';\n  destination = '';\n  var msg = (incoming.error && incoming.error.message) ? String(incoming.error.message) : 'unknown error';\n  outcome = 'Drive refused the move: ' + msg.slice(0, 200) + '. The file is still in the inbox.';\n} else {\n  decision = approved ? 'Approved' : 'Sent back';\n  destination = approved ? String(settings.approvedFolderId) : String(settings.rejectedFolderId);\n  outcome = approved ? 'Moved to the shared folder.' : 'Moved to the rework folder.';\n}\n\nreturn [{ json: {\n  decision: decision,\n  destinationFolderId: destination,\n  outcome: outcome,\n  answered: answered,\n  approved: approved,\n  moveFailed: moveFailed,\n  fileId: file.fileId,\n  fileName: file.fileName,\n  sizeHuman: file.sizeHuman,\n  mimeType: file.mimeType,\n  previewLink: file.previewLink\n} }];"
+      },
+      "id": "571dd429-afd6-4349-8abf-9e72d81941c3",
+      "name": "Resolve Decision Outcome",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1552,
+        352
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Watch Inbox Folder": {
+      "main": [
+        [
+          {
+            "node": "Set Review Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Review Settings": {
+      "main": [
+        [
+          {
+            "node": "Build Review Card",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Review Card": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move To Approved Folder": {
+      "main": [
+        [
+          {
+            "node": "Log Decision To Sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Resolve Decision Outcome",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resolve Decision Outcome",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Decision To Sheet": {
+      "main": [
+        [
+          {
+            "node": "Post Decision Receipt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move To Rejected Folder": {
+      "main": [
+        [
+          {
+            "node": "Log Decision To Sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Resolve Decision Outcome",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resolve Decision Outcome",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Files": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Request Approval In Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Decision Receipt": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request Approval In Discord": {
+      "main": [
+        [
+          {
+            "node": "Route Reviewer Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Reviewer Decision": {
+      "main": [
+        [
+          {
+            "node": "Move To Approved Folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Move To Rejected Folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resolve Decision Outcome",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve Decision Outcome": {
+      "main": [
+        [
+          {
+            "node": "Log Decision To Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {},
+  "tags": []
+}
