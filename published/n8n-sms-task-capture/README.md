@@ -1,5 +1,7 @@
 # Turn inbound SMS into Notion tasks with deterministic due-date parsing
 
+[Published n8n template](https://n8n.io/workflows/17402-create-notion-tasks-from-inbound-sms-with-twilio-and-rule-based-date-parsing/)
+
 Text a task to a Twilio number and it becomes a Notion page with a due date parsed straight out of the message. The parsing is a fixed rule table in a Code node, not a model, so the same wording always produces the same date and the rules are there to read instead of guess at. A message with no date phrase still becomes a page, with Needs Review ticked and the raw text stored, so nothing is dropped.
 
 Built with n8n, plus Twilio and Notion.

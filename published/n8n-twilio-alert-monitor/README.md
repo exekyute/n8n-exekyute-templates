@@ -1,5 +1,7 @@
 # Monitor Twilio debugger alerts and post a grouped Slack digest
 
+[Published n8n template](https://n8n.io/workflows/17399-monitor-twilio-debugger-alerts-and-send-grouped-digests-to-slack-and-google-sheets/)
+
 Poll the Twilio Monitor Alerts API on a schedule, collapse whatever it returns into groups by error code and severity, log every alert to a Google Sheet, and post one Slack digest per run. Failed webhooks and rejected sends land in the Twilio debugger, which nobody opens until a customer complains; this workflow brings them to a channel someone actually reads.
 
 Built with n8n, plus Twilio, Google Sheets, and Slack.
