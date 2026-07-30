@@ -10,7 +10,6 @@ Built with n8n, plus Notion, Groq, and Slack.
 
 ## Use it when
 
-- You track several projects in Notion and start each morning opening them one by one to work out what needs attention first. This posts the answer to Slack before you open anything.
 - A project flips overnight, a blocker clears or a milestone lands in two days, and a flat status list would bury the change. The standup leads with a CHANGED OVERNIGHT block.
 - A team channel needs one shared morning signal instead of five people keeping five private mental models of project health.
 
@@ -50,7 +49,7 @@ I keep yesterday's standup in a Notion row instead of n8n's `getWorkflowStaticDa
 
 ## The data model
 
-Two Notion databases drive everything. Projects is the source data: the workflow reads these fields and posts the result to Slack, never writing back, and upkeep is about two minutes a week (a short progress note and a date).
+Two Notion databases drive everything. Projects is the source data: the workflow reads these fields and posts the result to Slack, never writing back, and upkeep is a short progress note and a date each week.
 
 | Field | Type | Purpose |
 |---|---|---|
@@ -65,18 +64,12 @@ Memory is a single row the workflow reads and overwrites each run: `Key` (Title,
 
 ## Scoring logic
 
-| Score | Triggered by |
-|---|---|
-| Red | A milestone within 3 days and not on track, a named blocker, or no update in over 14 days |
-| Yellow | No update in 7 to 14 days, or a milestone within a week with unclear progress |
-| Green | A recent update and no near-term risk |
+Red means a milestone within 3 days and not on track, a named blocker, or no update in over 14 days; Yellow means no update in 7 to 14 days, or a milestone within a week with unclear progress; Green means a recent update and no near-term risk.
 
 ## Customize
 
-- Change the trigger time on Every Morning at 7 30am.
+- Change the trigger time on Every Morning at 7 30am, or point the Slack nodes at a different channel.
 - Edit the Red, Yellow, and Green thresholds in [`ai-prompt.md`](ai-prompt.md); the exact scoring and change-detection wording lives there.
-- Swap Groq for any OpenAI-compatible chat endpoint on Score With Groq; the default model is `llama-3.3-70b-versatile`.
-- Point the Slack nodes at a different channel.
 
 ## What is in this folder
 
@@ -87,8 +80,7 @@ Memory is a single row the workflow reads and overwrites each run: `Key` (Title,
 | `workflow.json` | The importable n8n workflow (placeholders only) |
 | `workflow-error-alert.json` | The companion error-alert workflow |
 | `ai-prompt.md` | The AI scoring and change-detection prompt |
-| `synthetic-data.md` | Two-day test dataset and expected standups |
-| `projects-day1.csv` | The same sample data, ready to import into Notion |
+| `synthetic-data.md`, `projects-day1.csv` | Two-day test dataset with expected standups, plus the same rows as a Notion-ready CSV |
 | `images/workflow.png` | The workflow on the n8n canvas |
 
 ---

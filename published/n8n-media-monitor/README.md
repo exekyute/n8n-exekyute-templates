@@ -2,7 +2,7 @@
 
 [Published n8n template](https://n8n.io/workflows/16296-send-scored-media-monitoring-digests-from-rss-feeds-via-smtp-email/)
 
-Scan RSS and Atom feeds on a schedule, score every matching article for relevance, sentiment, and entity tags, and email an HTML digest grouped by topic, with optional routes that send each department only its own coverage. All the matching and scoring is plain JavaScript in Code nodes, so the same input always produces the same output, and the whole thing runs on one SMTP credential: no database, no API keys.
+Scan RSS and Atom feeds on a schedule, score every matching article for relevance, sentiment, and entity tags, and email an HTML digest grouped by topic, with optional routes that send each department only its own coverage. All the matching and scoring is plain JavaScript in Code nodes, so the same input always produces the same output, and the whole thing runs on one SMTP credential: no database, no API keys. Relevance is clamped 0 to 100, a run emails at most 50 articles, and the cross-run seen-list keeps the last 5,000 link hashes.
 
 Built with n8n, plus any SMTP email service.
 
@@ -11,7 +11,7 @@ Built with n8n, plus any SMTP email service.
 ## Use it when
 
 - The morning news scan is a manual routine: someone reads the same feeds and forwards links to each department by hand. The routes here send every team a digest filtered to just its own topics.
-- You track brand, competitor, or regulatory mentions and a paid listening tool is not in the budget. This runs on the feeds you already read.
+- You track brand, competitor, or regulatory mentions and a paid listening tool is not in the budget. The feeds you already read come back as a scored digest email instead.
 - A busy feed buries the two articles that matter. Relevance scoring sorts each digest, and a minimum-relevance floor hides the rest.
 
 ## How it works
@@ -28,7 +28,7 @@ One linear pipeline runs on the schedule and on demand from Execute Workflow. Fe
 | Has Matches? / Skip Empty Run | Drops any digest with zero matches, so quiet runs end at a no-op instead of emailing |
 | Send Email | Sends every surviving digest through the one SMTP credential |
 
-I keep every setting in the one object Config returns because tuning feeds, topics, and scoring weights in a single node beats hunting through the pipeline.
+I keep every setting in the one object Config returns instead of scattering parameters across the pipeline nodes; settings you have to hunt for are settings nobody tunes.
 
 ## Requirements
 
@@ -49,7 +49,7 @@ Each article lists under its topic with a relevance badge, a sentiment badge, so
 
 ## The seen-list
 
-De-duplication is a hashed seen-list held in this one workflow's static data, and it has two habits worth knowing. A freshly imported copy starts with an empty memory, so its first run treats everything currently in your feeds as new and can send one large digest; run it manually at a quiet time, or temporarily raise `digest.minRelevance` so the opening batch is smaller. The list also persists only on scheduled runs of the active workflow, never on manual Execute Workflow clicks, so repeated articles during testing are normal. Real de-duplication begins once the workflow is active and settles from the second scheduled run onward.
+De-duplication is a hashed seen-list held in this one workflow's static data, capped at the newest 5,000 hashes; raising `seenCap` in Config remembers further back at the cost of a larger static-data entry. A freshly imported copy starts with an empty memory, so its first run treats everything currently in your feeds as new and can send one large digest; run it manually at a quiet time, or temporarily raise `digest.minRelevance` so the opening batch is smaller. The list persists only on scheduled runs of the active workflow, never on manual Execute Workflow clicks, so repeated articles during testing are normal and real de-duplication settles from the second scheduled run onward. The workflow never stores article text; it remembers a short hash per link and nothing else.
 
 ## Verifying locally
 
@@ -65,8 +65,7 @@ npm run build   # regenerates the workflow JSON after editing the lib
 
 - **Per-source trust.** Drop a host into `scoring.sources` with a multiplier, e.g. `"yourindustryrag.example": 1.8`.
 - **Cadence.** Edit the Schedule Trigger (minutes, hours, days, or cron). For weekly digests, raise `recencyHalfLifeHours` toward 168.
-- **Sentiment words.** Add entries to `lexicon` with an integer score, conventionally -5 to +5.
-- **Noise floor.** Raise `digest.minRelevance` to hide low-scoring items, or adjust the scoring weights in Config.
+- **Noise floor.** Raise `digest.minRelevance` to hide low-scoring items, adjust the scoring weights in Config, or add sentiment words to `lexicon` with an integer score, conventionally -5 to +5.
 - **Sheets archive.** The email already groups, scores, and timestamps every match, so no second store is required; for a spreadsheet copy, add a Google Sheets node after Process Articles with `operation: append` and `mappingMode: autoMapInputData`, and the enriched fields (title, link, source, topics, relevance, sentiment, entities) map straight to columns.
 
 ## What is in this folder
