@@ -2,7 +2,7 @@
 
 [Published n8n template](https://n8n.io/workflows/17271-post-a-daily-asana-project-status-digest-to-slack/)
 
-Read one Asana project on a weekday schedule and post a status digest to Slack: overdue, due today, due this week, unassigned, and completed since yesterday, plus how much open work each person is carrying. All the classification and counting runs in plain JavaScript inside a Code node, so the numbers are exact and identical from run to run.
+Read one Asana project on a weekday schedule and post a status digest to Slack: overdue, due today, due this week, unassigned, and completed since yesterday, plus how much open work each person is carrying. All the classification and counting runs in plain JavaScript inside a Code node, so the numbers are exact and identical from run to run. Each bucket links at most 5 tasks and folds the rest into a count.
 
 Built with n8n, plus Asana and Slack.
 
