@@ -2,6 +2,8 @@
 
 A collection of n8n workflow templates I have built, organized by their status in the n8n template library.
 
+Most of them share the same working habits: rules in a table or a config block a reader can inspect, a dated row logged for every record touched, and a quarantine lane that names the reason a record was held back instead of dropping it silently. The ones that alert stay quiet unless something actually broke, and where a model drafts something a customer will read, it waits as a Gmail draft for a person to approve. Each README states its own limits too. The number issuer says exactly what its counter can promise under concurrent load, and the deadline calculator ships a verification harness for its date math.
+
 ## Published
 
 **44 templates** are live in the n8n template library right now, grouped by area. Hit **View** on any row to open its listing on n8n.io. A template that spans two areas is listed once, under the first one.
