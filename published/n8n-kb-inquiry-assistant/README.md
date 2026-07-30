@@ -2,7 +2,7 @@
 
 [Published n8n template](https://n8n.io/workflows/16813-draft-grounded-gmail-support-replies-from-a-notion-kb-with-groq-and-cohere/)
 
-Turn inbound support email into sourced, ready-to-review replies grounded in your own Notion knowledge base. The assistant is retrieval-augmented (RAG): every answer is drafted from the articles retrieved for that specific question, then saved as a Gmail draft for a person to approve. Nothing is auto-sent.
+Turn inbound support email into sourced, ready-to-review replies grounded in your own Notion knowledge base. Two independent gates keep the model from guessing: a relevance threshold stops weak retrievals before the model runs, and a draft the sources cannot support comes back as `NEEDS_HUMAN` and never reaches the reply. Nothing is auto-sent; every reply waits as a Gmail draft for a person to approve.
 
 Built with n8n, plus Notion, Groq, Cohere, and Gmail.
 
@@ -10,13 +10,12 @@ Built with n8n, plus Notion, Groq, Cohere, and Gmail.
 
 ## Use it when
 
-- Support questions land in Gmail and the answers already live in Notion, but every reply means hunting through pages and pasting by hand.
-- You want AI drafts without auto-send risk. Every reply waits as a Gmail draft for a person to review, and nothing reaches a customer on its own.
+- Support questions land in Gmail and the answers already live in Notion, but every reply means hunting through pages and pasting by hand. Each question instead comes back as a Gmail draft citing the articles it drew from.
 - A generic chatbot invents answers your docs never gave. Here the model answers from retrieved articles only, and anything the knowledge base cannot support is held back for a human.
 
 ## How it works
 
-The template runs two flows on one canvas: a one-time ingestion that indexes your Notion articles, and the live assistant that answers email. Two independent guardrails keep it from guessing: a relevance gate stops weak retrievals before the model runs, and the draft prompt replies with exactly `NEEDS_HUMAN` when the numbered sources fall short, which `Check If Answered` routes away from the customer.
+The template runs two flows on one canvas: a one-time ingestion that indexes your Notion articles, and the live assistant that answers email.
 
 | Stage | What happens |
 |---|---|
@@ -31,7 +30,7 @@ The template runs two flows on one canvas: a one-time ingestion that indexes you
 | Draft Grounded Reply and Check If Answered | Groq drafts from the retrieved sources only, and `NEEDS_HUMAN` replies are held back |
 | Build Reply With Sources and Save Draft For Review | Appends the sources list and saves a Gmail draft. Nothing is sent automatically |
 
-I embed the query with the same Cohere model as the articles so every vector lives in one space; the reranker and the confidence gate are what separate this from embed-and-hope retrieval.
+I embed the query with the same Cohere model as the articles so every vector lives in one space. Both gates fail closed rather than falling back to the model's own knowledge, and I will take a blocked draft over a confident wrong answer in a customer's inbox.
 
 ## Requirements
 
@@ -50,7 +49,7 @@ I embed the query with the same Cohere model as the articles so every vector liv
 
 ## The RAG pipeline
 
-The worked example is built around "Cadence", a fictional team time-tracking and invoicing SaaS with a 12-article knowledge base; swap in your own product, articles, and inbox. The five RAG stages map to the workflow like this:
+The worked example is built around "Cadence", a fictional team time-tracking and invoicing SaaS; swap in your own product, articles, and inbox. The five RAG stages map to the workflow like this:
 
 | RAG stage | In this workflow |
 |---|---|
@@ -64,12 +63,13 @@ The worked example is built around "Cadence", a fictional team time-tracking and
 
 *Ingestion reads published articles, chunks and embeds them, and loads the store. The store is in-memory: it runs on a single instance, clears on restart, and does no metadata filtering, so re-run ingestion after a restart.*
 
+## The two gates
+
+Retrieval confidence is checked first: when the best reranked match scores below `minRelevance` (default 0.3, set in "Normalize Email"), the draft model is never called and no draft is written. The draft prompt is the second gate: it answers from the numbered sources only and replies with exactly `NEEDS_HUMAN` when they fall short, which `Check If Answered` holds back from the customer. Upstream, `topK` in "Retrieve From KB" (default 8) and `topN` in "Rerank Matches With Cohere" (default 4) set how many chunks are retrieved and how many survive the rerank. Tightening any of the three trades coverage for trust; the price is more questions a person answers by hand.
+
 ## Customize
 
-- Swap the model in "Groq Triage Model" and "Groq Draft Model", both on `llama-3.3-70b-versatile`.
-- Tune `topK` in "Retrieve From KB" (candidate chunks retrieved, default 8) and `topN` in "Rerank Matches With Cohere" (how many reach the model, default 4).
-- Adjust `minRelevance` in "Normalize Email", default 0.3, to make the confidence gate stricter or looser.
-- Edit the categories in "Classify Inquiry" to match your inbox.
+- Swap the model in "Groq Triage Model" and "Groq Draft Model" (both on `llama-3.3-70b-versatile`), and edit the categories in "Classify Inquiry" to match your inbox.
 - Swap the Simple Vector Store for Qdrant, Pinecone, or Weaviate to get persistence, metadata and permission filters, and hybrid keyword plus vector search on larger or multi-tenant knowledge bases.
 - Changing the embedding model means re-running ingestion; the model and the store are coupled.
 

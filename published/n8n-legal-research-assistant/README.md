@@ -4,7 +4,7 @@
 
 > Research assistance only. This is not legal advice and does not create a lawyer-client relationship. Read and verify every cited source before relying on it.
 
-Ask a legal question through a form and get an answer built only from authorities pulled live from CourtListener or CanLII, with a verified citation behind every point. The model answers from one numbered block of retrieved sources, and a deterministic code step checks every citation against that block before anything reaches the reader. When the sources do not support an answer, the workflow says so instead of inventing case law.
+Ask a legal question through a form and get an answer built only from authorities pulled live from CourtListener or CanLII, with a verified citation behind every point. The model answers from one numbered block of retrieved sources, and a deterministic code step checks every citation against that block before anything reaches the reader. When retrieval fails or the sources do not support an answer, the workflow says so, and no case law is asserted.
 
 Built with n8n, plus CourtListener, CanLII, and Groq.
 
@@ -12,7 +12,7 @@ Built with n8n, plus CourtListener, CanLII, and Groq.
 
 ## Use it when
 
-- You want a fast first pass on case law, and a plain chat model cannot be trusted with it because it will invent citations that look real.
+- You want a fast first pass on case law, but a plain chat model will invent citations that look real. The result page shows only citations that matched a retrieved source, plus a supported or not-supported badge.
 - A US question needs the holding, not the caption. The CourtListener path pulls the full opinion text of the top hit so the answer grounds on what the court actually wrote.
 - You already have a Canadian authority and need what surrounds it. The CanLII path pulls that case plus the cases in its citator network.
 
@@ -62,14 +62,15 @@ I rebuild each displayed citation from the retrieved source record instead of th
 
 The anti-hallucination behaviour runs in two layers. Prompt grounding first: the model is told to answer only from the numbered sources, cite each point by source number, never output a citation absent from the source list, and set `supported: false` when the sources are insufficient, with a structured output parser and auto-fix holding the response to a fixed shape. Then deterministic verification: "Verify citations and render result" checks every citation the model returns against the sources that were actually retrieved, rebuilds each displayed citation from the source record, and drops any that do not match. When none survive, the answer is replaced with an explicit "not supported" message and no case law is asserted.
 
+The guarantee: a citation reaches the result page only if it maps to a source the workflow retrieved, and the page prints that source's own name, citation, and URL. Lowering `resultCount` from its default of 5 tightens grounding at the cost of recall: the model sees fewer sources, so more questions come back not supported. The workflow never checks whether an authority is still good law; it proves each citation exists in the retrieved set and leaves reading the case to you.
+
 ![An example answer showing a grounded response with a supported badge and a verified citation.](images/result.png)
 
 *Asking "What is the standard for granting a preliminary injunction in federal court?" in CourtListener mode returns a grounded answer with a verified citation.*
 
 ## Customize
 
-- Swap the Groq model node for any supported chat provider.
-- Adjust `resultCount` to widen or narrow the sources sent to the model, and `citatorDirection` between `citingCases` and `citedCases` for CanLII mode.
+- Swap the Groq model node for any supported chat provider, or adjust `resultCount` and `citatorDirection` in "Set research configuration".
 - Add a Slack or email step after "Verify citations and render result" to route the answer somewhere.
 
 ## What is in this folder
