@@ -4,7 +4,7 @@
 
 > **Not legal advice.** This template is a scheduling aid. Limitation and procedural rules change and have many exceptions (discoverability, notice periods, suspensions, parties under disability, and more). Verify every date against the current statute and rules of court before relying on it.
 
-Calculate the applicable limitation period and downstream procedural deadlines for a litigation matter from a single intake form, then write them to a calendar, log them, and post staggered reminders. The dates are computed from an editable, jurisdiction-aware rules table with Luxon, and every deadline records the exact rule that produced it.
+Calculate the applicable limitation period and downstream procedural deadlines for a litigation matter from a single intake form, then write them to a calendar, log them, and post staggered reminders. The dates are computed from an editable, jurisdiction-aware rules table with Luxon, and every deadline records the exact rule that produced it. The default table ships 33 rules across nine Canadian jurisdictions and seven claim types.
 
 Built with n8n, plus Google Calendar, Google Sheets, Slack, and Gmail.
 
@@ -52,7 +52,9 @@ Illustrative defaults ship for Ontario, British Columbia, Alberta, Saskatchewan,
 
 ## Date logic and verification
 
-Year-based periods use the anniversary convention, the same calendar date N years later, which caps February 29 to February 28 in non-leap years. Procedural deadlines count the day after the anchor date as day one, and the business-day roll uses the editable holiday list. The `verification/` folder holds a harness that runs the engine's exact date logic against hand-computed expected dates, covering anniversary roll, leap year, procedural counting, reminder roll-back, past-reminder drop, and validation errors. Run `npm install` then `npm run verify`; [verification/RESULTS.md](verification/RESULTS.md) holds the cases and the latest output.
+Year-based periods use the anniversary convention, the same calendar date N years later, which caps February 29 to February 28 in non-leap years. Procedural deadlines count the day after the anchor date as day one, and the business-day roll uses the editable holiday list. The shipped list covers 2026 and 2027 with 24 dates, and the roll is holiday-aware only as far as it reaches. The engine never guesses a period: an unknown jurisdiction, an unknown claim type, or an invalid trigger date stops the run with a named error.
+
+The `verification/` folder holds a harness that runs the engine's exact date logic against hand-computed expected dates, nine cases and 32 assertions covering anniversary roll, leap year, procedural counting, reminder roll-back, past-reminder drop, and validation errors. Run `npm install` then `npm run verify`; [verification/RESULTS.md](verification/RESULTS.md) holds the cases and the latest output.
 
 ## Customize
 
