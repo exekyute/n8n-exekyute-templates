@@ -17,7 +17,7 @@ Built with n8n, plus YouTube, Google Sheets, and Slack.
 - A description quietly loses its links or a title gets rewritten, and nobody can say
   when. The change log keeps every edit as an old value to new value pair, timestamped.
 - Several people edit the same channel, and a privacy flip from public to private goes
-  unnoticed until viewers ask where the video went.
+  unnoticed until viewers ask where the video went. The log gets a `privacyStatus` row.
 - A video vanishes from the channel entirely. The audit enumerates the whole uploads
   playlist each run, so new and removed videos register too, not just edited ones.
 
@@ -41,7 +41,7 @@ quiet runs post nothing to Slack unless `alwaysNotify` is on.
 | Clear Snapshot Tab, Load Current Rows, Refresh Snapshot Rows | Overwrite the snapshot with today's values, after the log write |
 | Should Send Alert, Post Summary to Slack | Branch off the diff in parallel: post a summary listing the first 30 changes plus a count of the rest, or skip it on a quiet run unless `alwaysNotify` is true |
 
-I diff tags order-independently: reordering them is housekeeping, and only a real addition or removal should land in the log.
+I sort each tag list before comparing it rather than diffing the raw order, which would log a change every time someone reorders tags.
 
 ## Requirements
 
