@@ -10,8 +10,8 @@ Built with n8n, plus n8n Data Tables.
 
 ## Use it when
 
-- You are generating invoices from a workflow and the accountant needs them numbered consecutively, not by timestamp and not by record ID.
-- Two workflows both create tickets and you want one shared run of numbers across both, rather than two sequences that collide.
+- You are generating invoices from a workflow and the accountant needs them numbered consecutively, not by timestamp and not by record ID. Each POST comes back with the next number in the run.
+- Two workflows both create tickets and the numbering collides. Pointing both at this webhook draws one shared run from a single Data Table row.
 - You need a number that reads like a document reference to a human, with a prefix and fixed width, not a UUID.
 
 ## How it works
@@ -27,7 +27,7 @@ A POST webhook accepts a `sequence_key` with an optional `prefix` and zero-pad w
 | Save Sequence Counter | Upserts the counter on `sequence_key` |
 | Return Issued Number | Returns the key, the formatted number, the raw value and a timestamp |
 
-The read and the write are two separate operations, so this is a best-effort sequence rather than a lock. I would rather say that plainly in the response path than imply a guarantee the storage layer cannot make; see the concurrency section below.
+The read and the write are two separate operations, so this is a best-effort sequence rather than a lock. I kept the counter in a Data Table instead of an external database with row locking, which would close the race at the price of the template's first credential; see the concurrency section below.
 
 ## Requirements
 
@@ -62,6 +62,8 @@ Two ways to close that gap, in order of preference:
 
 - Set the workflow to one concurrent execution. Requests queue, the sequence holds, and this is the whole fix for almost every real caller.
 - Serialise upstream. If several workflows call this, have them go through a queue rather than firing in parallel.
+
+With either in place, each number issued is exactly one more than the last; the cost is that requests wait their turn instead of running in parallel. The workflow never cancels or reissues a number; it moves the counter forward and nothing else, so accounting for a voided document stays your job.
 
 ## Customize
 
