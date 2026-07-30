@@ -10,7 +10,7 @@ Built with n8n, plus Asana and Google Calendar.
 
 ## Use it when
 
-- You plan your week in a calendar but the deadlines live in Asana, so you keep two lists by hand and they drift apart the first time a date moves.
+- You plan your week in a calendar but the deadlines live in Asana, so you keep two lists by hand and they drift apart the first time a date moves. Every dated task becomes an event that stays current on its own.
 - A due date slips in Asana and the calendar copy silently keeps the old date. Here the next run moves the event, and a completed task takes its event with it.
 - A team keeps a shared deadline calendar next to its meetings. Point this at a dedicated calendar and the synced deadlines sit in a layer anyone can toggle off.
 

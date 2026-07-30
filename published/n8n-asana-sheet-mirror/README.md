@@ -33,7 +33,7 @@ A schedule triggers the run. An HTTP Request reads the project's tasks from the 
 | Build Run Summary | Writes a one-line count of created, updated, and removed |
 | Finish Sync Run | A no-op that keeps the summary so each run is inspectable |
 
-I key the whole mirror on the Asana task GID, so a task that is renamed or reassigned updates in place instead of creating a duplicate row, and a task that is removed is flagged rather than dropped.
+I key the whole mirror on the Asana task GID, not the task name, so a task that is renamed or reassigned updates in place instead of creating a duplicate row, and a task that is removed is flagged rather than dropped.
 
 ## Requirements
 
