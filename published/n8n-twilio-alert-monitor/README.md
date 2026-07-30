@@ -2,7 +2,7 @@
 
 [Published n8n template](https://n8n.io/workflows/17399-monitor-twilio-debugger-alerts-and-send-grouped-digests-to-slack-and-google-sheets/)
 
-Poll the Twilio Monitor Alerts API on a schedule, collapse whatever it returns into groups by error code and severity, log every alert to a Google Sheet, and post one Slack digest per run. Failed webhooks and rejected sends land in the Twilio debugger, which nobody opens until a customer complains; this workflow brings them to a channel someone actually reads.
+Poll the Twilio Monitor Alerts API on a schedule, collapse whatever it returns into groups by error code and severity, log every alert to a Google Sheet, and post one Slack digest per run. Failed webhooks and rejected sends land in the Twilio debugger, which nobody opens until a customer complains; this workflow brings them to a channel someone actually reads. By default it looks back 60 minutes, pulls up to 100 alerts, and lists the top five error codes in the digest.
 
 Built with n8n, plus Twilio, Google Sheets, and Slack.
 
@@ -10,7 +10,7 @@ Built with n8n, plus Twilio, Google Sheets, and Slack.
 
 ## Use it when
 
-- Your Twilio integration fails quietly. Sends get rejected, a callback URL starts returning 404s, and the only record is a console page nobody has open.
+- Your Twilio integration fails quietly. Sends get rejected, a callback URL starts returning 404s, and the only record is a console page nobody has open; the next run pulls those alerts into the Sheet and the Slack digest.
 - One misconfigured webhook raises the same error hundreds of times in an hour. A per-alert notifier would bury the channel; here that becomes one digest line with a count next to it.
 - You need an audit trail, not just an alert. The Sheet keeps one row per alert with its code, severity, and resource, so the Slack digest can stay short without losing the history.
 

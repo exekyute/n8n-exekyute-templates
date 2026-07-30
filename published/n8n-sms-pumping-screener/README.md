@@ -10,9 +10,9 @@ Built with n8n, plus Twilio Lookup, Google Sheets, and Slack.
 
 ## Use it when
 
-- A campaign list turns out to be full of landlines and VoIP numbers, and you find out after the send, when the failure rate spikes and the invoice arrives.
+- A campaign list turns out to be full of landlines and VoIP numbers, and you find out after the send, when the failure rate spikes and the invoice arrives. Run the screen first and those rows land in the quarantine tab instead, each with the line type named in its reason.
 - You suspect SMS pumping: someone injects premium-rate numbers into your signup flow so your campaign becomes their revenue. Those lines come back as VoIP or as a country you do not send to, and either way they stop at the quarantine tab.
-- Numbers land in your sheet from a form or an import and nobody validates them, so every blast pays for the junk rows too.
+- Numbers land in your sheet from a form or an import and nobody validates them, so every blast pays for the junk rows too. One run leaves the Safe To Send tab holding only verified mobiles in the countries you send to.
 
 ## How it works
 
@@ -31,7 +31,7 @@ A manual run pulls the pending campaign tab from Google Sheets and feeds it into
 | Build Screening Summary | Counts screened, safe, and quarantined, and groups the blocks by line type and country |
 | Post Screening Summary To Slack | One message per run, not one per number |
 
-I send safe and quarantined rows to separate tabs rather than one tab with a status column, so the sending workflow reads a list that only ever contains numbers that passed.
+I send safe and quarantined rows to separate tabs rather than one tab with a status column: a status column only protects a send until somebody forgets to filter on it, and then the campaign texts the quarantined numbers anyway. Separate tabs mean the sending workflow reads a list that only ever contains numbers that passed.
 
 ## Requirements
 
@@ -63,6 +63,8 @@ Seed the pending tab with five rows and run it:
 | An invalid string like `+1555` | quarantine, lookup failed or not valid |
 
 Check that each lookup returns a line type and a country, that the Switch puts only the first row in Safe To Send, and that the Slack message reports four quarantined with the breakdown. Basic Lookup validation is free. Line Type Intelligence is a billable add-on, around $0.008 per lookup, so a 2,000-number list costs roughly $16 and trial credit covers a test list this size. Screen each list once, not per send.
+
+Every screened number lands in exactly one of the two tabs, and every quarantined row carries one of three written reasons: the lookup failed, the country is outside the allowed list, or the line type is not allowed. Tightening the two allow lists quarantines more rows for a person to sift by hand; loosening them to admit VoIP lets softphone audiences through, and pumping lines arrive the same way. The workflow never sends a message; it decides which rows the sending workflow gets to see.
 
 ## Customize
 

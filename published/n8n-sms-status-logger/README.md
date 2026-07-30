@@ -2,7 +2,7 @@
 
 [Published n8n template](https://n8n.io/workflows/17342-log-twilio-sms-delivery-statuses-to-google-sheets-and-alert-slack-on-failures/)
 
-Log every Twilio message status change to a Google Sheet and alert Slack the moment a delivery fails, with the error decoded into a sentence a person can read instead of a five-digit code. Twilio already posts every state change to a callback URL; this workflow points that callback at n8n, appends each event to a ledger, and lets only `failed` and `undelivered` through to Slack.
+Log every Twilio message status change to a Google Sheet and alert Slack the moment a delivery fails, with the error decoded into a sentence a person can read instead of a five-digit code. Twilio already posts every state change to a callback URL; this workflow points that callback at n8n, appends each event to a ledger, and lets only `failed` and `undelivered` through to Slack. The map decodes six codes out of the box, and a failure with an unmapped code still alerts as "Unmapped Twilio error code".
 
 Built with n8n, plus Twilio status callbacks, Google Sheets, and Slack.
 
@@ -10,7 +10,7 @@ Built with n8n, plus Twilio status callbacks, Google Sheets, and Slack.
 
 ## Use it when
 
-- A customer tells you they never got the text, and that conversation is your first sign anything failed.
+- A customer tells you they never got the text, and that conversation is your first sign anything failed. Point the status callback here and the Slack alert arrives when the message fails, not when the customer mentions it.
 - You need per-message delivery history, not just failure pings. The sheet keeps one row per state change, successes included, so you can see which codes pile up over a week.
 
 ## How it works
