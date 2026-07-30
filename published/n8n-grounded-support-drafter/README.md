@@ -12,9 +12,9 @@ Built with n8n, plus You.com and Gmail, with an optional Slack ping.
 
 ## Use it when
 
-- A customer asks how a third-party API or SaaS tool behaves, and the truth is the vendor's own documentation and changelog, not anything in your knowledge base.
-- A regulatory or compliance question comes in whose answer is a public standard or a government page, and the reply needs citations someone can check.
-- Your help desk supports public tools where a help center or status page holds the current behavior, and a stale internal doc would give the wrong answer.
+- A customer asks how a third-party API or SaaS tool behaves, and the truth is the vendor's own documentation and changelog, not anything in your knowledge base. The draft cites those vendor pages directly.
+- A regulatory or compliance question comes in whose answer is a public standard or a government page, and the draft arrives with citations someone can check.
+- Your help desk supports public tools where a help center or status page holds the current behavior, and a stale internal doc would give the wrong answer. The research reads the live page instead.
 
 ## How it works
 

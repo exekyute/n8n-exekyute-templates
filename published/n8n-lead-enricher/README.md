@@ -4,7 +4,7 @@
 
 > Self-hosted n8n only. This template uses the You.com community node `@youdotcom-oss/n8n-nodes-youdotcom`, which can only be installed on a self-hosted instance.
 
-Turn a raw company name or domain into a qualified, one-page lead profile before a human ever opens it. You.com gathers recent signals and reads the company site, Groq writes the profile and scores fit against your criteria, and hot leads page Slack while every lead lands in Notion.
+Turn a raw company name or domain into a qualified, one-page lead profile before a human ever opens it. You.com gathers recent signals and reads the company site, Groq writes the profile and scores fit against your criteria, and hot leads page Slack while every lead lands in Notion. A guard rejects empty input with a `400` before any API call is spent, and the hot-lead threshold ships at `70`.
 
 Built with n8n, plus You.com, Groq, Notion, and Slack.
 
@@ -12,7 +12,7 @@ Built with n8n, plus You.com, Groq, Notion, and Slack.
 
 ## Use it when
 
-- A form submission lands with nothing but a company name, and whoever picks it up spends twenty minutes searching before they can tell whether the lead matters.
+- A form submission lands with nothing but a company name, and whoever picks it up has to research the company before they can tell whether the lead matters. The workflow runs that research the moment the lead arrives and returns a scored one-page profile.
 - Hot leads cool off in a shared inbox while everything gets equal attention. Scoring at intake pages the channel for the one signup worth a same-day call, and every lead still lands in Notion with a score, tier, and summary.
 
 ## How it works
