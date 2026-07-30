@@ -28,7 +28,7 @@ A nightly schedule fires after the backup jobs should have finished. The workflo
 | Any Source Failing? | Ends the run quietly when every verdict is OK |
 | Post Failing-Source Alert | Posts one Slack message listing the failing sources |
 
-I judge SHRUNK against the trailing median size of each source's recent files because a truncated dump is fresh, present, and useless, and an existence check waves it through.
+I judge SHRUNK against the trailing median of each source's recent sizes rather than a fixed byte floor alone, because a floor tuned once quietly stops fitting as the data grows, while the median tracks what normal looks like now. The absolute `min_size_bytes` floor stays as a backstop for sources without enough history for a median.
 
 ## Requirements
 
@@ -60,27 +60,19 @@ One row per expected backup source. The Code node reads the columns by name, so 
 | `min_size_bytes` | Optional absolute floor, in raw bytes, so `100000000` is a 100 MB floor. The newest file must be at least this large. Blank to skip |
 | `min_pct_of_median` | Optional SHRUNK threshold, a whole percent like `60`. The newest file must be at least that percent of the trailing median size of recent files. Blank to skip |
 
-For each source, the workflow finds the files whose names match its pattern, picks the newest by modified time, and assigns a verdict:
+For each source, the workflow finds the files whose names match its pattern, picks the newest by modified time, and assigns the verdict: MISSING when no file matches the pattern at all, STALE when the newest is older than `max_age_hours` (or the cadence window), SHRUNK when it is below `min_size_bytes` or below `min_pct_of_median` of the trailing median, and OK when it is fresh and full.
 
-| Verdict | When |
-|---|---|
-| MISSING | No file matches the pattern at all |
-| STALE | The newest matching file is older than `max_age_hours` (or the cadence window) |
-| SHRUNK | The newest file is below `min_size_bytes`, or below `min_pct_of_median` of the trailing median |
-| OK | Fresh and full |
-
-The trailing median is taken over the recent matching files before the newest one (up to five), and the percent check needs at least two of them for history. That is what catches a truncated or corrupt dump: present, fresh, and suddenly a fraction of its normal size.
+The trailing median is taken over the recent matching files before the newest one (up to five), and the percent check needs at least two of them for history. Tightening `min_pct_of_median` or `max_age_hours` catches trouble sooner at the price of flagging normal variance, like a legitimately small differential dump. The checks stop at metadata: the workflow never downloads or restores a backup, so a full-size file of garbage bytes still reads OK, and only a test restore would catch it.
 
 ## Error handling
 
-Each Google Drive, Google Sheets, and Slack step retries a few times on a transient error. The Drive listing and the Slack post continue rather than halt, and the Code node skips files with no size (Google native files) or an unreadable timestamp, so one odd file never stops the audit. If the Drive listing itself fails, every source reads as MISSING, which surfaces the outage rather than hiding it. For an unattended job like this, also set a workflow-level error workflow in n8n settings so a crash between nodes still reaches you.
+Each Google Drive, Google Sheets, and Slack step retries on a transient error, up to three tries, five seconds apart. The Drive listing and the Slack post continue rather than halt, and the Code node skips files with no size (Google native files) or an unreadable timestamp, so one odd file never stops the audit. If the Drive listing itself fails, every source reads as MISSING, which surfaces the outage rather than hiding it. For an unattended job like this, also set a workflow-level error workflow in n8n settings so a crash between nodes still reaches you.
 
 ## Customize
 
 - Change the run time in "Nightly Schedule", or run it more than once a day.
 - Tune each source from the SLA sheet alone, with no edits to the workflow.
 - Add a real on-call destination: an HTTP Request node on the failing branch that calls a PagerDuty or Opsgenie free-tier event, or a Twilio SMS, so a stale backup pages someone off-hours instead of waiting in Slack.
-- Add a plain-English digest: feed the failing list to a cheap model (Groq on the free tier, gpt-4o-mini, or Claude Haiku). The base workflow runs without any model.
 
 ## What is in this folder
 

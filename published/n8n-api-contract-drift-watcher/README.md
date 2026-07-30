@@ -2,7 +2,7 @@
 
 [Published n8n template](https://n8n.io/workflows/16699-alert-on-api-contract-drift-using-data-tables-and-slack/)
 
-Polls a JSON or OpenAPI endpoint on a schedule, works out the shape of its response (every field path and its type), stores that shape in a Data Table, and posts a Slack alert only when the contract breaks. The diff compares structure, never values, so a changed number or an extra item in a list stays quiet; only structural and type changes raise an alert.
+Polls a JSON or OpenAPI endpoint on a schedule, works out the shape of its response (every field path and its type), stores that shape in a Data Table, and posts a Slack alert only when the contract breaks. The diff compares structure, never values, so a changed number or an extra item in a list stays quiet. Each change it does find is one of five kinds at one of three severities, and only high or medium fires the alert.
 
 Built with n8n, plus an HTTP endpoint and Slack.
 
@@ -11,7 +11,6 @@ Built with n8n, plus an HTTP endpoint and Slack.
 ## Use it when
 
 - A vendor API you parse in production ships a change without notice. A field disappears or flips type, and the first sign is a broken integration; here the change lands in Slack with the exact field path.
-- Diffing raw responses on a live endpoint flags something every run, because the values change on every call. This watcher tracks the shape only, so ordinary churn never pages anyone.
 - An internal team renames a field and forgets to tell the consumers. The scheduled poll reports it as a removed field, tagged high severity, before the downstream jobs start failing.
 
 ## How it works
@@ -29,7 +28,7 @@ A schedule fires, the endpoint is fetched, and a Code node derives the response 
 | Breaking change found? | An IF gate lets only high or medium changes through |
 | Post drift alert to Slack | One Slack message lists each change, its severity, and the exact field path |
 
-I diff shapes rather than raw responses because values change on every call; the shape is the contract, and only the contract breaking is worth a message.
+I diff shapes rather than raw responses because a raw diff would flag every run; the shape is the contract, and only the contract breaking is worth a message.
 
 ## Requirements
 
@@ -56,6 +55,8 @@ The diff compares field paths, types, and nullability, never values; array indic
 | Medium | Nullability flip | a field that was always set now returns null |
 | Low | New optional field | a field that appears in only some records |
 
+Two guards cap the derived schema: nesting past 15 levels stops being tracked, and a response that derives more than 4,000 field paths skips the run rather than saving a partial snapshot. Lowering the gate to include low severity trades that quiet for a message on every new optional field a vendor ships. The watcher never validates a response against a published spec; it compares each response's shape to the last shape it saw.
+
 ## Testing it
 
 1. Seed. With the default endpoint, run the workflow once. The Data Table now holds one row for `jsonplaceholder-users`, and no alert fires.
@@ -64,14 +65,13 @@ The diff compares field paths, types, and nullability, never values; array indic
 
 ## Error handling
 
-The endpoint fetch retries a few times on a transient error, then routes a hard failure to the Skip node instead of halting. A 200 response that is not JSON (an HTML login page, for example) is treated the same way. In both cases the saved shape is left untouched, so a bad fetch never overwrites a good snapshot or raises a false alarm. For unattended runs, set an n8n error workflow so a persistent outage still reaches you.
+The endpoint fetch makes up to 3 tries, 5 seconds apart, then routes a hard failure to the Skip node instead of halting. A 200 response that is not JSON (an HTML login page, for example) is treated the same way. In both cases the saved shape is left untouched, so a bad fetch never overwrites a good snapshot or raises a false alarm. For unattended runs, set an n8n error workflow so a persistent outage still reaches you.
 
 ## Customize
 
 - Change the interval in Check on a schedule, or lower the alert bar to include low severity by editing the Breaking change found? gate.
 - Watch several endpoints by running a copy per endpoint, each with its own `endpointKey`, all sharing one Data Table.
 - Watch a private API by opening Fetch the endpoint, setting Authentication to the type your API uses (Header Auth or Bearer, for example), and adding your token as an n8n credential. Keep the token in the credential, never in a node field.
-- Optional paid upgrade: add a small model step (gpt-4o-mini or Claude Haiku, with Groq free as the primary) to turn the change list into a plain-English note on what might break. The base workflow does not use it and ships fully free.
 - For a production-critical contract, send the alert to an on-call destination (Opsgenie, PagerDuty, or Twilio SMS) alongside Slack.
 
 ## What is in this folder

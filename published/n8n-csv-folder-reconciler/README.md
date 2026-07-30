@@ -2,7 +2,7 @@
 
 [Published n8n template](https://n8n.io/workflows/16700-reconcile-daily-google-drive-csv-exports-into-a-master-file-and-send-a-slack-recap/)
 
-Merge every CSV in a Google Drive folder into one deduplicated master file, quarantine every bad row to a dated reject file with the reason it failed, and post a rows in, merged, quarantined, duplicates recap to Slack. The reconciliation is rule based end to end, driven by an editable block of required columns, a dedup key, and format checks at the top of a single Code node, so the same input always produces the same result.
+Merge every CSV in a Google Drive folder into one deduplicated master file, quarantine every bad row to a dated reject file with the reason it failed, and post the counts to Slack. The rules are an editable block at the top of one Code node: required columns, a dedup key, and format checks, so the same input always produces the same result. Every run balances: rows in equals merged plus quarantined plus duplicates.
 
 Built with n8n, plus Google Drive and Slack.
 
@@ -10,7 +10,7 @@ Built with n8n, plus Google Drive and Slack.
 
 ## Use it when
 
-- Every branch or system drops its own daily CSV export into a shared Drive folder, and someone stitches them into one clean file by hand each morning.
+- Every branch or system drops its own daily CSV export into a shared Drive folder, and someone stitches them into one clean file by hand each morning. The scheduled run does the stitch, and the recap says what was dropped and why.
 - Two exports overlap and the same order lands twice. The dedup key keeps the first occurrence and quarantines the copy, so the totals stop drifting.
 - Someone asks why a row disappeared during the merge, and the honest answer today is a shrug. Here the reject file answers with the exact reason.
 
@@ -27,7 +27,7 @@ On a schedule, the workflow lists every CSV in the folder, downloads and parses 
 | Reject Rows, Build Reject CSV, Upload Reject CSV | Every bad row lands in a dated reject file with a reason, back on Drive |
 | Post Recap to Slack | Posts the rows in, merged, quarantined, and duplicates counts |
 
-I made the reject lane and the recap the point: every row that does not reach the master is accounted for, so a run is auditable instead of a silent merge.
+I quarantine bad rows instead of dropping them or halting the run: a dropped row is a total that quietly drifts, and a halted run is a morning with no master file. Every miss is written down with its reason.
 
 ## Requirements
 
@@ -58,24 +58,17 @@ A row must have every required column present and non-empty, a non-empty key, an
 
 ## The reject lane and the recap
 
-Every row that does not reach the master goes to `reconciled-rejects-YYYY-MM-DD.csv` with three audit columns added:
-
-| Column | Holds |
-|---|---|
-| source_file | The CSV the row came from |
-| reject_type | `invalid`, `duplicate`, or `unreadable_file` |
-| reject_reason | The specific reason, for example `column "qty" is not a valid integer (got "abc")` |
+Every row that does not reach the master goes to `reconciled-rejects-YYYY-MM-DD.csv` with three audit columns added: `source_file` names the CSV the row came from, `reject_type` is `invalid`, `duplicate`, or `unreadable_file`, and `reject_reason` holds the specific failure, for example `column "qty" is not a valid integer (got "abc")`.
 
 A file that cannot be parsed is logged as an `unreadable_file` and the run carries on, so one bad file never halts the reconciliation. The master file, `reconciled-master-YYYY-MM-DD.csv`, holds only the clean deduped rows, with no audit columns. When nothing is quarantined no reject file is written, and when no valid rows survive no master is written.
 
-The Slack recap reconciles the whole run: files read, rows in, merged to master, quarantined, duplicates dropped, unreadable files, and both output filenames with the reject row count. Rows in always equals merged plus quarantined plus duplicates, so the numbers balance. The recap posts either way.
+The Slack recap reconciles the whole run: files read, rows in, merged to master, quarantined, duplicates dropped, unreadable files, and both output filenames with the reject row count. Rows in always equals merged plus quarantined plus duplicates, so the numbers balance. The recap posts even on a clean run, so a silent channel means the workflow did not run.
 
 ## Customize
 
 - Edit the rules block to change the required columns, the dedup key, the format checks, or the `reconciled` output prefix.
 - Change the schedule in "Run on Schedule", or drop the Slack node to run with Google Drive only.
 - Point the two upload nodes at a separate output folder. The List node already skips the `reconciled-` prefix, so writing the outputs back to the same folder is safe too.
-- Optional paid upgrade: feed only the count summary (never the file contents) to a cheap LLM (Groq free, or gpt-4o-mini / Claude Haiku) for a smoother narrative recap line. The base workflow ships fully free without it.
 
 ## What is in this folder
 
