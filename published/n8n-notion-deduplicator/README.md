@@ -10,7 +10,7 @@ Built with n8n, plus Notion.
 
 ## Use it when
 
-- A CSV import or a web clipper fills your Notion CRM with the same company three times, and cleaning it up by hand means eyeballing hundreds of rows.
+- A CSV import or a web clipper fills your Notion CRM with the same company three times, and cleaning it up by hand means eyeballing hundreds of rows. One 2am run later, each company has one row and the extra copies sit in the trash.
 - Your reading list or tracker collects repeats, and deleting the wrong copy loses the version with the notes on it. The `mostFilled` keep rule holds onto the row with the most filled properties.
 - You want an audit trail of what was removed, not a silent cleanup. Every run appends a recap line to a log page, clean runs included.
 
