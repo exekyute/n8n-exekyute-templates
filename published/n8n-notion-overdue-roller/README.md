@@ -2,7 +2,7 @@
 
 [Published n8n template](https://n8n.io/workflows/16802-roll-overdue-notion-tasks-forward-and-flag-stale-ones-on-a-schedule/)
 
-Point this workflow at one Notion task database and it rewrites overdue tasks in place on a schedule: every past-due date rolls forward to today, a counter records how many times each task has been rolled, and a Stale checkbox flips once a task has been pushed too many times. The logic is plain rule-based JavaScript, so the same board always resolves the same way, and it edits the dates themselves instead of sending reminders, so there is nothing to ignore.
+Point this workflow at one Notion task database and it rewrites overdue tasks in place on a schedule: every past-due date rolls forward to today, a counter records how many times each task has been rolled, and a Stale checkbox flips once a task has been pushed too many times. The logic is plain rule-based JavaScript, so the same board always resolves the same way, and it edits the dates themselves instead of sending reminders, so there is nothing to ignore. The stale threshold ships at 3, so a task flips Stale on its fourth roll.
 
 Built with n8n, plus Notion.
 
@@ -10,7 +10,7 @@ Built with n8n, plus Notion.
 
 ## Use it when
 
-- Your Notion task list, content calendar, or sprint board fills up with red overdue dates that no longer mean anything, and cleanup means dragging each date forward by hand.
+- Your Notion task list, content calendar, or sprint board fills up with red overdue dates that no longer mean anything, and cleanup means dragging each date forward by hand. The morning run rolls every past-due date forward in one pass.
 - You want to know which tasks you keep pushing instead of doing. The roll counter turns every deferral into a number, and the Stale flag marks the tasks that crossed the line.
 
 ## How it works

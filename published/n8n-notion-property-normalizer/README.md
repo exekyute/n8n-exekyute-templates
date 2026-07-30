@@ -2,7 +2,7 @@
 
 [Published n8n template](https://n8n.io/workflows/16800-normalize-and-backfill-notion-database-properties-with-rules-and-logging/)
 
-Point this workflow at one Notion database and it keeps the properties tidy on a daily schedule: it backfills a missing Status with a default, folds inconsistent Status spellings into one canonical value, derives a slug key and a created-week stamp from each row, and appends a one-line recap to a log page. Everything runs from an editable rules block, fully rule based and deterministic, so the same row always resolves the same way and only rows that actually change are written.
+Point this workflow at one Notion database and it keeps the properties tidy on a daily schedule: it backfills a missing Status with a default, folds inconsistent Status spellings into one canonical value, derives a slug key and a created-week stamp from each row, and appends a one-line recap to a log page. Everything runs from an editable rules block, fully rule based and deterministic, so the same row always resolves the same way. Only rows that actually change are written.
 
 Built with n8n, plus Notion.
 
@@ -10,8 +10,8 @@ Built with n8n, plus Notion.
 
 ## Use it when
 
-- A CSV import or a week of quick edits leaves your tracker with `wip`, `in progress`, and `In Progress` as three different values, and filtered views quietly miss two of them.
-- New rows land without a Status, so every grouped board grows a blank column nobody triages.
+- A CSV import or a week of quick edits leaves your tracker with `wip`, `in progress`, and `In Progress` as three different values, and filtered views quietly miss two of them. The canonical map folds all three into `In Progress`.
+- New rows land without a Status, so every grouped board grows a blank column nobody triages. The next run fills each blank with `To Do`, or the default you choose.
 - You want a stable slug key and a created-week stamp maintained on every row for rollups and lookups, without keeping them current by hand.
 
 ## How it works
