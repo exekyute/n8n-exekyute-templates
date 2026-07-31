@@ -1,5 +1,7 @@
 # Reconcile a Google Sheets roster against Discord roles and report the drift
 
+[Published n8n template](https://n8n.io/workflows/17616-reconcile-discord-roles-with-google-sheets-rosters-and-report-drift-weekly/)
+
 Read a roster from a Google Sheet, read the members of a Discord server, and report every place the two disagree: people holding a gated role with no roster row, and people on the roster missing the role they are entitled to. It never calls roleAdd or roleRemove and has no fix-it branch, so it is safe to point at a live server. Role IDs are fetched from the guild at run time, which means you configure role names and never copy a snowflake.
 
 Built with n8n, plus Discord and Google Sheets.

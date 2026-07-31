@@ -6,7 +6,7 @@ Most of them share the same working habits: rules in a table or a config block a
 
 ## Published
 
-**44 templates** are live in the n8n template library right now, grouped by area. Hit **View** on any row to open its listing on n8n.io. A template that spans two areas is listed once, under the first one.
+**46 templates** are live in the n8n template library right now, grouped by area. Hit **View** on any row to open its listing on n8n.io. A template that spans two areas is listed once, under the first one.
 
 ### 🤖 AI · 13
 
@@ -38,14 +38,15 @@ Most of them share the same working habits: rules in a table or a config block a
 | [Asana Sheet Mirror](published/n8n-asana-sheet-mirror/) · [View](https://n8n.io/workflows/17306-sync-asana-project-tasks-with-a-mirrored-google-sheets-tab/) | Upserts every task in one Asana project into a Google Sheet keyed by task GID, keeping status, assignee, and dates current. | Asana, Google Sheets |
 | [Notion Cadence Spawner](published/n8n-notion-cadence-spawner/) · [View](https://n8n.io/workflows/17549-spawn-recurring-notion-tasks-from-rules-with-data-tables-and-slack/) | Reads a Notion database of recurrence rules, works out which are due today, and creates one task page each without repeating on a second run. | Notion, Slack, Data Tables |
 
-### 📁 Files & Documents · 2
+### 📁 Files & Documents · 3
 
 | Template | What it does | Stack |
 |---|---|---|
 | [CSV Folder Reconciler](published/n8n-csv-folder-reconciler/) · [View](https://n8n.io/workflows/16700-reconcile-daily-google-drive-csv-exports-into-a-master-file-and-send-a-slack-recap/) | Merges every CSV in a Drive folder into one deduplicated master file, quarantines bad rows with a reason, and recaps to Slack. | Google Drive, Slack |
 | [Drive Auto-Filer](published/n8n-drive-auto-filer/) · [View](https://n8n.io/workflows/16812-file-google-drive-inbox-documents-into-dated-folders-with-a-google-sheets-audit-log/) | Files everything dropped in a Drive inbox into a dated Year, Month, Type folder tree, with an audit row written for every move. | Google Drive, Google Sheets |
+| [Discord Attachment Archiver](published/n8n-discord-attachment-archiver/) · [View](https://n8n.io/workflows/17615-archive-discord-attachments-to-google-drive-and-log-them-in-google-sheets/) | Sweeps named Discord channels daily and pulls every new attachment into a dated Google Drive folder before its signed URL expires. | Discord, Google Drive, Google Sheets |
 
-### 📡 DevOps & Monitoring · 9
+### 📡 DevOps & Monitoring · 10
 
 | Template | What it does | Stack |
 |---|---|---|
@@ -58,6 +59,7 @@ Most of them share the same working habits: rules in a table or a config block a
 | [Twilio Alert Monitor](published/n8n-twilio-alert-monitor/) · [View](https://n8n.io/workflows/17399-monitor-twilio-debugger-alerts-and-send-grouped-digests-to-slack-and-google-sheets/) | Polls the Twilio Monitor Alerts API on a schedule, groups debugger errors by code and severity, logs each one, and posts one Slack digest. | Twilio, Google Sheets, Slack |
 | [SMS Deliverability Rollup](published/n8n-sms-deliverability-rollup/) · [View](https://n8n.io/workflows/17401-summarize-daily-twilio-sms-delivery-rates-to-google-sheets-and-slack/) | Counts yesterday's Twilio messages by status each morning, works out a delivery rate, and posts the same figures to a Sheet and Slack. | Twilio, Google Sheets, Slack |
 | [Sheet Metrics Exporter](published/n8n-sheet-metrics-exporter/) · [View](https://n8n.io/workflows/17546-expose-google-sheet-kpis-as-prometheus-metrics-for-grafana/) | Serves a tab of business numbers as a Prometheus exposition endpoint, so SLO targets and licence counts sit on a Grafana dashboard next to real telemetry. | Google Sheets, Prometheus, Grafana |
+| [Roster Drift Reconciler](published/n8n-roster-drift-reconciler/) · [View](https://n8n.io/workflows/17616-reconcile-discord-roles-with-google-sheets-rosters-and-report-drift-weekly/) | Compares a Google Sheets roster against Discord roles each week and reports both directions of drift without ever changing a role. | Discord, Google Sheets |
 
 ### 📣 Sales & Marketing · 4
 
@@ -89,9 +91,7 @@ Submitted to the n8n Creator hub and awaiting approval. Templates move up to `pu
 | Template | What it does | Stack |
 |---|---|---|
 | [Drive Approval Gate](pending-review/n8n-drive-approval-gate/) | Holds every new file in a Drive inbox until somebody taps Approve or Send back on a Discord message, then moves it and logs the decision. | Discord, Google Drive, Google Sheets |
-| [Discord Attachment Archiver](pending-review/n8n-discord-attachment-archiver/) | Sweeps named Discord channels daily and pulls every new attachment into a dated Google Drive folder before its signed URL expires. | Discord, Google Drive, Google Sheets |
 | [Unanswered Question Digest](pending-review/n8n-unanswered-question-digest/) | Finds the questions in a Discord help channel that nobody answered and posts them with jump links to a moderator channel each morning. | Discord, Google Sheets |
-| [Roster Drift Reconciler](pending-review/n8n-roster-drift-reconciler/) | Compares a Google Sheets roster against Discord roles each week and reports both directions of drift without ever changing a role. | Discord, Google Sheets |
 
 ## Pending submission
 
