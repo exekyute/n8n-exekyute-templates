@@ -92,6 +92,8 @@ Submitted to the n8n Creator hub and awaiting approval. Templates move up to `pu
 |---|---|---|
 | [Drive Approval Gate](pending-review/n8n-drive-approval-gate/) | Holds every new file in a Drive inbox until somebody taps Approve or Send back on a Discord message, then moves it and logs the decision. | Discord, Google Drive, Google Sheets |
 | [Unanswered Question Digest](pending-review/n8n-unanswered-question-digest/) | Finds the questions in a Discord help channel that nobody answered and posts them with jump links to a moderator channel each morning. | Discord, Google Sheets |
+| [Discord Audit Ledger](pending-review/n8n-discord-audit-ledger/) | Copies Discord audit log entries into a Google Sheets ledger before the 45 day retention window deletes them, and posts a weekly per-moderator digest to Slack. | Discord, Google Sheets, Slack, Data Tables |
+| [Wiki Health Auditor](pending-review/n8n-wiki-health-auditor/) | Sweeps a Notion wiki weekly for pages nobody links to, nobody has edited and nobody has written, then writes the findings back to Notion and posts a ranked Slack digest. | Notion, Slack |
 
 ## Pending submission
 
