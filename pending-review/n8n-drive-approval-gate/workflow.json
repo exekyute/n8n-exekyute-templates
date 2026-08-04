@@ -160,7 +160,7 @@
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [
-        848,
+        864,
         320
       ],
       "credentials": {
@@ -195,7 +195,7 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1344,
+        1376,
         240
       ],
       "credentials": {
@@ -335,7 +335,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        1824,
+        1888,
         352
       ],
       "credentials": {
@@ -370,7 +370,7 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1344,
+        1376,
         480
       ],
       "credentials": {
@@ -419,7 +419,7 @@
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [
-        2048,
+        2144,
         352
       ],
       "credentials": {
@@ -433,15 +433,15 @@
     {
       "parameters": {
         "content": "## Approve a new Google Drive file from inside Discord before it moves\n\nA client deliverable lands in an inbox folder and nothing moves until a person taps a button. The Discord node posts the file card with real Approve and Send back buttons and pauses the execution until someone answers, so a freelancer clearing an agency deliverable, or a moderator clearing user-submitted media, decides from their phone without opening a second tool.\n\n### How it works\n1. A Google Drive trigger polls the inbox folder and fires on each new file, and `Set Review Settings` supplies every ID and constant from one node.\n2. `Build Review Card` turns raw Drive metadata into a readable card: name, human-readable size, type and a preview link.\n3. `Loop Over Files` hands the reviewer one file at a time, so cards never pile up.\n4. `Request Approval In Discord` posts the card with Approve and Send back buttons and pauses this execution until someone taps one.\n5. `Route Reviewer Decision` sends approved files to the shared folder, sent-back files to the rework folder, and an expired decision window to neither.\n6. `Resolve Decision Outcome` names what actually happened, the row is appended to the decision sheet, and a receipt goes back to the channel.\n\n### Setup steps\n- [ ] Create a Discord application, add a bot, and invite it to your server with Send Messages on the review channel.\n- [ ] Connect the Discord Bot credential. No privileged intents needed: this template never reads message content or the member list.\n- [ ] Connect your Google Drive and Google Sheets credentials.\n- [ ] Point the trigger at your inbox folder ID.\n- [ ] Fill `Set Review Settings`: guild ID, review channel ID, approved and rejected folder IDs, log sheet URL, tab name and the decision window in hours.\n- [ ] Give the log sheet these headers: Decided At, File Name, File ID, Size, Type, Preview Link, Decision, Destination Folder ID, Reviewed In Channel, Execution ID.\n- [ ] Drop one test file in the inbox and complete the round trip before you trust the queue.\n\n### Customization\n`decisionWindowHours` sets how long a card waits before the run is recorded as `No response` and the file is left in the inbox. Shorten the trigger poll interval for a busier queue and accept the extra API calls. Set `driveId` to a Shared Drive ID if your deliverables do not live in My Drive.",
-        "height": 956,
-        "width": 660
+        "height": 1036,
+        "width": 836
       },
       "id": "fb2fc6a5-bfd2-4fde-8173-b9536c7e0a8b",
       "name": "Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1008,
+        -1184,
         -64
       ]
     },
@@ -473,7 +473,7 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        800,
+        816,
         96
       ]
     },
@@ -481,7 +481,7 @@
       "parameters": {
         "content": "## Route, move, log and confirm\n\nThree outcomes are logged distinctly: approved, sent back, and nobody answered. A failed Drive move is caught per file, so one bad file cannot kill the rest of the batch.",
         "height": 606,
-        "width": 944,
+        "width": 1024,
         "color": 7
       },
       "id": "bf1e9473-b5a6-45b4-8c95-429822ed2af8",
@@ -489,14 +489,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1280,
+        1312,
         64
       ]
     },
     {
       "parameters": {
         "content": "## Read before you activate\n\nYour n8n instance must be reachable at its webhook URL. The Discord buttons point at that URL, so a self-hosted instance behind a firewall, or one without `WEBHOOK_URL` set correctly, renders buttons nobody can complete.\n\n**Nothing moves unless a human decides.** If the decision window expires the file is left in the inbox and the run is logged as `No response`. An expired window is never recorded as a rejection.\n\nBoth Approve and Send back MOVE the file out of the inbox, and each is one way. Point both folder IDs at real folders before the first run. For a Shared Drive, set `driveId` in `Set Review Settings` to the drive ID instead of `My Drive`.",
-        "height": 308,
+        "height": 324,
         "width": 932,
         "color": 3
       },
@@ -506,7 +506,7 @@
       "typeVersion": 1,
       "position": [
         -208,
-        560
+        592
       ]
     },
     {
@@ -572,7 +572,7 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        1072,
+        1088,
         304
       ]
     },
@@ -585,7 +585,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1552,
+        1648,
         352
       ]
     }

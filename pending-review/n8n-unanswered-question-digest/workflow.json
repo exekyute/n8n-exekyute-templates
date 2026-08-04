@@ -16,7 +16,7 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
       "position": [
-        32,
+        48,
         0
       ]
     },
@@ -99,7 +99,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        272,
+        288,
         0
       ]
     },
@@ -127,7 +127,7 @@
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [
-        608,
+        640,
         0
       ],
       "credentials": {
@@ -146,7 +146,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        832,
+        880,
         0
       ]
     },
@@ -179,7 +179,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1056,
+        1136,
         0
       ]
     },
@@ -192,7 +192,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1408,
+        1552,
         -16
       ]
     },
@@ -217,8 +217,8 @@
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [
-        1408,
-        224
+        1552,
+        240
       ],
       "credentials": {
         "discordBotApi": {
@@ -248,7 +248,7 @@
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [
-        1648,
+        1888,
         -144
       ],
       "credentials": {
@@ -268,7 +268,7 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        1648,
+        1888,
         112
       ]
     },
@@ -369,7 +369,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        1856,
+        2160,
         112
       ],
       "credentials": {
@@ -383,23 +383,23 @@
     {
       "parameters": {
         "content": "## Post a daily digest of unanswered Discord help questions to Google Sheets\n\nYour help channel is a support queue nobody measures. Every morning this reads one Discord channel, finds the questions that got no reply, no later mention of the asker and no thread, then posts them with jump links to your moderator channel and logs every one to a Google Sheet.\n\n### How it works\n1. A schedule fires at 09:00 and `Set Digest Settings` supplies every ID, sheet reference and tuning constant from one node.\n2. `Get Recent Messages` reads the help channel with Simplify OFF, so the raw `message_reference` field survives and reply detection stays a fact rather than a guess.\n3. `Find Unanswered Questions` keeps messages inside the lookback window that look like questions, then drops any that were replied to, that mention the asker in a later message, or that already have a thread.\n4. The same node measures its own coverage: how far back the read actually reached, and whether message content came through at all.\n5. `Format Digest` builds one message with a jump link per question, carrying a warning when the read was truncated.\n6. The sheet log is written first, then the digest posts to the moderator channel. A clean day still posts a scan receipt.\n\n### Setup steps\n- [ ] Create a Discord application, add a bot, and invite it to your server with View Channel and Read Message History on the help channel.\n- [ ] Turn ON the MESSAGE CONTENT privileged intent in the Discord developer portal, Bot tab. The question test reads message text, so without it every digest finds nothing.\n- [ ] Give the bot Send Messages on your moderator channel.\n- [ ] Connect the Discord Bot credential on all three Discord nodes and your Google Sheets credential on the log node.\n- [ ] Fill in `Set Digest Settings`: guild ID, help channel ID, moderator channel ID and log sheet URL.\n- [ ] Create the log sheet tab with the headers Digest Date, Asked At, Age Hours, Author, Question, Jump Link, Message ID.\n- [ ] Run the workflow once by hand, read the digest and the coverage line, then activate.\n\n### Customization\n`questionWords` and `minQuestionLength` decide what counts as a question and are meant to be edited for your channel's voice. `lookbackHours` sets the window and `messageFetchLimit` sets how far back a single run can see, so keep the limit comfortably above your channel's daily traffic. `maxQuestionsInMessage` trims the Discord post without trimming the sheet.",
-        "height": 804,
-        "width": 812
+        "height": 964,
+        "width": 908
       },
       "id": "f01748f9-d9ff-49c9-ad02-f9877d3159e2",
       "name": "Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -928,
+        -1056,
         -416
       ]
     },
     {
       "parameters": {
         "content": "## Schedule and one place to configure\nEvery server ID, channel ID, sheet reference and tuning constant lives in Set Digest Settings. Nothing downstream is hardcoded, so configuring this template means editing one node.\nTunable constants: lookbackHours, messageFetchLimit, questionWords, minQuestionLength, maxQuestionsInMessage.",
-        "height": 440,
-        "width": 512,
+        "height": 456,
+        "width": 544,
         "color": 7
       },
       "id": "2e3f2cde-5530-4efd-adb7-c49e2b7bf839",
@@ -414,8 +414,8 @@
     {
       "parameters": {
         "content": "## Read the channel and score it\nSimplify is OFF on Get Recent Messages so the raw payload keeps message_reference. A message counts as ANSWERED if any of these is true: another message replies to it, a later message mentions its author, or it has a thread. Everything else that passes the question test is unanswered.\nThe question test is a heuristic and it is meant to be edited: text ends with a question mark, or opens with a word from questionWords.",
-        "height": 440,
-        "width": 776,
+        "height": 456,
+        "width": 824,
         "color": 7
       },
       "id": "639b6d25-45f1-40e2-9c42-4c90c0ab4569",
@@ -423,15 +423,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        528,
+        560,
         -256
       ]
     },
     {
       "parameters": {
         "content": "## Publish the digest and log it\n\nThe sheet log runs first, then the Discord post, so a Discord failure cannot cost you the log. The post is deliberately left on stop-on-error: if the digest cannot reach moderators, the run should go red rather than green.\n\nA clean day still posts a scan receipt carrying the coverage line, so silence always means broken and never means healthy.",
-        "height": 822,
-        "width": 700,
+        "height": 870,
+        "width": 972,
         "color": 7
       },
       "id": "e60b5738-7e7b-4f54-ab94-bff559842b25",
@@ -439,14 +439,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1360,
+        1440,
         -416
       ]
     },
     {
       "parameters": {
         "content": "## Read this before the first run\n\n**MESSAGE CONTENT intent is mandatory.** In the Discord developer portal open your application, go to Bot, and switch ON Message Content Intent. For bots in fewer than 100 servers this is a toggle, not an approval queue, but it is where most installs die. Leave it off and every content field arrives empty and the question test matches nothing. The scan receipt names that case explicitly rather than letting it look like a quiet day.\n\n**Simplify must stay OFF** on Get Recent Messages. With Simplify on, Discord strips message_reference and reply detection stops being a fact and becomes a guess.\n\n**The question test is a heuristic, not an oracle.** A digest that names the wrong messages generates support noise fast. Tune questionWords and minQuestionLength in Set Digest Settings and read one digest by hand before you activate the schedule.\n\n**One page, no pagination.** The Discord message list has no before or after cursor, so this reads only the most recent messageFetchLimit messages. Every run reports how far back it actually reached, so a truncated scan says so instead of hiding it. If your help channel takes more traffic than that in a day, raise the limit or run the schedule more often.",
-        "height": 436,
+        "height": 468,
         "width": 1036,
         "color": 3
       },
@@ -456,7 +456,7 @@
       "typeVersion": 1,
       "position": [
         -48,
-        240
+        320
       ]
     }
   ],
