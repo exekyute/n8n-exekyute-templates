@@ -1,5 +1,7 @@
 # Archive Discord attachments to Google Drive with a Google Sheets log
 
+[Published n8n template](https://n8n.io/workflows/17615-archive-discord-attachments-to-google-drive-and-log-them-in-google-sheets/)
+
 Sweep named Discord channels once a day, pull every new attachment into a dated Google Drive folder, and write one log row per file with its poster, channel, size and a jump link back to the original message. Discord signs attachment URLs with `ex`, `is` and `hm` parameters that expire, so the download has to happen inside the same run as the read. That single constraint is the whole reason a saved link in your scrollback is not an archive.
 
 Built with n8n, plus Discord, Google Drive, and Google Sheets.
