@@ -1,0 +1,807 @@
+{
+  "name": "Check in participants by QR code with Google Sheets and Slack",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Session Check-In",
+        "formDescription": "Scan the session QR code, confirm your email, tap Check In.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "you@example.com",
+              "requiredField": true
+            },
+            {
+              "fieldType": "hiddenField",
+              "fieldName": "session_code"
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {
+          "appendAttribution": false,
+          "buttonLabel": "Check In",
+          "path": "session-check-in"
+        }
+      },
+      "id": "dc83f67f-93c1-402a-8a92-6fbd97198864",
+      "name": "Session Check-In Kiosk",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "30cf10f8-3132-466e-a54c-143922b3770b"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-sheet-id",
+              "name": "registration_sheet_id",
+              "value": "<__PLACEHOLDER_VALUE__REGISTRATION_SHEET_ID__>",
+              "type": "string"
+            },
+            {
+              "id": "cfg-roster-tab",
+              "name": "roster_tab",
+              "value": "Cohort Roster",
+              "type": "string"
+            },
+            {
+              "id": "cfg-schedule-tab",
+              "name": "schedule_tab",
+              "value": "Cohort Schedule",
+              "type": "string"
+            },
+            {
+              "id": "cfg-checkins-tab",
+              "name": "checkins_tab",
+              "value": "Check-Ins",
+              "type": "string"
+            },
+            {
+              "id": "cfg-slack-channel",
+              "name": "slack_channel_id",
+              "value": "<__PLACEHOLDER_VALUE__SLACK_CHANNEL_ID__>",
+              "type": "string"
+            },
+            {
+              "id": "cfg-threshold",
+              "name": "certification_threshold",
+              "value": 0.8,
+              "type": "number"
+            },
+            {
+              "id": "cfg-email",
+              "name": "normalized_email",
+              "value": "={{ ($json.Email ?? \"\").toString().trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "cfg-session",
+              "name": "session_code",
+              "value": "={{ ($json.session_code ?? \"\").toString().trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "cfg-key",
+              "name": "checkin_key",
+              "value": "={{ ($json.Email ?? \"\").toString().trim().toLowerCase() + \"|\" + ($json.session_code ?? \"\").toString().trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "8519469a-d3f2-447c-a69c-bff15972dddd",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        272,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "session_checkin_dedupe",
+          "cachedResultName": null
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "checkin_key",
+              "keyValue": "={{ $json.checkin_key }}"
+            }
+          ]
+        }
+      },
+      "id": "8d474fae-d210-455e-a431-65ef8ad93eaf",
+      "name": "Screen For First Scan",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        544,
+        0
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dup-check",
+              "leftValue": "={{ $json.checkin_key }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "66150bf9-dbb7-4297-b6f2-da91b7c12895",
+      "name": "Route Duplicate Scans",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        816,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Workflow Configuration').first().json.registration_sheet_id }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Workflow Configuration').first().json.roster_tab }}"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "email",
+              "lookupValue": "={{ $('Workflow Configuration').first().json.normalized_email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0b24a7ce-063a-4685-ba15-fd930618e2aa",
+      "name": "Look Up Registration",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -96,
+        496
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_SHEETS_CREDENTIAL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Workflow Configuration').first().json.registration_sheet_id }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Workflow Configuration').first().json.checkins_tab }}"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "checked_in_at": "={{ $now.toISO() }}",
+            "email": "={{ $('Workflow Configuration').first().json.normalized_email }}",
+            "name": "={{ $json.name ?? \"\" }}",
+            "cohort": "={{ $json.cohort ?? \"UNREGISTERED\" }}",
+            "session_code": "={{ $('Workflow Configuration').first().json.session_code }}",
+            "status": "={{ $json.email ? \"REGISTERED\" : \"WALK_IN\" }}"
+          },
+          "schema": [
+            {
+              "id": "checked_in_at",
+              "displayName": "checked_in_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "cohort",
+              "displayName": "cohort",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "session_code",
+              "displayName": "session_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7f21171f-4c9a-4564-a7e7-a0e55b52abae",
+      "name": "Log Check In To Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        176,
+        496
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_SHEETS_CREDENTIAL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "session_checkin_dedupe",
+          "cachedResultName": null
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "checkin_key": "={{ $('Workflow Configuration').first().json.checkin_key }}",
+            "email": "={{ $('Workflow Configuration').first().json.normalized_email }}",
+            "session_code": "={{ $('Workflow Configuration').first().json.session_code }}",
+            "checked_in_at": "={{ $now.toISO() }}"
+          },
+          "schema": [
+            {
+              "id": "checkin_key",
+              "displayName": "checkin_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "session_code",
+              "displayName": "session_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "checked_in_at",
+              "displayName": "checked_in_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bc9bed5d-d386-45b4-8cc0-bf9a4ab43a23",
+      "name": "Record Dedupe Key",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Workflow Configuration').first().json.registration_sheet_id }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Workflow Configuration').first().json.schedule_tab }}"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "cohort",
+              "lookupValue": "={{ $('Look Up Registration').first().json.cohort ?? 'UNREGISTERED' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "102ff2bb-ebff-4ea9-9a96-a943fad26ecc",
+      "name": "Read Cohort Schedule",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        784,
+        496
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_SHEETS_CREDENTIAL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "session_checkin_dedupe",
+          "cachedResultName": null
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "keyValue": "={{ $('Workflow Configuration').first().json.normalized_email }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "3e408222-2ccb-46b1-b6ad-d1ce72791283",
+      "name": "Fetch Attendance History",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1024,
+        496
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Workflow Configuration').first().json;\nconst roster = $('Look Up Registration').first().json;\nconst scheduleRows = $('Read Cohort Schedule').all().map(i => i.json).filter(r => r.session_code);\nconst historyRows = $input.all().map(i => i.json).filter(r => r.session_code);\nconst isRegistered = Boolean(roster.email);\nconst threshold = Number(cfg.certification_threshold) > 0 ? Number(cfg.certification_threshold) : 0.8;\nconst todayIso = $today.toFormat('yyyy-MM-dd');\nconst isRequired = (r) => {\n  const v = String(r.required === undefined || r.required === '' ? 'TRUE' : r.required).trim().toLowerCase();\n  return v === 'true' || v === 'yes' || v === '1';\n};\nconst requiredRows = scheduleRows.filter(isRequired);\nconst requiredCodes = new Set(requiredRows.map(r => String(r.session_code).trim()));\nconst attendedCodes = new Set(historyRows.map(r => String(r.session_code).trim()).filter(c => requiredCodes.has(c)));\nconst attended = attendedCodes.size;\nconst requiredTotal = requiredRows.length;\nconst remaining = requiredRows.filter(r => String(r.session_date).trim() > todayIso && !attendedCodes.has(String(r.session_code).trim())).length;\nconst currentFraction = requiredTotal > 0 ? attended / requiredTotal : 0;\nconst bestCaseFraction = requiredTotal > 0 ? Math.min(1, (attended + remaining) / requiredTotal) : 0;\nconst neededSessions = Math.ceil(threshold * requiredTotal - 0.000000001);\nconst shortfallSessions = Math.max(0, neededSessions - (attended + remaining));\nconst unreachable = isRegistered && requiredTotal > 0 && bestCaseFraction < threshold - 0.000000001;\nconst pct = (f) => Math.round(f * 1000) / 10;\nconst participantName = String(roster.name || cfg.normalized_email);\nlet kioskMessage;\nif (!isRegistered) {\n  kioskMessage = 'You were not on the pre-registered roster, so this visit was logged as a walk-in for session ' + cfg.session_code + '. Please see the program coordinator to get added to a cohort.';\n} else if (requiredTotal === 0) {\n  kioskMessage = 'Check-in recorded for session ' + cfg.session_code + '. No required sessions were found for cohort ' + String(roster.cohort) + ', so no eligibility math was run.';\n} else {\n  kioskMessage = 'Check-in recorded for session ' + cfg.session_code + '. Attendance so far: ' + attended + ' of ' + requiredTotal + ' required sessions (' + pct(currentFraction) + '%). Required sessions still ahead: ' + remaining + '.';\n}\nreturn [{ json: {\n  status: isRegistered ? 'REGISTERED' : 'WALK_IN',\n  participant_name: participantName,\n  email: String(cfg.normalized_email),\n  cohort: String(roster.cohort || 'UNREGISTERED'),\n  session_code: String(cfg.session_code),\n  attended: attended,\n  required_total: requiredTotal,\n  remaining_required: remaining,\n  current_pct: pct(currentFraction),\n  best_case_pct: pct(bestCaseFraction),\n  threshold_pct: pct(threshold),\n  shortfall_sessions: shortfallSessions,\n  unreachable: unreachable,\n  kiosk_message: kioskMessage\n} }];"
+      },
+      "id": "bb3e61f0-4a26-4a88-9ca0-7406f573419c",
+      "name": "Compute Attendance Reachability",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "unreachable-check",
+              "leftValue": "={{ $json.unreachable }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9f8c270e-48ed-425f-b559-a3a58090a9cd",
+      "name": "Route Unreachable Certification",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1456,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Workflow Configuration').first().json.slack_channel_id }}"
+        },
+        "text": "=Certification at risk: {{ $json.participant_name }} ({{ $json.email }}), cohort {{ $json.cohort }}.\nAttended {{ $json.attended }} of {{ $json.required_total }} required sessions, {{ $json.remaining_required }} still ahead.\nBest case {{ $json.best_case_pct }}% vs threshold {{ $json.threshold_pct }}%. Short by {{ $json.shortfall_sessions }} session(s) even with perfect attendance from here.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "e4bc09d2-111e-43d0-905e-364b5ead236a",
+      "name": "Alert Coordinator On Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        1728,
+        480
+      ],
+      "webhookId": "99c7a0cb-37c1-4ce6-8211-c7d045d87b8d",
+      "credentials": {
+        "slackApi": {
+          "id": "REPLACE_WITH_YOUR_SLACK_CREDENTIAL",
+          "name": "Slack account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "You are checked in",
+        "completionMessage": "={{ $('Compute Attendance Reachability').first().json.kiosk_message }}",
+        "options": {}
+      },
+      "id": "e15b2528-08f1-4b3c-876d-2d3e6133397d",
+      "name": "Show Check In Confirmation Screen",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        1984,
+        512
+      ],
+      "webhookId": "7927d130-98b5-4064-b276-a9d30625d653"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Already checked in",
+        "completionMessage": "=You already scanned in for session {{ $('Workflow Configuration').first().json.session_code }}. No duplicate was recorded. You are good to go.",
+        "options": {}
+      },
+      "id": "32a73239-92a1-4cd9-baa8-85261ea30a24",
+      "name": "Show Already Checked In Screen",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        1088,
+        16
+      ],
+      "webhookId": "491ec364-b077-4c41-8e4c-2a2c0bfbaf1e"
+    },
+    {
+      "parameters": {
+        "content": "# Session Check-In Kiosk with Attendance Eligibility Alerts\n\nA QR-powered attendance kiosk for cohort programs with a certification attendance requirement. Participants scan a session QR code that opens this form with the session code prefilled, type only their email, and get an instant confirmation screen. Behind the scenes the workflow dedupes double scans, tags walk-ins, timestamps every check-in to Google Sheets, recomputes the cumulative attendance fraction against the required sessions that remain, and alerts Slack the moment the certification threshold becomes mathematically unreachable.\n\n## How it works\n1. A participant scans the session QR code, which opens the production form URL with session_code prefilled as a query parameter. They type only their email.\n2. Workflow Configuration centralizes the Sheet ID, tab names, Slack channel and certification threshold, and builds the email plus session composite key.\n3. The Data Table rowNotExists check screens out double scans. Duplicates route straight to an Already Checked In screen.\n4. First scans are validated against the cohort roster tab. Unregistered walk-ins are tagged WALK_IN and still logged, never rejected.\n5. The check-in row is timestamped to the Check-Ins tab, then the composite key is recorded in the dedupe Data Table.\n6. The cohort schedule tab is read to derive required sessions, and required sessions still ahead are counted from schedule dates later than today.\n7. A Code node recomputes the cumulative attendance fraction and the best case fraction with perfect attendance from here.\n8. If the threshold is mathematically unreachable, a Slack alert names the person and the shortfall. Every branch ends on a form completion screen.\n\n## Setup\n- Replace <__PLACEHOLDER_VALUE__REGISTRATION_SHEET_ID__> in Workflow Configuration with your registration spreadsheet ID.\n- Keep tab names in sync: Cohort Roster (email, name, cohort), Cohort Schedule (cohort, session_code, session_date, required), Check-Ins (checked_in_at, email, name, cohort, session_code, status).\n- Replace <__PLACEHOLDER_VALUE__SLACK_CHANNEL_ID__> with the coordinator channel ID and invite the bot to that channel.\n- Adjust certification_threshold (default 0.8) if your program uses a different bar.\n- The Data Table session_checkin_dedupe is already created and wired by ID. Keep its columns checkin_key, email, session_code, checked_in_at.\n- Publish the workflow, then build QR codes on the PRODUCTION form URL with ?session_code=YOUR_CODE appended.",
+        "height": 760,
+        "width": 1160
+      },
+      "id": "375be43e-b9ce-4ed9-9725-0485e43c79f2",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -1040
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Production URL only\n\nQuery parameter prefill fills the session_code hidden field on the PRODUCTION form URL only. Test mode ignores query parameters, so a QR walkthrough staged on the test URL records blank session codes. Stage the QR walkthrough on the production URL.",
+        "height": 232,
+        "width": 560,
+        "color": 3
+      },
+      "id": "e49c0e2d-f4ee-4996-816c-4b203e51f680",
+      "name": "Production URL warning",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        -784
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Keep the line moving\n\nEvery branch must end on a form completion screen or the kiosk browser hangs and the line backs up. The Slack alert runs with onError continue so a failed post can never strand the success screen.",
+        "height": 200,
+        "width": 568,
+        "color": 3
+      },
+      "id": "a7bab3d3-be5b-4471-9d72-c5c215b87c23",
+      "name": "Completion screen warning",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        -496
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Intake and dedupe gate\n\nThe form takes one typed field, email. session_code arrives prefilled from the QR query parameter. The rowNotExists check matches the email plus session composite key, and duplicates exit on their own completion screen.",
+        "height": 436,
+        "width": 1384,
+        "color": 7
+      },
+      "id": "115490c6-4c40-42c3-acad-10c070f4fbc1",
+      "name": "Section intake",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Validate, tag and log\n\nThe roster tab decides REGISTERED or WALK_IN. Walk-ins are tagged and logged, never rejected. The check-in row is timestamped to the Sheet, then the composite key lands in the dedupe Data Table.",
+        "height": 404,
+        "width": 816,
+        "color": 7
+      },
+      "id": "8b4c6460-a5a6-4d88-becc-7dfdb9c1d452",
+      "name": "Section validate",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Eligibility math and alert\n\nRequired sessions still ahead are derived from schedule dates later than today, not a static count, so the reachability math stays honest mid-program. When even perfect attendance from here cannot reach the threshold, Slack gets an alert naming the person and the shortfall.",
+        "height": 420,
+        "width": 1504,
+        "color": 7
+      },
+      "id": "a065b51a-6c7f-40e6-99cc-c5f7932a907f",
+      "name": "Section eligibility",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        704,
+        304
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Session Check-In Kiosk": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Screen For First Scan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Screen For First Scan": {
+      "main": [
+        [
+          {
+            "node": "Route Duplicate Scans",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Duplicate Scans": {
+      "main": [
+        [
+          {
+            "node": "Look Up Registration",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Show Already Checked In Screen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Look Up Registration": {
+      "main": [
+        [
+          {
+            "node": "Log Check In To Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Check In To Sheet": {
+      "main": [
+        [
+          {
+            "node": "Record Dedupe Key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Dedupe Key": {
+      "main": [
+        [
+          {
+            "node": "Read Cohort Schedule",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Cohort Schedule": {
+      "main": [
+        [
+          {
+            "node": "Fetch Attendance History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Attendance History": {
+      "main": [
+        [
+          {
+            "node": "Compute Attendance Reachability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute Attendance Reachability": {
+      "main": [
+        [
+          {
+            "node": "Route Unreachable Certification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Unreachable Certification": {
+      "main": [
+        [
+          {
+            "node": "Alert Coordinator On Slack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Show Check In Confirmation Screen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert Coordinator On Slack": {
+      "main": [
+        [
+          {
+            "node": "Show Check In Confirmation Screen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {},
+  "tags": []
+}
