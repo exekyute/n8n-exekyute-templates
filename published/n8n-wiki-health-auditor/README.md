@@ -1,5 +1,7 @@
 # Audit Notion wiki health for orphan, stale and thin pages using Notion and Slack
 
+[Published n8n template](https://n8n.io/workflows/17809-audit-notion-wiki-health-and-send-weekly-digests-to-slack/)
+
 Sweep a Notion wiki once a week, build the internal link graph from the page content itself, and flag every page nobody links to, nobody has edited, or nobody has written. Findings are written back to a Notion database and a ranked digest goes to Slack. No model is involved anywhere: orphan, stale and thin are thresholds you set, so the same wiki produces the same answer every run.
 
 Built with n8n, plus Notion and Slack.

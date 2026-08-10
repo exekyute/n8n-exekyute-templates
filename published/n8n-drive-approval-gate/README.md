@@ -1,5 +1,7 @@
 # Approve a new Google Drive file from inside Discord before it moves
 
+[Published n8n template](https://n8n.io/workflows/17614-review-google-drive-inbox-files-with-discord-and-log-decisions-in-sheets/)
+
 Watch a Drive inbox folder and hold every new file there until somebody taps Approve or Send back on a Discord message. The approval message uses n8n's native `sendAndWait`, so the execution parks in a waiting state and resumes the instant a button is pressed rather than polling for an answer. An expired decision window is recorded as `No response` and the file stays where it is.
 
 Built with n8n, plus Discord, Google Drive, and Google Sheets.

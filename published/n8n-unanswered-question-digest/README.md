@@ -1,5 +1,7 @@
 # Post a daily digest of unanswered Discord help questions to Google Sheets
 
+[Published n8n template](https://n8n.io/workflows/17613-log-daily-unanswered-discord-help-questions-from-discord-to-google-sheets/)
+
 Read one Discord help channel every morning, find the questions nobody answered, and post them with jump links to a moderator channel while logging each one to a Google Sheet. A message counts as answered if any of three things is true: something replied to it, a later message mentioned the asker, or it has a thread. Every run also reports how far back it actually reached, so a scan that saw less than a full day says so instead of reading like a quiet morning.
 
 Built with n8n, plus Discord and Google Sheets.

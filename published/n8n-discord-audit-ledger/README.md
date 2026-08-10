@@ -1,5 +1,7 @@
 # Archive Discord audit log entries to Google Sheets and roll up weekly in Slack
 
+[Published n8n template](https://n8n.io/workflows/17808-archive-discord-audit-logs-to-google-sheets-and-send-weekly-slack-digests/)
+
 Discord deletes audit log entries after 45 days, so this copies them into a Google Sheets ledger on a daily schedule and posts a per-moderator summary to Slack once a week. A Data Table holds the id of the last entry archived, and each run pages forward from there. The audit log is the one Discord read endpoint with a real server side cursor, so resuming from a stored id is exact rather than a guess based on timestamps.
 
 Built with n8n, plus Discord, Google Sheets, Data Tables, and Slack.
