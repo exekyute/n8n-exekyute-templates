@@ -92,6 +92,13 @@ Most of them share the same working habits: rules in a table or a config block a
 
 Submitted to the n8n Creator hub and awaiting approval. Templates move up to `published/` once they are live in the library.
 
+| Template | What it does | Stack |
+|---|---|---|
+| [Certification Lapse Radar](pending-review/n8n-certification-lapse-radar/) | Checks every assigned staffer's certification against the date of each upcoming session, then posts a Slack fix list and emails whoever has lapsed. | Google Calendar, Google Sheets, Slack, Gmail, Data Tables |
+| [Missing Paperwork Collector](pending-review/n8n-missing-paperwork-collector/) | Chases the onboarding documents each new hire still owes with a daily Drive check, tiered Gmail reminders, and one Slack roll up of overdue people. | Google Drive, Gmail, Slack, Data Tables |
+| [Session Check-In Kiosk](pending-review/n8n-session-checkin-kiosk/) | Participants scan a session QR code and type their email, check-ins log to Google Sheets, and Slack is alerted when certification becomes unreachable. | Google Sheets, Slack, Data Tables |
+| [Volunteer Hour Statements](pending-review/n8n-volunteer-hour-statements/) | Emails every volunteer a monthly statement of their hours from a Google Sheets ledger and sends the coordinator one in-kind total for grant reporting. | Google Sheets, Gmail, Data Tables |
+
 ## Pending submission
 
 Built and tested but not yet submitted to the Creator hub. Templates move to `pending-review/` once submitted.
