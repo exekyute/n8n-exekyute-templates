@@ -6,7 +6,7 @@ Most of them share the same working habits: rules in a table or a config block a
 
 ## Published
 
-**50 templates** are live in the n8n template library right now, grouped by area. Hit **View** on any row to open its listing on n8n.io. A template that spans two areas is listed once, under the first one.
+**54 templates** are live in the n8n template library right now, grouped by area. Hit **View** on any row to open its listing on n8n.io. A template that spans two areas is listed once, under the first one.
 
 ### 🤖 AI · 13
 
@@ -48,7 +48,7 @@ Most of them share the same working habits: rules in a table or a config block a
 | [Discord Attachment Archiver](published/n8n-discord-attachment-archiver/) · [View](https://n8n.io/workflows/17615-archive-discord-attachments-to-google-drive-and-log-them-in-google-sheets/) | Sweeps named Discord channels daily and pulls every new attachment into a dated Google Drive folder before its signed URL expires. | Discord, Google Drive, Google Sheets |
 | [Drive Approval Gate](published/n8n-drive-approval-gate/) · [View](https://n8n.io/workflows/17614-review-google-drive-inbox-files-with-discord-and-log-decisions-in-sheets/) | Holds every new file in a Drive inbox until somebody taps Approve or Send back on a Discord message, then moves it and logs the decision. | Discord, Google Drive, Google Sheets |
 
-### 📡 DevOps & Monitoring · 12
+### 📡 DevOps & Monitoring · 13
 
 | Template | What it does | Stack |
 |---|---|---|
@@ -64,6 +64,7 @@ Most of them share the same working habits: rules in a table or a config block a
 | [Roster Drift Reconciler](published/n8n-roster-drift-reconciler/) · [View](https://n8n.io/workflows/17616-reconcile-discord-roles-with-google-sheets-rosters-and-report-drift-weekly/) | Compares a Google Sheets roster against Discord roles each week and reports both directions of drift without ever changing a role. | Discord, Google Sheets |
 | [Unanswered Question Digest](published/n8n-unanswered-question-digest/) · [View](https://n8n.io/workflows/17613-log-daily-unanswered-discord-help-questions-from-discord-to-google-sheets/) | Finds the questions in a Discord help channel that nobody answered and posts them with jump links to a moderator channel each morning. | Discord, Google Sheets |
 | [Wiki Health Auditor](published/n8n-wiki-health-auditor/) · [View](https://n8n.io/workflows/17809-audit-notion-wiki-health-and-send-weekly-digests-to-slack/) | Sweeps a Notion wiki weekly for pages nobody links to, nobody has edited and nobody has written, then writes the findings back to Notion and posts a ranked Slack digest. | Notion, Slack |
+| [Certification Lapse Radar](published/n8n-certification-lapse-radar/) · [View](https://n8n.io/workflows/17983-validate-staff-certifications-for-upcoming-sessions-with-google-calendar-and-slack/) | Checks every assigned staffer's certification against the date of each upcoming session, then posts a Slack fix list and emails whoever has lapsed. | Google Calendar, Google Sheets, Slack, Gmail, Data Tables |
 
 ### 📣 Sales & Marketing · 4
 
@@ -74,7 +75,7 @@ Most of them share the same working habits: rules in a table or a config block a
 | [Local Business Proximity](published/n8n-local-business-proximity/) · [View](https://n8n.io/workflows/16997-log-nearby-businesses-from-openstreetmap-to-google-sheets-by-proximity/) | Pulls every business of a chosen category within a radius from OpenStreetMap into a Google Sheet, flagged by whether each lists a website. | OpenStreetMap, Google Sheets |
 | [SMS Pumping Screener](published/n8n-sms-pumping-screener/) · [View](https://n8n.io/workflows/17400-screen-sms-campaign-numbers-for-high-risk-lines-with-twilio-sheets-and-slack/) | Screens every campaign number through Twilio Lookup before sending, routing SMS pumping fraud lines, VoIP, and landlines to a quarantine tab with a written reason. | Twilio Lookup, Google Sheets, Slack |
 
-### ⚙️ Operations · 9
+### ⚙️ Operations · 12
 
 | Template | What it does | Stack |
 |---|---|---|
@@ -87,17 +88,13 @@ Most of them share the same working habits: rules in a table or a config block a
 | [SMS Task Capture](published/n8n-sms-task-capture/) · [View](https://n8n.io/workflows/17402-create-notion-tasks-from-inbound-sms-with-twilio-and-rule-based-date-parsing/) | Turns an inbound SMS into a Notion task, reading the due date from the message with a fixed rule table instead of a model. | Twilio, Notion |
 | [Sheet Calendar Feed](published/n8n-sheet-calendar-feed/) · [View](https://n8n.io/workflows/17548-publish-a-live-calendar-feed-from-google-sheets-to-google-apple-and-outlook/) | Serves a tab of events as an iCalendar feed at a stable URL, so anyone can subscribe once and see later edits arrive on their own calendar. | Google Sheets, iCalendar |
 | [Gapless Number Issuer](published/n8n-gapless-number-issuer/) · [View](https://n8n.io/workflows/17547-issue-sequential-invoice-and-ticket-numbers-via-webhook-and-data-table/) | Issues consecutive invoice and ticket numbers over a webhook, and states plainly what the counter can and cannot promise under concurrent load. | Data Tables |
+| [Missing Paperwork Collector](published/n8n-missing-paperwork-collector/) · [View](https://n8n.io/workflows/17984-chase-missing-onboarding-documents-daily-with-google-drive-gmail-slack-and-data-tables/) | Chases the onboarding documents each new hire still owes with a daily Drive check, tiered Gmail reminders, and one Slack roll up of overdue people. | Google Drive, Gmail, Slack, Data Tables |
+| [Session Check-In Kiosk](published/n8n-session-checkin-kiosk/) · [View](https://n8n.io/workflows/17985-check-in-participants-via-qr-code-with-google-sheets-and-slack-alerts/) | Participants scan a session QR code and type their email, check-ins log to Google Sheets, and Slack is alerted when certification becomes unreachable. | Google Sheets, Slack, Data Tables |
+| [Volunteer Hour Statements](published/n8n-volunteer-hour-statements/) · [View](https://n8n.io/workflows/17986-send-monthly-volunteer-hour-statements-from-google-sheets-with-gmail/) | Emails every volunteer a monthly statement of their hours from a Google Sheets ledger and sends the coordinator one in-kind total for grant reporting. | Google Sheets, Gmail, Data Tables |
 
 ## Pending review
 
 Submitted to the n8n Creator hub and awaiting approval. Templates move up to `published/` once they are live in the library.
-
-| Template | What it does | Stack |
-|---|---|---|
-| [Certification Lapse Radar](pending-review/n8n-certification-lapse-radar/) | Checks every assigned staffer's certification against the date of each upcoming session, then posts a Slack fix list and emails whoever has lapsed. | Google Calendar, Google Sheets, Slack, Gmail, Data Tables |
-| [Missing Paperwork Collector](pending-review/n8n-missing-paperwork-collector/) | Chases the onboarding documents each new hire still owes with a daily Drive check, tiered Gmail reminders, and one Slack roll up of overdue people. | Google Drive, Gmail, Slack, Data Tables |
-| [Session Check-In Kiosk](pending-review/n8n-session-checkin-kiosk/) | Participants scan a session QR code and type their email, check-ins log to Google Sheets, and Slack is alerted when certification becomes unreachable. | Google Sheets, Slack, Data Tables |
-| [Volunteer Hour Statements](pending-review/n8n-volunteer-hour-statements/) | Emails every volunteer a monthly statement of their hours from a Google Sheets ledger and sends the coordinator one in-kind total for grant reporting. | Google Sheets, Gmail, Data Tables |
 
 ## Pending submission
 
