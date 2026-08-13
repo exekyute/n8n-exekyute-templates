@@ -1,5 +1,7 @@
 # Chase missing onboarding documents daily with Google Drive, Gmail and Slack
 
+[Published n8n template](https://n8n.io/workflows/17984-chase-missing-onboarding-documents-daily-with-google-drive-gmail-slack-and-data-tables/)
+
 Chase the onboarding documents each new hire still owes, once a day, without anyone writing the reminder. Two n8n Data Tables hold the rules and the people: a role based requirement matrix with due offsets, and a roster carrying each person's Google Drive intake folder. A document counts as received when a filename in that folder contains its slug, so nothing here reads file contents.
 
 Built with n8n, plus Google Drive, Gmail, Slack, and n8n Data Tables.

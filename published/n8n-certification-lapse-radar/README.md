@@ -1,5 +1,7 @@
 # Validate staff certifications against upcoming session dates using Google Calendar, Sheets, Slack and Gmail
 
+[Published n8n template](https://n8n.io/workflows/17983-validate-staff-certifications-for-upcoming-sessions-with-google-calendar-and-slack/)
+
 Checks whether every staffer assigned to an upcoming session still holds the required certification on the day that session runs, then posts one Slack fix list and emails each lapsed person. Expiry dates are compared against the session date rather than against today, so a card that lapses in six weeks fails a class eight weeks out even though it looks valid this morning. Sessions that fall short get the smallest set of renewals that closes the gap, latest lapse first, with the date each renewal has to land by.
 
 Built with n8n, plus Google Calendar, Google Sheets, n8n Data Tables, Slack, and Gmail.

@@ -1,5 +1,7 @@
 # Check in participants by QR code with Google Sheets and Slack
 
+[Published n8n template](https://n8n.io/workflows/17985-check-in-participants-via-qr-code-with-google-sheets-and-slack-alerts/)
+
 Turn a printed QR code into a check-in kiosk: participants scan, type only their email, and get a confirmation screen telling them where their attendance stands. Every scan writes a timestamped row to Google Sheets, records a dedupe key in an n8n Data Table so a second scan cannot double-count, and recomputes the running attendance fraction against the required sessions the cohort still has ahead. When even perfect attendance from here cannot reach the certification threshold, Slack gets an alert naming the person and the shortfall.
 
 Built with n8n, plus Google Sheets, Slack, n8n Forms, and Data Tables.

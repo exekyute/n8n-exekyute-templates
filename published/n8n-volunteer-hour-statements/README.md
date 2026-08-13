@@ -1,5 +1,7 @@
 # Issue monthly volunteer hour statements from a Google Sheets ledger with Gmail
 
+[Published n8n template](https://n8n.io/workflows/17986-send-monthly-volunteer-hour-statements-from-google-sheets-with-gmail/)
+
 On the 1st of each month this reads a verified volunteer hours ledger in Google Sheets, emails every volunteer their own statement for the previous calendar month, and sends the coordinator one program summary carrying the total in-kind dollar value for grant match reporting. The period is the previous calendar month derived from the run date rather than a rolling 30 days, and a log row per period in a Data Table stops a re-run from emailing the whole roster twice. The hourly rate, the milestone thresholds (25, 50, 100 by default), and the zero-hour policy all live in a Data Table, so no valuation number is hardcoded in the workflow.
 
 Built with n8n, plus Google Sheets, Gmail, and n8n Data Tables.
