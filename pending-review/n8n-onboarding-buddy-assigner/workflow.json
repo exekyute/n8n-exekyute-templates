@@ -1,0 +1,697 @@
+{
+  "name": "Pair new hires with onboarding buddies from a Google Sheets mentor pool using Gmail and Slack",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Onboarding Buddy Request",
+        "formDescription": "Tell us who you are and we will pair you with an onboarding buddy from your team.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Full Name",
+              "fieldName": "Full Name",
+              "placeholder": "e.g. Jordan Lee",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Work Email",
+              "fieldType": "email",
+              "fieldName": "Work Email",
+              "placeholder": "e.g. jordan.lee@example.com",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Team or Cohort",
+              "fieldName": "Team or Cohort",
+              "placeholder": "e.g. Data Platform",
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {
+          "appendAttribution": false,
+          "buttonLabel": "Request a buddy",
+          "path": "onboarding-buddy"
+        }
+      },
+      "id": "5236ffc2-02e0-47d4-ae8a-95f4f26f2264",
+      "name": "New Joiner Intake Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        32,
+        0
+      ],
+      "webhookId": "ccc24c91-11b6-46a6-b37d-76817c7c1ddb"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-sheet-id",
+              "name": "sheet_document_id",
+              "value": "<__PLACEHOLDER_VALUE__BUDDY_PROGRAM_SHEET_ID__>",
+              "type": "string"
+            },
+            {
+              "id": "cfg-coordinator-email",
+              "name": "coordinator_email",
+              "value": "<__PLACEHOLDER_VALUE__COORDINATOR_EMAIL__>",
+              "type": "string"
+            },
+            {
+              "id": "cfg-coordinator-slack",
+              "name": "coordinator_slack_channel_id",
+              "value": "<__PLACEHOLDER_VALUE__COORDINATOR_SLACK_CHANNEL_ID__>",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "896d0825-16ab-403e-8ced-bb47e73f55d5",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Workflow Configuration').first().json.sheet_document_id }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Mentors"
+        },
+        "options": {}
+      },
+      "id": "14a49a03-f7fa-4b4c-bff9-51897ff3ac6f",
+      "name": "Fetch Mentor Roster",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        688,
+        0
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_SHEETS_CREDENTIAL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Workflow Configuration').first().json.sheet_document_id }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Pairings"
+        },
+        "options": {}
+      },
+      "id": "a9c7329e-01ec-4199-85c6-2b1062a28bb0",
+      "name": "Fetch Open Pairings",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        960,
+        0
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_SHEETS_CREDENTIAL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const mentors = $('Fetch Mentor Roster').all()\n  .map(item => item.json)\n  .filter(row => row && row.email);\n\nconst pairings = $input.all()\n  .map(item => item.json)\n  .filter(row => row && row.mentor_email);\n\nconst activeCounts = {};\nfor (const row of pairings) {\n  if (String(row.status || '').trim().toLowerCase() !== 'active') continue;\n  const key = String(row.mentor_email).trim().toLowerCase();\n  activeCounts[key] = (activeCounts[key] || 0) + 1;\n}\n\nconst joiner = $('New Joiner Intake Form').first().json;\nconst joinerName = String(joiner['Full Name'] || '').trim();\nconst joinerEmail = String(joiner['Work Email'] || '').trim();\nconst joinerCohort = String(joiner['Team or Cohort'] || '').trim();\n\nconst truthy = value => ['true', 'yes', 'y', '1'].includes(String(value || '').trim().toLowerCase());\n\nconst eligible = mentors\n  .map(mentor => {\n    const key = String(mentor.email).trim().toLowerCase();\n    return {\n      name: String(mentor.mentor_name || mentor.name || '').trim(),\n      email: String(mentor.email).trim(),\n      slackId: String(mentor.slack_member_id || '').trim(),\n      cohort: String(mentor.cohort || '').trim(),\n      capacity: Number(mentor.capacity) || 0,\n      onLeave: truthy(mentor.on_leave),\n      lastAssigned: String(mentor.last_assigned || '').trim(),\n      active: activeCounts[key] || 0,\n    };\n  })\n  .filter(mentor => !mentor.onLeave && mentor.active < mentor.capacity);\n\nconst rank = (a, b) => {\n  if (a.active !== b.active) return a.active - b.active;\n  return a.lastAssigned.localeCompare(b.lastAssigned);\n};\n\nconst sameCohort = joinerCohort\n  ? eligible.filter(mentor => mentor.cohort.toLowerCase() === joinerCohort.toLowerCase())\n  : [];\nconst pool = sameCohort.length > 0 ? sameCohort : eligible;\nconst winner = pool.slice().sort(rank)[0] || null;\n\nconst base = {\n  joiner_name: joinerName,\n  joiner_email: joinerEmail,\n  joiner_cohort: joinerCohort,\n  assigned_at: new Date().toISOString(),\n};\n\nif (!winner) {\n  return [{ json: { ...base, matched: false, status: 'waitlisted', mentor_name: '', mentor_email: '', mentor_slack_id: '', cohort_match: false } }];\n}\n\nreturn [{ json: { ...base, matched: true, status: 'active', mentor_name: winner.name, mentor_email: winner.email, mentor_slack_id: winner.slackId, cohort_match: sameCohort.length > 0 } }];"
+      },
+      "id": "47abb67c-9c09-45ca-ac51-138921b05ea2",
+      "name": "Select Mentor With Cohort Fallback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Workflow Configuration').first().json.sheet_document_id }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Pairings"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "joiner_name": "={{ $json.joiner_name }}",
+            "joiner_email": "={{ $json.joiner_email }}",
+            "joiner_cohort": "={{ $json.joiner_cohort }}",
+            "mentor_name": "={{ $json.mentor_name }}",
+            "mentor_email": "={{ $json.mentor_email }}",
+            "status": "={{ $json.status }}",
+            "assigned_at": "={{ $json.assigned_at }}"
+          },
+          "schema": [
+            {
+              "id": "joiner_name",
+              "displayName": "joiner_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "joiner_email",
+              "displayName": "joiner_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "joiner_cohort",
+              "displayName": "joiner_cohort",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mentor_name",
+              "displayName": "mentor_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mentor_email",
+              "displayName": "mentor_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "assigned_at",
+              "displayName": "assigned_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b94e0922-548c-45a1-918a-85aa90104d58",
+      "name": "Record Pairing Or Waitlist Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1520,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_SHEETS_CREDENTIAL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('Select Mentor With Cohort Fallback').item.json.matched }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              },
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4e266354-73f6-4c35-a444-e9561144c179",
+      "name": "Route On Match Result",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1792,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Workflow Configuration').first().json.sheet_document_id }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Mentors"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "email"
+          ],
+          "value": {
+            "email": "={{ $('Select Mentor With Cohort Fallback').item.json.mentor_email }}",
+            "last_assigned": "={{ $('Select Mentor With Cohort Fallback').item.json.assigned_at }}"
+          },
+          "schema": [
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "last_assigned",
+              "displayName": "last_assigned",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a4cc35dd-12b0-435b-84fb-7be8413d988e",
+      "name": "Stamp Mentor Last Assigned",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2256,
+        -16
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_GOOGLE_SHEETS_CREDENTIAL",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Select Mentor With Cohort Fallback').item.json.mentor_email }}, {{ $('Select Mentor With Cohort Fallback').item.json.joiner_email }}",
+        "subject": "=Onboarding buddies: {{ $('Select Mentor With Cohort Fallback').item.json.mentor_name }} and {{ $('Select Mentor With Cohort Fallback').item.json.joiner_name }}",
+        "emailType": "text",
+        "message": "=Hi {{ $('Select Mentor With Cohort Fallback').item.json.mentor_name }} and {{ $('Select Mentor With Cohort Fallback').item.json.joiner_name }},\n\n{{ $('Select Mentor With Cohort Fallback').item.json.joiner_name }} is joining the {{ $('Select Mentor With Cohort Fallback').item.json.joiner_cohort }} team, and {{ $('Select Mentor With Cohort Fallback').item.json.mentor_name }} will be their onboarding buddy.\n\nBuddy: {{ $('Select Mentor With Cohort Fallback').item.json.mentor_name }} ({{ $('Select Mentor With Cohort Fallback').item.json.mentor_email }})\nNew joiner: {{ $('Select Mentor With Cohort Fallback').item.json.joiner_name }} ({{ $('Select Mentor With Cohort Fallback').item.json.joiner_email }})\n\nPlease book a 30 minute intro call this week. The program coordinator is copied on this thread for any questions.\n\nWelcome aboard!",
+        "options": {
+          "appendAttribution": false,
+          "ccList": "={{ $('Workflow Configuration').first().json.coordinator_email }}"
+        }
+      },
+      "id": "42445221-d64c-45e4-8f4f-711dc181d72c",
+      "name": "Send Dual Intro Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2544,
+        -16
+      ],
+      "webhookId": "0e75f2a1-bb96-48a1-84f2-0b8bb509af9a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_WITH_YOUR_GMAIL_CREDENTIAL",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Select Mentor With Cohort Fallback').item.json.mentor_slack_id }}"
+        },
+        "text": "=You have a new onboarding mentee: {{ $('Select Mentor With Cohort Fallback').item.json.joiner_name }} ({{ $('Select Mentor With Cohort Fallback').item.json.joiner_email }}), cohort {{ $('Select Mentor With Cohort Fallback').item.json.joiner_cohort }}. An intro email is already in your inbox, please book the first call this week.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "1527d077-7d33-4cc9-a90d-5787853d2479",
+      "name": "Ping Mentor In Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        2816,
+        -16
+      ],
+      "webhookId": "45a7e96a-c48e-4403-825f-e919ad43c44d",
+      "credentials": {
+        "slackApi": {
+          "id": "REPLACE_WITH_YOUR_SLACK_CREDENTIAL",
+          "name": "Slack account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "=You are paired with {{ $('Select Mentor With Cohort Fallback').item.json.mentor_name }}",
+        "completionMessage": "Check your inbox: an intro email connecting you both is on its way, with the program coordinator copied. Your buddy will reach out to book an intro call this week.",
+        "options": {}
+      },
+      "id": "09a191c1-c936-4f0b-a559-dd505ca2f208",
+      "name": "Show Pairing Confirmation",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        3104,
+        -16
+      ],
+      "webhookId": "e665a05e-5f24-451f-9136-c7354adedc48"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Workflow Configuration').first().json.coordinator_slack_channel_id }}"
+        },
+        "text": "=No eligible buddy for {{ $('Select Mentor With Cohort Fallback').item.json.joiner_name }} ({{ $('Select Mentor With Cohort Fallback').item.json.joiner_email }}, cohort {{ $('Select Mentor With Cohort Fallback').item.json.joiner_cohort }}). A waitlisted row was added to the Pairings tab. Free up capacity or add mentors, then pair them manually.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "8d44e564-5792-41d5-9fb6-05f1175c99d9",
+      "name": "Alert Coordinator In Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        2256,
+        208
+      ],
+      "webhookId": "51c651ee-9ee8-41b2-b0f9-1b2da31e4709",
+      "credentials": {
+        "slackApi": {
+          "id": "REPLACE_WITH_YOUR_SLACK_CREDENTIAL",
+          "name": "Slack account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "You are on the buddy waitlist",
+        "completionMessage": "Every buddy is at capacity right now, so we could not pair you today. The program coordinator has been alerted and will assign you a buddy manually as soon as a spot opens. No action needed from you.",
+        "options": {}
+      },
+      "id": "241e087c-131f-415a-bf89-f7a3fb6ddebf",
+      "name": "Show Waitlist Notice",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        2544,
+        208
+      ],
+      "webhookId": "b340bc51-c43f-49b3-bd60-a302b7c4f9b6"
+    },
+    {
+      "parameters": {
+        "content": "# Onboarding Buddy Assigner\n\nCapacity aware round robin buddy assignment for new joiners. A short intake form takes the joiner name, work email, and cohort, then the workflow picks the best available mentor from a Google Sheets pool, records the pairing, introduces both sides in one Gmail thread with the coordinator copied, and pings the mentor in Slack. When every mentor is full, the joiner lands on a waitlist and the completion page says so honestly.\n\n## How it works\n1. The n8n form collects joiner name, work email, and team or cohort.\n2. Workflow Configuration centralizes the spreadsheet id, coordinator email, and coordinator Slack channel.\n3. The Mentors tab and the Pairings tab are both read fresh on every submission.\n4. A Code node counts each mentor's open mentees from the Pairings tab, keeps mentors below capacity and not on leave, prefers the joiner's cohort, and falls back to the full eligible pool.\n5. Ties break to fewest active mentees, then the oldest last_assigned ISO date.\n6. The outcome row is appended to the Pairings tab with status active or status waitlisted.\n7. Match: last_assigned is stamped, one dual intro email goes out with the coordinator on cc, and the mentor gets a Slack ping.\n8. No match: the coordinator is alerted in Slack and the joiner sees a waitlist completion page.\n\n## Setup\n- [ ] Replace `<__PLACEHOLDER_VALUE__BUDDY_PROGRAM_SHEET_ID__>` in Workflow Configuration with your Google Sheets document id.\n- [ ] Replace `<__PLACEHOLDER_VALUE__COORDINATOR_EMAIL__>` with the program coordinator email.\n- [ ] Replace `<__PLACEHOLDER_VALUE__COORDINATOR_SLACK_CHANNEL_ID__>` with the coordinator alert channel id.\n- [ ] Create a Mentors tab with columns: mentor_name, email, slack_member_id, cohort, capacity, on_leave, last_assigned.\n- [ ] Create a Pairings tab with columns: joiner_name, joiner_email, joiner_cohort, mentor_name, mentor_email, status, assigned_at.\n- [ ] Confirm the Google Sheets, Gmail, and Slack credentials, then share the production form URL with your people team.",
+        "height": 768,
+        "width": 1220
+      },
+      "id": "3a1e1deb-a80c-4d5f-b477-0c2ea7d07839",
+      "name": "Overview And Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -1184
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 1. Intake and configuration\n\nThe form collects the new joiner name, work email, and team or cohort, and answers with a live completion page rather than a canned message.\n\nWorkflow Configuration is the only node holding user specific values: the buddy program spreadsheet id, the coordinator email, and the coordinator Slack channel id. Every downstream node reads these by expression, so filling the three placeholders here wires the whole workflow.",
+        "height": 516,
+        "width": 600,
+        "color": 7
+      },
+      "id": "5ef34c7d-f698-47f9-ae83-a262ccaf9861",
+      "name": "Section Intake And Configuration",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Selection engine\n\nFetch Mentor Roster reads the Mentors tab and Fetch Open Pairings reads the Pairings tab. Fetch Open Pairings runs once no matter how many mentor rows come in (Execute Once is safe here because its output ignores its input), and it keeps the run alive on an empty tab (Always Output Data), otherwise the very first pairing could never be written.\n\nThe Code node runs two passes inside one node: pass one keeps only eligible mentors in the joiner cohort, pass two falls back to the full eligible pool when the cohort pool is empty. Eligible means active mentees below capacity and not on leave. Ranking is fewest active mentees first, then longest since last_assigned using a plain ISO date string sort, so no date library is needed. The appended row is status active for a match or status waitlisted when nobody is available, keeping one history ledger for both outcomes.",
+        "height": 516,
+        "width": 1436,
+        "color": 7
+      },
+      "id": "3430289a-86a1-41f3-950e-cf1e2b0b55c0",
+      "name": "Section Selection Engine",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        608,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Pairing actions and waitlist\n\nMatch found: stamp the mentor last_assigned, send one intro email to mentor and joiner together with the coordinator copied, ping the mentor in Slack, and show the joiner a confirmation page naming their buddy.\n\nThe Slack ping uses the slack_member_id column from the Mentors tab, which avoids asking Slack for the users:read.email scope just to resolve an address.\n\nNo match: the coordinator channel gets an alert and the joiner sees an honest waitlist page, never a generic thank you. The email and Slack sends continue on error so one bad address cannot strand the submitter without a response.",
+        "height": 736,
+        "width": 1224,
+        "color": 7
+      },
+      "id": "635c7abc-4de0-472d-92d7-e4cf1aeb06f9",
+      "name": "Section Pairing Actions And Waitlist",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2128,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Never store a mentee counter\n\nActive mentee counts are derived on every run by counting status active rows in the Pairings tab. Do not add a stored counter column to the Mentors tab: read, modify, write counters drift the moment a run fails halfway or two submissions land at once. The Pairings tab is the single source of truth.",
+        "height": 256,
+        "width": 564,
+        "color": 3
+      },
+      "id": "005bb03e-1dce-4054-9530-4aed7089459e",
+      "name": "Warning Never Store A Mentee Counter",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        -736
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "New Joiner Intake Form": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Fetch Mentor Roster",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Mentor Roster": {
+      "main": [
+        [
+          {
+            "node": "Fetch Open Pairings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Open Pairings": {
+      "main": [
+        [
+          {
+            "node": "Select Mentor With Cohort Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Mentor With Cohort Fallback": {
+      "main": [
+        [
+          {
+            "node": "Record Pairing Or Waitlist Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Pairing Or Waitlist Row": {
+      "main": [
+        [
+          {
+            "node": "Route On Match Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route On Match Result": {
+      "main": [
+        [
+          {
+            "node": "Stamp Mentor Last Assigned",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Alert Coordinator In Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stamp Mentor Last Assigned": {
+      "main": [
+        [
+          {
+            "node": "Send Dual Intro Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Dual Intro Email": {
+      "main": [
+        [
+          {
+            "node": "Ping Mentor In Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ping Mentor In Slack": {
+      "main": [
+        [
+          {
+            "node": "Show Pairing Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert Coordinator In Slack": {
+      "main": [
+        [
+          {
+            "node": "Show Waitlist Notice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {},
+  "tags": []
+}
