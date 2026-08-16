@@ -1,4 +1,4 @@
-# Normalize YouTube video tags to a controlled vocabulary
+# Normalize YouTube video tags to a controlled vocabulary using Google Sheets
 
 [Published n8n template](https://n8n.io/workflows/17071-normalize-youtube-video-tags-using-google-sheets-vocabulary-rules/)
 
