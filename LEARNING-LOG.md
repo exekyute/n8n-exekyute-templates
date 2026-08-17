@@ -4,6 +4,10 @@ Dated entries from building these templates. Each one is anchored to where the c
 
 [HOW-I-BUILD.md](HOW-I-BUILD.md) describes the method as it stands now. This is how it got there.
 
+## 2026-08-16, at 54 published
+
+Every batch so far started from a surface or a gap: pick a node family like Twilio or YouTube, or a thin spot in the library, and invent workflows to fill it. Today I inverted that and started from people. Thirty workplace roles, five ideas each, every idea modeled on a chore the role repeats weekly. The inversion finds jobs a node-first scan never shows, like callback verification for vendor bank-detail changes or superseded-drawing alerts for site crews, because the unit of thought is a recurring pain instead of an integration. It also mass-produces duplicates: 55 of the 150 candidates died as near-copies of each other or of templates already in this repo, since different roles keep asking for the same machine underneath (an expiry radar, an approval gate, a chat lookup, a reconciliation pass, a checklist spawner). The direction I am taking from it is a two-step. Generate from roles to find real scenarios, then referee every overlap at the mechanism level: one mechanism ships once, hosted by the role most people would search from, and a sibling only ships when its graph differs in the trigger, the matching logic, the read-versus-write side, or the gate. Next batches will probably pick the mechanism first and choose its host role deliberately, and a near-sibling README will lead with the difference instead of burying it.
+
 ## 2026-08-15, at 54 published
 
 Fifty-four workflow templates are live in the n8n library, added to this repo between June 25 and August 10, 2026, with four more in review. What follows is what changed in how they get built over that stretch, and what is still wrong.
