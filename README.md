@@ -99,8 +99,6 @@ Submitted to the n8n Creator hub and awaiting approval. Templates move up to `pu
 | Template | What it does | Stack |
 |---|---|---|
 | [Departure Handover Sweep](pending-review/n8n-departure-handover-sweep/) | Sweeps a leaver's future Google Calendar events and open Asana tasks into a Notion handover checklist and posts the link to Slack. | Google Calendar, Asana, Notion, Slack |
-| [Onboarding Buddy Assigner](pending-review/n8n-onboarding-buddy-assigner/) | Pairs each new joiner with an available onboarding buddy from a Google Sheets mentor pool, then introduces them by email and Slack. | Google Sheets, Gmail, Slack |
-| [Equipment Checkout Ledger](pending-review/n8n-equipment-checkout-ledger/) | One form records equipment checkouts and returns in Data Tables, blocks checkouts on assets already out, and emails receipts listing the borrower's overdue items. | Data Tables, Gmail, Slack |
 | [Policy Acknowledgment Tracker](pending-review/n8n-policy-ack-tracker/) | Mails everyone on an audience list their own acknowledgment link for a policy or minutes, then reports who has not confirmed. | Gmail, Google Sheets, Data Tables |
 
 ## Pending submission
