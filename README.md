@@ -91,6 +91,7 @@ Most of them share the same working habits: rules in a table or a config block a
 | [Missing Paperwork Collector](published/n8n-missing-paperwork-collector/) · [View](https://n8n.io/workflows/17984-chase-missing-onboarding-documents-daily-with-google-drive-gmail-slack-and-data-tables/) | Chases the onboarding documents each new hire still owes with a daily Drive check, tiered Gmail reminders, and one Slack roll up of overdue people. | Google Drive, Gmail, Slack, Data Tables |
 | [Session Check-In Kiosk](published/n8n-session-checkin-kiosk/) · [View](https://n8n.io/workflows/17985-check-in-participants-via-qr-code-with-google-sheets-and-slack-alerts/) | Participants scan a session QR code and type their email, check-ins log to Google Sheets, and Slack is alerted when certification becomes unreachable. | Google Sheets, Slack, Data Tables |
 | [Volunteer Hour Statements](published/n8n-volunteer-hour-statements/) · [View](https://n8n.io/workflows/17986-send-monthly-volunteer-hour-statements-from-google-sheets-with-gmail/) | Emails every volunteer a monthly statement of their hours from a Google Sheets ledger and sends the coordinator one in-kind total for grant reporting. | Google Sheets, Gmail, Data Tables |
+| [Policy Acknowledgment Tracker](published/n8n-policy-ack-tracker/) · [View](https://n8n.io/workflows/18263-track-policy-and-meeting-minutes-acknowledgments-with-gmail-and-google-sheets/) | Mails everyone on an audience list their own acknowledgment link for a policy or minutes, then reports who has not confirmed. | Gmail, Google Sheets, Data Tables |
 
 ## Pending review
 
@@ -99,7 +100,6 @@ Submitted to the n8n Creator hub and awaiting approval. Templates move up to `pu
 | Template | What it does | Stack |
 |---|---|---|
 | [Departure Handover Sweep](pending-review/n8n-departure-handover-sweep/) | Sweeps a leaver's future Google Calendar events and open Asana tasks into a Notion handover checklist and posts the link to Slack. | Google Calendar, Asana, Notion, Slack |
-| [Policy Acknowledgment Tracker](published/n8n-policy-ack-tracker/) · [View](https://n8n.io/workflows/18263-track-policy-and-meeting-minutes-acknowledgments-with-gmail-and-google-sheets/) | Mails everyone on an audience list their own acknowledgment link for a policy or minutes, then reports who has not confirmed. | Gmail, Google Sheets, Data Tables |
 
 ## Pending submission
 
