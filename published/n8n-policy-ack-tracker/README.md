@@ -1,5 +1,7 @@
 # Distribute policies and meeting minutes then collect acknowledgments with Gmail, Data Tables and Google Sheets
 
+[Published n8n template](https://n8n.io/workflows/18263-track-policy-and-meeting-minutes-acknowledgments-with-gmail-and-google-sheets/)
+
 Mails a policy or a set of minutes to an audience list, gives every recipient their own tokenized acknowledgment link, and reports who has not confirmed yet. Acknowledging takes two requests on purpose: the first click only serves a landing page, so a mail scanner that auto-visits links cannot acknowledge on someone's behalf, and only the explicit confirm writes a timestamp. One webhook path carries all three actions, distribute, ack and status, against a single Data Table ledger.
 
 Built with n8n, plus Gmail, Google Sheets, and n8n Data Tables.

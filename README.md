@@ -6,7 +6,7 @@ Most of them share the same working habits: rules in a table or a config block a
 
 ## Published
 
-**54 templates** are live in the n8n template library right now, grouped by area. Hit **View** on any row to open its listing on n8n.io. A template that spans two areas is listed once, under the first one.
+**55 templates** are live in the n8n template library right now, grouped by area. Hit **View** on any row to open its listing on n8n.io. A template that spans two areas is listed once, under the first one.
 
 ### 🤖 AI · 13
 
@@ -75,7 +75,7 @@ Most of them share the same working habits: rules in a table or a config block a
 | [Local Business Proximity](published/n8n-local-business-proximity/) · [View](https://n8n.io/workflows/16997-log-nearby-businesses-from-openstreetmap-to-google-sheets-by-proximity/) | Pulls every business of a chosen category within a radius from OpenStreetMap into a Google Sheet, flagged by whether each lists a website. | OpenStreetMap, Google Sheets |
 | [SMS Pumping Screener](published/n8n-sms-pumping-screener/) · [View](https://n8n.io/workflows/17400-screen-sms-campaign-numbers-for-high-risk-lines-with-twilio-sheets-and-slack/) | Screens every campaign number through Twilio Lookup before sending, routing SMS pumping fraud lines, VoIP, and landlines to a quarantine tab with a written reason. | Twilio Lookup, Google Sheets, Slack |
 
-### ⚙️ Operations · 12
+### ⚙️ Operations · 13
 
 | Template | What it does | Stack |
 |---|---|---|
@@ -99,7 +99,7 @@ Submitted to the n8n Creator hub and awaiting approval. Templates move up to `pu
 | Template | What it does | Stack |
 |---|---|---|
 | [Departure Handover Sweep](pending-review/n8n-departure-handover-sweep/) | Sweeps a leaver's future Google Calendar events and open Asana tasks into a Notion handover checklist and posts the link to Slack. | Google Calendar, Asana, Notion, Slack |
-| [Policy Acknowledgment Tracker](pending-review/n8n-policy-ack-tracker/) | Mails everyone on an audience list their own acknowledgment link for a policy or minutes, then reports who has not confirmed. | Gmail, Google Sheets, Data Tables |
+| [Policy Acknowledgment Tracker](published/n8n-policy-ack-tracker/) · [View](https://n8n.io/workflows/18263-track-policy-and-meeting-minutes-acknowledgments-with-gmail-and-google-sheets/) | Mails everyone on an audience list their own acknowledgment link for a policy or minutes, then reports who has not confirmed. | Gmail, Google Sheets, Data Tables |
 
 ## Pending submission
 
