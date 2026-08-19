@@ -97,10 +97,6 @@ Most of them share the same working habits: rules in a table or a config block a
 
 Submitted to the n8n Creator hub and awaiting approval. Templates move up to `published/` once they are live in the library.
 
-| Template | What it does | Stack |
-|---|---|---|
-| [Departure Handover Sweep](pending-review/n8n-departure-handover-sweep/) | Sweeps a leaver's future Google Calendar events and open Asana tasks into a Notion handover checklist and posts the link to Slack. | Google Calendar, Asana, Notion, Slack |
-
 ## Pending submission
 
 Built and tested but not yet submitted to the Creator hub. Templates move to `pending-review/` once submitted.
